@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Distributed Emergency Resource Matching System
 
 Scaffold for the system specified in [docs/SPEC.md](docs/SPEC.md). Service logic is not implemented yet.
@@ -11,3 +12,461 @@ make lint      # ruff check .
 make up        # not implemented yet
 make down      # not implemented yet
 ```
+=======
+# Distributed Emergency Resource Matching System
+
+A distributed, fault-tolerant emergency resource matching platform designed to connect people in need with nearby available resources during emergency situations.
+
+The system uses a microservices architecture, distributed storage, asynchronous messaging, data replication, and container orchestration to provide reliable resource allocation and demonstrate distributed systems concepts.
+
+---
+
+## Overview
+
+During emergencies such as floods, natural disasters, and other crisis situations, people may require essential resources such as water, food, medicine, transportation, and shelter.
+
+This project aims to build a distributed platform where individuals can submit emergency requests while volunteers, NGOs, and other organizations can register available resources. The system automatically identifies and assigns the nearest suitable resource based on resource type and geographical location.
+
+Beyond resource matching, the project focuses on demonstrating important distributed computing concepts, including:
+
+- Distributed data storage and hash-based sharding.
+- Primary-replica replication.
+- Heartbeat-based failure detection.
+- Automatic failover and recovery synchronization.
+- Asynchronous communication using RabbitMQ.
+- Concurrent and atomic resource reservation.
+- Containerization using Docker.
+- Container orchestration using Kubernetes.
+
+## System Architecture
+
+The system consists of three domain microservices, a central coordinator, six distributed storage nodes, and a RabbitMQ message broker.
+
+### Architecture Diagram
+
+```text
+                  CLIENTS
+              (Postman / curl)
+                     |
+          +----------+----------+
+          |                     |
+          v                     v
+   REQUEST SERVICE       RESOURCE SERVICE
+      (:8001)                (:8002)
+          |                     |
+          |                     |
+          v                     |
+      COORDINATOR <-------------+
+        (:8000)
+          |
+     +----+----+----------------+
+     |         |                |
+     v         v                v
+  SHARD 0   SHARD 1          SHARD 2
+     |         |                |
+  +--+--+   +--+--+          +--+--+
+  |     |   |     |          |     |
+  P     R   P     R          P     R
+  |     |   |     |          |     |
+  +-----+   +-----+          +-----+
+
+     P = Primary
+     R = Replica
+
+REQUEST SERVICE
+       |
+       | Publish match event
+       v
+   RABBITMQ
+       |
+       | Consume event
+       v
+ MATCHING SERVICE (:8003)
+       |
+       +------> RESOURCE SERVICE
+       |          (Reserve resource)
+       |
+       +------> REQUEST SERVICE
+                  (Record match outcome)
+```
+
+### Core Components
+
+| Component | Responsibility |
+|---|---|
+| Request Service | Creates emergency requests, retrieves requests, updates statuses, and publishes matching events. |
+| Resource Service | Registers resources, searches for suitable candidates, and handles atomic reservations and releases. |
+| Matching Service | Processes matching events, identifies the nearest suitable resource, and coordinates assignment. |
+| Coordinator | Manages storage-node registration, heartbeats, hash-based routing, failover, and diagnostics. |
+| Storage Nodes | Persist records using SQLite, maintain operation logs, and replicate data between primary and replica nodes. |
+| RabbitMQ | Handles asynchronous communication between request processing and matching workers. |
+
+## Key Features
+
+### 1. Emergency Request Management
+- Create emergency requests for essential resources.
+- Retrieve request information using unique identifiers.
+- Update request statuses.
+- Support resource categories such as water, food, medicine, transportation, and shelter.
+
+### 2. Resource Management
+- Register available resources and volunteers.
+- Search resources based on type and geographical location.
+- Track resource availability and assignment status.
+- Release resources when requests are completed or cancelled.
+
+### 3. Intelligent Resource Matching
+- Match requests with resources of the appropriate type.
+- Calculate geographical distance using the Haversine formula.
+- Prioritize the nearest eligible resource.
+- Use deterministic tie-breaking for consistent results.
+- Prevent multiple requests from reserving the same resource.
+
+### 4. Distributed Storage
+- Three logical storage shards.
+- SHA-256-based hash partitioning.
+- Six storage nodes with one primary and one replica per shard.
+- Coordinator-based routing so clients do not need to know physical storage locations.
+- SQLite-backed persistent storage and version-controlled records.
+
+### 5. Replication and Fault Tolerance
+- Primary-replica data replication.
+- Periodic heartbeat monitoring.
+- Automatic detection of unavailable storage nodes.
+- Replica promotion and epoch-based fencing.
+- Delta synchronization and snapshot recovery.
+- Protection against stale replica promotion.
+
+### 6. Asynchronous Messaging
+- RabbitMQ-based event processing.
+- Durable exchanges and queues.
+- Publisher confirmations and manual message acknowledgements.
+- Retry mechanisms with exponential backoff.
+- Dead-letter queue handling.
+- Idempotent message processing to prevent duplicate assignments.
+
+### 7. Containerization and Orchestration
+- Individual Dockerfiles for application components.
+- Docker Compose for local integration.
+- Kubernetes Deployments, Services, StatefulSets, and PersistentVolumeClaims.
+- Horizontal scaling of matching workers.
+- Health checks and automatic pod recovery.
+
+## Technology Stack
+
+| Category | Technologies |
+|---|---|
+| Programming Language | Python 3.11 |
+| Backend Framework | FastAPI |
+| ASGI Server | Uvicorn |
+| Database | SQLite |
+| Messaging | RabbitMQ |
+| Containerization | Docker |
+| Container Orchestration | Kubernetes |
+| Local Kubernetes | Minikube / kind |
+| Testing | Pytest |
+| API Testing | Postman |
+| Version Control | Git and GitHub |
+
+## Repository Structure
+
+```text
+distributed-emergency-resource-matching/
+│
+├── common/
+│   └── ems_common/
+│       ├── sharding.py
+│       ├── models.py
+│       ├── errors.py
+│       ├── logging.py
+│       ├── haversine.py
+│       ├── storage_client.py
+│       └── rabbit.py
+│
+├── services/
+│   ├── storage-node/
+│   │   ├── app/
+│   │   ├── Dockerfile
+│   │   └── requirements.txt
+│   │
+│   ├── coordinator/
+│   │   ├── app/
+│   │   └── Dockerfile
+│   │
+│   ├── request-service/
+│   │   ├── app/
+│   │   ├── Dockerfile
+│   │   └── requirements.txt
+│   │
+│   ├── resource-service/
+│   │   ├── app/
+│   │   ├── Dockerfile
+│   │   └── requirements.txt
+│   │
+│   └── matching-service/
+│       ├── app/
+│       ├── Dockerfile
+│       └── requirements.txt
+│
+├── k8s/
+│   ├── 00-namespace.yaml
+│   ├── 01-config.yaml
+│   ├── 02-secret.yaml
+│   ├── rabbitmq.yaml
+│   ├── storage-node.tpl.yaml
+│   ├── generate-storage.sh
+│   ├── coordinator.yaml
+│   └── services.yaml
+│
+├── scripts/
+│   ├── seed.py
+│   ├── load_loop.py
+│   ├── watch_cluster.py
+│   ├── find_key_for_shard.py
+│   └── reset.sh
+│
+├── tests/
+│   ├── unit/
+│   ├── component/
+│   ├── integration/
+│   └── fault/
+│
+├── postman/
+│
+├── docs/
+│   ├── architecture.md
+│   ├── api.md
+│   ├── diagrams/
+│   ├── evidence/
+│   └── report/
+│
+├── docker-compose.yml
+├── Makefile
+├── .env.example
+├── .gitignore
+├── .dockerignore
+└── README.md
+```
+
+## API Endpoints
+
+The platform exposes seven public REST endpoints.
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/requests` | Create an emergency request |
+| GET | `/requests/{id}` | Retrieve a request |
+| PUT | `/requests/{id}/status` | Update request status |
+| POST | `/resources` | Register a resource |
+| GET | `/resources` | List and filter resources |
+| PUT | `/resources/{id}/status` | Update resource status |
+| POST | `/match/{requestId}` | Trigger matching for a request |
+
+The Request Service handles request operations, while the Resource Service handles resource operations. Matching is performed asynchronously by the Matching Service.
+
+### Example Workflow
+
+1. A person submits an emergency request for drinking water.
+2. The Request Service validates and stores the request through the Coordinator.
+3. The request is initially assigned the `PENDING` status.
+4. A matching event is published to RabbitMQ.
+5. The Matching Service consumes the event.
+6. Suitable water resources are retrieved from the Resource Service.
+7. The nearest available resource is selected using geographical distance.
+8. The Resource Service atomically reserves the selected resource.
+9. The Request Service records the matching outcome.
+10. The request becomes `MATCHED`, and the resource becomes `ASSIGNED`.
+
+## Getting Started
+
+### Prerequisites
+
+Ensure the following tools are installed:
+
+- Python 3.11
+- pip
+- Docker Desktop
+- Docker Compose V2
+- kubectl
+- Minikube or kind
+- Git
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/distributed-emergency-resource-matching.git
+
+cd distributed-emergency-resource-matching
+```
+
+### 2. Configure Environment Variables
+
+Create a local environment file using the example configuration:
+
+```bash
+cp .env.example .env
+```
+
+Configure the required service URLs, database settings, RabbitMQ credentials, and other environment variables.
+
+Never commit actual credentials or secrets to the repository.
+
+### 3. Install Dependencies
+
+Each service maintains its own `requirements.txt` file. Install the dependencies for the component you intend to run.
+
+For example:
+
+```bash
+pip install -r services/request-service/requirements.txt
+```
+
+### 4. Run Using Docker Compose
+
+Once the Docker Compose configuration is implemented:
+
+```bash
+docker compose build
+docker compose up -d
+```
+
+Check the running containers:
+
+```bash
+docker compose ps
+```
+
+View coordinator logs:
+
+```bash
+docker compose logs -f coordinator
+```
+
+### 5. Kubernetes Deployment
+
+Start a local Kubernetes cluster:
+
+```bash
+minikube start --memory=4096 --cpus=2
+```
+
+Deploy the Kubernetes resources after building and loading the application images:
+
+```bash
+kubectl apply -f k8s/00-namespace.yaml
+kubectl apply -f k8s/01-config.yaml
+kubectl apply -f k8s/02-secret.yaml
+```
+
+Deploy the remaining RabbitMQ, storage, coordinator, and application resources according to the deployment order documented in the project plan.
+
+Check the cluster:
+
+```bash
+kubectl -n ems get pods
+kubectl -n ems get services
+kubectl -n ems get deployments
+```
+
+*Note: The commands above describe the planned setup workflow. They require the corresponding implementation files and configurations to be completed.*
+
+## Testing
+
+The project follows a layered testing strategy to verify correctness under normal and failure conditions.
+
+| Test Layer | Purpose |
+|---|---|
+| Unit Tests | Validate individual functions, sharding, Haversine distance, data models, and matching logic. |
+| Component Tests | Verify individual services and their interactions with dependent components. |
+| Integration Tests | Validate the complete system using Docker Compose and RabbitMQ. |
+| Fault Tests | Verify failure detection, replication, recovery, retries, and Kubernetes self-healing. |
+
+The test suite will cover:
+
+- CRUD operations and API validation.
+- Correct shard selection and data distribution.
+- Primary-replica consistency.
+- Concurrent resource reservations.
+- Duplicate message handling.
+- RabbitMQ retries and dead-lettering.
+- Storage-node failure and recovery.
+- Kubernetes pod recovery and service scaling.
+
+The planned Makefile commands are:
+
+```bash
+make test       # Run unit and component tests
+make up         # Start the Docker Compose stack
+make itest      # Run integration tests
+make k8s-up     # Deploy to Kubernetes
+```
+
+## Fault Tolerance and Reliability
+
+Fault tolerance is a central part of this project.
+
+The system is designed to demonstrate:
+
+- Detection of failed storage nodes through periodic heartbeats.
+- Promotion of an in-sync replica when a primary becomes unavailable.
+- Epoch-based fencing to reject writes from stale primaries.
+- Synchronization of recovered nodes using operation logs or snapshots.
+- Continued processing during supported single-node failures.
+- Safe handling of unavailable or stale storage copies.
+- Idempotent message processing and atomic resource reservation.
+
+The design prioritizes data safety over availability when the system cannot establish that a storage copy is current.
+
+## Design Limitations
+
+This is an educational distributed systems project, not a production-ready emergency response platform.
+
+Known design limitations include:
+
+- The coordinator is a single point of failure.
+- No Raft or Paxos consensus protocol is implemented.
+- Multiple coordinator instances and dynamic shard rebalancing are outside the current scope.
+- Network-partition tolerance is not guaranteed.
+- Authentication, authorization, frontend applications, and public-cloud deployment are outside the current scope.
+- Kubernetes demonstrations use a local cluster and do not demonstrate multi-machine pod distribution.
+
+## Implementation Roadmap
+
+The project is organized into incremental implementation stages:
+
+| Stage | Component / Milestone |
+|---|---|
+| 0 | Foundations, shared library, and service skeletons |
+| 1 | Standalone storage node |
+| 2 | Coordinator and three primary shards |
+| 3 | Kubernetes skeleton |
+| 4 | Primary-replica replication |
+| 5 | Heartbeats, failover, and recovery |
+| 6 | Request and Resource Services |
+| 7 | RabbitMQ integration |
+| 8 | Matching Service |
+| 9 | Docker Compose integration and scaling |
+| 10 | End-to-end testing, demonstrations, and evidence collection |
+
+Each stage builds upon the previous one and must satisfy its testing and completion criteria before proceeding.
+
+## Documentation
+
+Additional project documentation will be maintained in the `docs/` directory:
+
+- `architecture.md` – System architecture and component interactions.
+- `api.md` – REST API specifications and data contracts.
+- `diagrams/` – Architecture and workflow diagrams.
+- `evidence/` – Screenshots, logs, and test evidence.
+- `report/` – Design decisions and project documentation.
+
+## Contributors
+
+Developed as part of the Cloud Computing – Infrastructure Project.
+
+**Project:** Distributed Emergency Resource Matching System
+
+---
+
+*Building a reliable distributed system for emergency resource allocation through fault tolerance, replication, and intelligent matching.*
+>>>>>>> 09615fa35fc495aaf654738da11ad89f83d1ac04
