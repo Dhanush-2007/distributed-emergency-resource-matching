@@ -1,12 +1,7 @@
 """Unit tests for errors and error handlers."""
 
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
-from pydantic import BaseModel, Field
 import pytest
-
 from ems_common.errors import (
-    EmsError,
     InvalidInput,
     InvalidTransition,
     NotFound,
@@ -14,6 +9,9 @@ from ems_common.errors import (
     VersionConflict,
     register_error_handlers,
 )
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+from pydantic import BaseModel, Field
 
 
 class DummyPayload(BaseModel):

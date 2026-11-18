@@ -3,9 +3,9 @@
 import contextvars
 import json
 import logging
-from datetime import datetime, timezone
-from typing import Any
 import uuid
+from datetime import UTC, datetime
+from typing import Any
 
 from fastapi import FastAPI, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
@@ -33,7 +33,7 @@ class JSONFormatter(logging.Formatter):
 
     def format(self, record: logging.LogRecord) -> str:
         log_entry: dict[str, Any] = {
-            "ts": datetime.now(timezone.utc).isoformat(),
+            "ts": datetime.now(UTC).isoformat(),
             "level": record.levelname,
             "service": getattr(record, "service", self.service_name),
             "event": record.getMessage(),
@@ -101,7 +101,11 @@ class CorrelationIdMiddleware(BaseHTTPMiddleware):
     async def dispatch(
         self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response:
-        cid = request.headers.get("X-Correlation-Id")
+        cid = None
+        for k, v in request.headers.items():
+            if k.lower() == "x-correlation-id":
+                cid = v
+                break
         if not cid:
             cid = str(uuid.uuid4())
 

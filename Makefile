@@ -6,7 +6,10 @@ PY := python3.11
 VENV_PY := .venv/bin/python
 endif
 
-.PHONY: install test lint up down
+.PHONY: install test lint up down image-storage
+
+image-storage:
+	docker build -f services/storage-node/Dockerfile -t ems-storage-node:latest .
 
 install:
 	$(PY) -m venv .venv

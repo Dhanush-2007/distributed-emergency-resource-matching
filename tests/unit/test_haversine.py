@@ -1,7 +1,6 @@
 """Unit tests for Haversine distance calculation."""
 
 import pytest
-
 from ems_common.haversine import haversine_km
 
 

@@ -2,13 +2,9 @@
 
 import json
 import logging
-from unittest.mock import patch
 import uuid
 
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
 import pytest
-
 from ems_common.logging import (
     JSONFormatter,
     correlation_id_ctx,
@@ -16,6 +12,8 @@ from ems_common.logging import (
     register_logging_middleware,
     setup_json_logger,
 )
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
 
 @pytest.mark.unit

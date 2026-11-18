@@ -103,12 +103,51 @@ class StorageUnavailable(EmsError):
         )
 
 
+class StaleEpoch(EmsError):
+    def __init__(
+        self,
+        message: str = "Stale epoch",
+        details: list[dict[str, Any]] | None = None,
+    ) -> None:
+        super().__init__(
+            http_status=409,
+            code="STALE_EPOCH",
+            message=message,
+            details=details,
+        )
+
+
+class NotPrimary(EmsError):
+    def __init__(
+        self,
+        message: str = "Node is not primary",
+        details: list[dict[str, Any]] | None = None,
+    ) -> None:
+        super().__init__(
+            http_status=409,
+            code="NOT_PRIMARY",
+            message=message,
+            details=details,
+        )
+
+
+def _extract_cid(request: Request) -> str | None:
+    for k, v in request.headers.items():
+        if k.lower() == "x-correlation-id":
+            return v
+    return None
+
+
 def register_error_handlers(app: FastAPI) -> None:
     """Register custom exception handlers on a FastAPI application."""
 
     @app.exception_handler(EmsError)
     async def ems_error_handler(request: Request, exc: EmsError) -> JSONResponse:
-        return JSONResponse(status_code=exc.http_status, content=exc.to_dict())
+        resp = JSONResponse(status_code=exc.http_status, content=exc.to_dict())
+        cid = _extract_cid(request)
+        if cid:
+            resp.headers["X-Correlation-Id"] = cid
+        return resp
 
     @app.exception_handler(RequestValidationError)
     async def validation_error_handler(
@@ -118,18 +157,26 @@ def register_error_handlers(app: FastAPI) -> None:
         for error in exc.errors():
             loc = error.get("loc", ())
             # Ignore leading body/query/path location if present or join cleanly
-            field_parts = [str(part) for part in loc if part not in ("body",)]
+            field_parts = [
+                str(part)
+                for part in loc
+                if part not in ("body",) and not str(part).isdigit()
+            ]
             field = ".".join(field_parts) if field_parts else "body"
             details.append({"field": field, "problem": error.get("msg", "invalid")})
 
         err = InvalidInput(message="Request validation failed", details=details)
-        return JSONResponse(status_code=err.http_status, content=err.to_dict())
+        resp = JSONResponse(status_code=err.http_status, content=err.to_dict())
+        cid = _extract_cid(request)
+        if cid:
+            resp.headers["X-Correlation-Id"] = cid
+        return resp
 
     @app.exception_handler(Exception)
     async def unhandled_exception_handler(
         request: Request, exc: Exception
     ) -> JSONResponse:
-        return JSONResponse(
+        resp = JSONResponse(
             status_code=500,
             content={
                 "error": {
@@ -139,3 +186,7 @@ def register_error_handlers(app: FastAPI) -> None:
                 }
             },
         )
+        cid = _extract_cid(request)
+        if cid:
+            resp.headers["X-Correlation-Id"] = cid
+        return resp
