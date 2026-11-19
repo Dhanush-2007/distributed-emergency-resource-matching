@@ -33,7 +33,14 @@ class DeleteResult:
     seq: int
 
 
-class StorageDB:
+class ReplicationGap(Exception):
+    def __init__(self, last_seq: int):
+        self.last_seq = last_seq
+        super().__init__(f"Replication gap: expected seq {last_seq + 1}")
+
+    def __repr__(self) -> str:
+        return f"ReplicationGap(last_seq={self.last_seq})"
+
     """Manages SQLite storage node operations for key-value records, oplog, and meta."""
 
     def __init__(self, db_path: str | Path) -> None:
@@ -84,11 +91,23 @@ class StorageDB:
                 );
             """)
             # Initialize default metadata if absent
+cur.execute("INSERT OR IGNORE INTO meta (k, v) VALUES ('last_applied_seq', '0');")
+cur.execute("INSERT OR IGNORE INTO meta (k, v) VALUES ('epoch', '1');")
+# No default role; role will be set based on INITIAL_ROLE env if absent
+cur.execute("INSERT OR IGNORE INTO meta (k, v) VALUES ('last_log_epoch', '0');")
             cur.execute("INSERT OR IGNORE INTO meta (k, v) VALUES ('last_applied_seq', '0');")
             cur.execute("INSERT OR IGNORE INTO meta (k, v) VALUES ('epoch', '1');")
-            cur.execute("INSERT OR IGNORE INTO meta (k, v) VALUES ('role', 'PRIMARY');")
+            
 
-    def _get_meta(self, cur: sqlite3.Cursor, key: str) -> str:
+    OPLOG_RETAIN: int = 10000  # default retain count
+
+    def _prune_oplog(self, cur: sqlite3.Cursor) -> None:
+        """Prune oplog entries older than the retain window."""
+        last_seq = int(self._get_meta(cur, "last_applied_seq"))
+        retain_seq = last_seq - self.OPLOG_RETAIN
+        if retain_seq > 0:
+            cur.execute("DELETE FROM oplog WHERE seq <= ?;", (retain_seq,))
+
         cur.execute("SELECT v FROM meta WHERE k = ?;", (key,))
         row = cur.fetchone()
         return row[0] if row else ""
@@ -203,7 +222,89 @@ class StorageDB:
                 updated_at=row["updated_at"],
             )
 
-    def delete(self, key: str, epoch: int) -> DeleteResult:
+    def apply_replicated(
+        self,
+        epoch: int,
+        seq: int,
+        op: str,
+        key: str,
+        value: dict[str, Any] | None,
+        version: int,
+    ) -> str:
+        """Apply a replicated operation coming from the primary.
+
+        Returns "APPLIED" if the operation was applied, "DUPLICATE" if the
+        sequence number is less than or equal to the last applied sequence.
+        Raises ``ReplicationGap`` if ``seq`` is greater than ``last_seq + 1``.
+        """
+        with self._lock:
+            cur = self._conn.cursor()
+            cur.execute("BEGIN IMMEDIATE;")
+            try:
+                last_seq = int(self._get_meta(cur, "last_applied_seq"))
+                if seq > last_seq + 1:
+                    raise ReplicationGap(last_seq)
+                if seq <= last_seq:
+                    # Duplicate or replay; no state change
+                    cur.execute("COMMIT;")
+                    return "DUPLICATE"
+
+                # seq == last_seq + 1 : apply operation
+                now = datetime.now(UTC).isoformat()
+                if op.upper() == "DELETE":
+                    # For delete, we ignore the provided value and mark tombstone
+                    cur.execute(
+                        """
+                        INSERT INTO kv (key, value, version, deleted, updated_at)
+                        VALUES (?, ?, ?, 1, ?)
+                        ON CONFLICT(key) DO UPDATE SET
+                            version = excluded.version,
+                            deleted = 1,
+                            updated_at = excluded.updated_at;
+                        """,
+                        (key, "{}", version, now),
+                    )
+                    value_json = None
+                else:
+                    # PUT operation
+                    value_json = json.dumps(value) if value is not None else "{}"
+                    cur.execute(
+                        """
+                        INSERT INTO kv (key, value, version, deleted, updated_at)
+                        VALUES (?, ?, ?, 0, ?)
+                        ON CONFLICT(key) DO UPDATE SET
+                            value = excluded.value,
+                            version = excluded.version,
+                            deleted = 0,
+                            updated_at = excluded.updated_at;
+                        """,
+                        (key, value_json, version, now),
+                    )
+
+                # Append to oplog with same seq/epoch
+                cur.execute(
+                    """
+                    INSERT INTO oplog (seq, epoch, key, op, value, version, ts)
+                    VALUES (?, ?, ?, ?, ?, ?, ?);
+                    """,
+                    (seq, epoch, key, op.upper(), value_json, version, now),
+                )
+
+                # Update metadata
+                cur.execute(
+                    "UPDATE meta SET v = ? WHERE k = 'last_applied_seq';",
+                    (str(seq),),
+                )
+                cur.execute(
+                    "UPDATE meta SET v = ? WHERE k = 'last_log_epoch';",
+                    (str(epoch),),
+                )
+                cur.execute("COMMIT;")
+                return "APPLIED"
+            except Exception:
+                cur.execute("ROLLBACK;")
+                raise
+self, key: str, epoch: int) -> DeleteResult:
         with self._lock:
             cur = self._conn.cursor()
             cur.execute("BEGIN IMMEDIATE;")

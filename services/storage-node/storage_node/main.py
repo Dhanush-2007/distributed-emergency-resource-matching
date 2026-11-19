@@ -10,10 +10,36 @@ from ems_common.errors import (
     NotPrimary,
     StaleEpoch,
     StorageUnavailable,
+    NotReplica,
+    Gap,
+    register_error_handlers,
+)
+from fastapi import FastAPI, Query, Response, status, Body
+from pydantic import BaseModel, Field
+from storage_node.db import StorageDB, ReplicationGap
+
+
+
+
+from fastapi import FastAPI, Query, Response, status, Body
+from pydantic import BaseModel, Field
+from storage_node.db import StorageDB, ReplicationGap
+
+from fastapi import FastAPI, Query, Response, status, Body
+from pydantic import BaseModel, Field
+
+
+    NotFound,
+    NotPrimary,
+    StaleEpoch,
+    StorageUnavailable,
     register_error_handlers,
 )
 from ems_common.logging import register_logging_middleware, setup_json_logger
-from fastapi import FastAPI, Query, Response, status
+from fastapi import FastAPI, Query, Response, status, Body
+from pydantic import BaseModel, Field
+from fastapi import FastAPI, Query, Response, status, Body
+from pydantic import BaseModel, Field
 from pydantic import BaseModel, Field
 
 from storage_node.db import StorageDB
@@ -165,7 +191,95 @@ def create_app(
     def health_ready() -> dict[str, str]:
         return {"status": "ok"}
 
-    @application.get("/health")
+        @application.post("/internal/replicate")
+    def replicate_data(payload: dict = Body(...)) -> dict[str, Any]:
+        """Endpoint for replicas to receive replication ops from primary.
+
+        Expected payload fields: epoch, seq, op, key, value, version.
+        """
+        _assert_ready()
+
+        stats = local_db.stats()
+        node_role = stats["role"]
+        node_epoch = stats["epoch"]
+
+        if node_role != "REPLICA":
+            raise NotReplica()
+
+        # Validate epoch and seq
+        incoming_epoch = int(payload.get("epoch", 0))
+        incoming_seq = int(payload.get("seq", 0))
+        op = payload.get("op", "").upper()
+        key = payload.get("key")
+        value = payload.get("value")
+        version = int(payload.get("version", 0))
+
+        if incoming_epoch < node_epoch:
+            raise StaleEpoch(details=[{"epoch": node_epoch}])
+        if incoming_epoch > node_epoch:
+            # adopt newer epoch
+            local_db.update_meta(epoch=incoming_epoch)
+            node_epoch = incoming_epoch
+
+        try:
+            result = local_db.apply_replicated(
+                epoch=node_epoch,
+                seq=incoming_seq,
+                op=op,
+                key=key,
+                value=value,
+                version=version,
+            )
+        except ReplicationGap as gap_err:
+            raise Gap(details=[{"lastSeq": gap_err.last_seq}])
+
+        # result is "APPLIED" or "DUPLICATE"
+        return {"ack": incoming_seq, "lastSeq": local_db.stats()["last_seq"], "result": result}
+
+    def replicate_data(payload: dict = Body(...)) -> dict[str, Any]:
+        """Endpoint for replicas to receive replication ops from primary.
+
+        Expected payload fields: epoch, seq, op, key, value, version.
+        """
+        _assert_ready()
+
+        stats = local_db.stats()
+        node_role = stats["role"]
+        node_epoch = stats["epoch"]
+
+        if node_role != "REPLICA":
+            raise NotReplica()
+
+        # Validate epoch
+        incoming_epoch = int(payload.get("epoch", 0))
+        incoming_seq = int(payload.get("seq", 0))
+        op = payload.get("op", "").upper()
+        key = payload.get("key")
+        value = payload.get("value")
+        version = int(payload.get("version", 0))
+
+        if incoming_epoch < node_epoch:
+            raise StaleEpoch(details=[{"epoch": node_epoch}])
+        if incoming_epoch > node_epoch:
+            # adopt newer epoch
+            local_db.update_meta(epoch=incoming_epoch)
+            node_epoch = incoming_epoch
+
+        try:
+            result = local_db.apply_replicated(
+                epoch=node_epoch,
+                seq=incoming_seq,
+                op=op,
+                key=key,
+                value=value,
+                version=version,
+            )
+        except Gap as gap_err:
+            raise Gap(details=[{"lastSeq": gap_err.last_seq}])
+
+        # result is "APPLIED" or "DUPLICATE"
+        return {"ack": incoming_seq, "lastSeq": local_db.stats()["last_seq"], "result": result}
+
     def health() -> dict[str, Any]:
         stats = local_db.stats()
         return {

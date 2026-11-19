@@ -134,6 +134,43 @@ class NotPrimary(EmsError):
             details=details,
         )
 
+class NotReplica(EmsError):
+    def __init__(
+        self,
+        message: str = "Node is not replica",
+        details: list[dict[str, Any]] | None = None,
+    ) -> None:
+        super().__init__(
+            http_status=409,
+            code="NOT_REPLICA",
+            message=message,
+            details=details,
+        )
+
+class Gap(EmsError):
+    def __init__(
+        self,
+        message: str = "Replication gap",
+        details: list[dict[str, Any]] | None = None,
+    ) -> None:
+        super().__init__(
+            http_status=409,
+            code="GAP",
+            message=message,
+            details=details,
+        )
+    def __init__(
+        self,
+        message: str = "Node is not primary",
+        details: list[dict[str, Any]] | None = None,
+    ) -> None:
+        super().__init__(
+            http_status=409,
+            code="NOT_PRIMARY",
+            message=message,
+            details=details,
+        )
+
 
 def _extract_cid(request: Request) -> str | None:
     for k, v in request.headers.items():

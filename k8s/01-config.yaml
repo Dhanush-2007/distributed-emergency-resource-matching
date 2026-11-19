@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ems-config
+  namespace: ems
+  labels:
+    app: ems
+
+data:
+  COORDINATOR_URL: "http://coordinator:8000"
+  N_SHARDS: "3"
+  HEARTBEAT_INTERVAL_SEC: "2"
+  MISSED_HEARTBEATS_LIMIT: "3"
+  HTTP_TIMEOUT_SEC: "3"
