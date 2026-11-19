@@ -1,6 +1,7 @@
 """SQLite storage database layer for a storage node."""
 
 import json
+import os
 import sqlite3
 import threading
 from dataclasses import dataclass
@@ -41,6 +42,8 @@ class ReplicationGap(Exception):
     def __repr__(self) -> str:
         return f"ReplicationGap(last_seq={self.last_seq})"
 
+
+class StorageDB:
     """Manages SQLite storage node operations for key-value records, oplog, and meta."""
 
     def __init__(self, db_path: str | Path) -> None:
@@ -91,12 +94,13 @@ class ReplicationGap(Exception):
                 );
             """)
             # Initialize default metadata if absent
-cur.execute("INSERT OR IGNORE INTO meta (k, v) VALUES ('last_applied_seq', '0');")
-cur.execute("INSERT OR IGNORE INTO meta (k, v) VALUES ('epoch', '1');")
-# No default role; role will be set based on INITIAL_ROLE env if absent
-cur.execute("INSERT OR IGNORE INTO meta (k, v) VALUES ('last_log_epoch', '0');")
             cur.execute("INSERT OR IGNORE INTO meta (k, v) VALUES ('last_applied_seq', '0');")
             cur.execute("INSERT OR IGNORE INTO meta (k, v) VALUES ('epoch', '1');")
+            cur.execute(
+                "INSERT OR IGNORE INTO meta (k, v) VALUES ('role', ?);",
+                (os.getenv("INITIAL_ROLE", "PRIMARY"),),
+            )
+            cur.execute("INSERT OR IGNORE INTO meta (k, v) VALUES ('last_log_epoch', '0');")
             
 
     OPLOG_RETAIN: int = 10000  # default retain count
@@ -108,6 +112,7 @@ cur.execute("INSERT OR IGNORE INTO meta (k, v) VALUES ('last_log_epoch', '0');")
         if retain_seq > 0:
             cur.execute("DELETE FROM oplog WHERE seq <= ?;", (retain_seq,))
 
+    def _get_meta(self, cur: sqlite3.Cursor, key: str) -> str:
         cur.execute("SELECT v FROM meta WHERE k = ?;", (key,))
         row = cur.fetchone()
         return row[0] if row else ""
@@ -304,7 +309,7 @@ cur.execute("INSERT OR IGNORE INTO meta (k, v) VALUES ('last_log_epoch', '0');")
             except Exception:
                 cur.execute("ROLLBACK;")
                 raise
-self, key: str, epoch: int) -> DeleteResult:
+    def delete(self, key: str, epoch: int) -> DeleteResult:
         with self._lock:
             cur = self._conn.cursor()
             cur.execute("BEGIN IMMEDIATE;")
