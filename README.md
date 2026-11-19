@@ -1,18 +1,3 @@
-<<<<<<< HEAD
-# Distributed Emergency Resource Matching System
-
-Scaffold for the system specified in [docs/SPEC.md](docs/SPEC.md). Service logic is not implemented yet.
-
-Python 3.11. Shared code lives in `common/ems_common` (package name `ems-common`).
-
-```
-make install   # create .venv and install the shared package plus requirements
-make test      # pytest -m "unit or component"
-make lint      # ruff check .
-make up        # not implemented yet
-make down      # not implemented yet
-```
-=======
 # Distributed Emergency Resource Matching System
 
 A distributed, fault-tolerant emergency resource matching platform designed to connect people in need with nearby available resources during emergency situations.
@@ -392,13 +377,18 @@ The test suite will cover:
 - Storage-node failure and recovery.
 - Kubernetes pod recovery and service scaling.
 
-The planned Makefile commands are:
+The Makefile commands are:
 
 ```bash
+make install    # Create .venv and install all dependencies
 make test       # Run unit and component tests
-make up         # Start the Docker Compose stack
 make itest      # Run integration tests
-make k8s-up     # Deploy to Kubernetes
+make ftest      # Run fault tests
+make all-tests  # Run lint, test, itest, and ftest suites
+make up         # Start the full Docker Compose stack (--wait)
+make down       # Stop the Docker Compose stack
+make reset      # Reset Compose data and seed deterministic resources
+make images     # Build all 5 service container images
 ```
 
 ## Fault Tolerance and Reliability
@@ -469,4 +459,3 @@ Developed as part of the Cloud Computing – Infrastructure Project.
 ---
 
 *Building a reliable distributed system for emergency resource allocation through fault tolerance, replication, and intelligent matching.*
->>>>>>> 09615fa35fc495aaf654738da11ad89f83d1ac04

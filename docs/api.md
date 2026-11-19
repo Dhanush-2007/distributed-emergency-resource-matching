@@ -603,3 +603,26 @@ Request Service writes records to coordinator storage with `eventPending=True`. 
 - `GET /health`: JSON `{"status": "ok", "service": "matching-service", "consumer_ready": true}`.
 - `GET /health/live`: `200 OK`.
 - `GET /health/ready`: `200 OK` if consumer connection to broker is established; `503` otherwise.
+
+
+---
+
+## 9. Stack Orchestration and Everyday Commands (Stage 8)
+
+The system provides standardized `make` targets and utility scripts to manage the full distributed stack:
+
+### 9.1 Makefile Commands
+- `make up`: Starts all 11 Compose containers in the proper dependency order (`docker compose up -d --wait`).
+- `make down`: Gracefully stops all stack containers (`docker compose down`).
+- `make reset`: Runs `scripts/reset.sh compose` to tear down volumes, recreate the stack, purge RabbitMQ queues, and seed deterministic resources.
+- `make itest`: Runs the end-to-end integration test suite against the live stack.
+- `make ftest`: Runs the cluster fault, failover, and partition drill suites.
+- `make all-tests`: Sequentially executes `make lint`, `make test`, `make itest`, and `make ftest`.
+- `make images`: Builds all five application container images (`ems/storage-node:1.0`, `ems/coordinator:1.0`, `ems/request-service:1.0`, `ems/resource-service:1.0`, `ems/matching-service:1.0`).
+
+### 9.2 Utility Scripts
+- `scripts/seed.py`: Seeds resources and requests. `--fixed` creates the deterministic demo dataset (3 water resources at ~0.6km, 2km, 6km and 1 food resource); `--requests N --resources N` seeds random test distributions.
+- `scripts/reset.sh [compose]`: Idempotent stack teardown, volume reset, queue purge, and deterministic seed.
+- `scripts/app_load.py`: Submits sustained request load with 503 backoff retries and verifies all requests settle.
+- `scripts/test_fresh_clone.sh`: Verifies that a clean repository clone without a `.env` file starts and matches resources out of the box.
+- `scripts/test_storage_persistence.sh`: Proves that storage node data survives container restarts on a Docker named volume.

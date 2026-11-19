@@ -1,11 +1,11 @@
 === EMS CLUSTER STATUS ===
-Timestamp: 2026-11-20 02:07:45
+Timestamp: 2026-11-20 02:35:12
 
 SHARDS:
 Shard    State        Primary      Epoch    Degraded   DegradedSeq 
 -----------------------------------------------------------------
 0        UNAVAILABLE  -            2        False      0           
-1        UNAVAILABLE  -            6        True       0           
+1        UNAVAILABLE  -            7        True       0           
 2        UNAVAILABLE  -            3        False      0           
 
 NODES:

@@ -1,19 +1,19 @@
 === EMS CLUSTER STATUS ===
-Timestamp: 2026-11-20 02:07:32
+Timestamp: 2026-11-20 02:34:59
 
 SHARDS:
 Shard    State        Primary      Epoch    Degraded   DegradedSeq 
 -----------------------------------------------------------------
 0        HEALTHY      -            2        False      0           
-1        HEALTHY      -            5        False      0           
+1        HEALTHY      -            6        False      0           
 2        HEALTHY      -            3        False      0           
 
 NODES:
 NodeId     Shard    Role       Health   Status       LastSeq    AckSeq   Counts              
 ------------------------------------------------------------------------------------------
-s0-a       0        REPLICA    UP       READY        269        -        {'request': 82, 'resource': 15, 'other': 5}
-s0-b       0        PRIMARY    UP       READY        269        -        {'request': 82, 'resource': 15, 'other': 5}
-s1-a       1        PRIMARY    UP       READY        250        -        {'request': 95, 'resource': 8, 'other': 6}
-s1-b       1        REPLICA    UP       READY        250        -        {'request': 95, 'resource': 8, 'other': 6}
-s2-a       2        PRIMARY    UP       READY        244        -        {'request': 72, 'resource': 13, 'other': 4}
-s2-b       2        REPLICA    UP       READY        244        -        {'request': 72, 'resource': 13, 'other': 4}
+s0-a       0        REPLICA    UP       READY        139        -        {'request': 47, 'resource': 9, 'other': 0}
+s0-b       0        PRIMARY    UP       READY        139        -        {'request': 47, 'resource': 9, 'other': 0}
+s1-a       1        REPLICA    UP       READY        161        -        {'request': 64, 'resource': 12, 'other': 0}
+s1-b       1        PRIMARY    UP       READY        161        -        {'request': 64, 'resource': 12, 'other': 0}
+s2-a       2        PRIMARY    UP       READY        144        -        {'request': 43, 'resource': 13, 'other': 0}
+s2-b       2        REPLICA    UP       READY        144        -        {'request': 43, 'resource': 13, 'other': 0}

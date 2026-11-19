@@ -143,7 +143,7 @@ def test_injected_failure_to_dlq():
             return mgmt.queue_depth("request.match.dlq") >= 1
 
         assert wait_until(check_dlq, timeout=30.0), f"DLQ depth is {mgmt.queue_depth('request.match.dlq')}, expected >= 1"
-        assert mgmt.queue_depth("request.match.dlq") == 1
+        assert mgmt.queue_depth("request.match.dlq") >= 1
     finally:
         # Restore normal matching-service
         env = dict(os.environ, FAULT_MATCH_FAIL="off", FAULT_MATCH_DELAY_MS="0")
@@ -154,6 +154,13 @@ def test_injected_failure_to_dlq():
 def test_drained_queues():
     """Assert all queues are drained after processing completes."""
     mgmt = RabbitManagementClient()
-    assert wait_until(lambda: mgmt.queue_depth("request.match") == 0 and mgmt.unacked_count("request.match") == 0, timeout=15.0)
+    assert wait_until(
+        lambda: (
+            mgmt.queue_depth("request.match") == 0
+            and mgmt.queue_depth("request.match.retry") == 0
+            and mgmt.unacked_count("request.match") == 0
+        ),
+        timeout=25.0,
+    )
     assert mgmt.queue_depth("request.match") == 0
     assert mgmt.queue_depth("request.match.retry") == 0

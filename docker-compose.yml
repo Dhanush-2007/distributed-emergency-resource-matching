@@ -21,11 +21,16 @@ volumes:
   rabbitmq-data:
     name: ems-rabbitmq-data
 
-# Shared storage node definition (YAML extension)
-x-storage-node: &storage-node-base
-  image: ems/storage-node:1.0
+# Shared Python service definition (YAML extension)
+x-python-service: &python-service-base
   networks:
     - ems-net
+  restart: "no"
+
+# Shared storage node definition (YAML extension)
+x-storage-node: &storage-node-base
+  <<: *python-service-base
+  image: ems/storage-node:1.0
   depends_on:
     coordinator:
       condition: service_healthy
@@ -38,19 +43,21 @@ x-storage-node: &storage-node-base
 
 services:
   coordinator:
+    <<: *python-service-base
     image: ems/coordinator:1.0
     build:
       context: .
       dockerfile: services/coordinator/Dockerfile
     container_name: ems-coordinator
-    networks:
-      - ems-net
     ports:
       - "8000:8000"
     volumes:
       - coord-state:/state
     environment:
-      STATE_DIR: /state
+      STATE_DIR: ${STATE_DIR:-/state}
+      N_SHARDS: ${N_SHARDS:-3}
+      MISSED_HEARTBEATS_LIMIT: ${MISSED_HEARTBEATS_LIMIT:-3}
+      HEALTH_CHECK_INTERVAL_SEC: ${HEALTH_CHECK_INTERVAL_SEC:-1.0}
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/live')"]
       interval: 5s
@@ -68,12 +75,14 @@ services:
       NODE_ID: s0-a
       SHARD_ID: 0
       STANDALONE: "false"
-      COORDINATOR_URL: http://coordinator:8000
+      COORDINATOR_URL: ${COORDINATOR_URL:-http://coordinator:8000}
       ADVERTISE_URL: http://s0-a:9000
       PEER_URL: http://s0-b:9000
       INITIAL_ROLE: primary
-      DATA_DIR: /data
-      REPLICATION_TIMEOUT_SEC: 2
+      DATA_DIR: ${DATA_DIR:-/data}
+      HEARTBEAT_INTERVAL_SEC: ${HEARTBEAT_INTERVAL_SEC:-2.0}
+      REPLICATION_TIMEOUT_SEC: ${REPLICATION_TIMEOUT_SEC:-2.0}
+      OPLOG_RETAIN: ${OPLOG_RETAIN:-10000}
     volumes:
       - s0-a-data:/data
 
@@ -87,12 +96,14 @@ services:
       NODE_ID: s0-b
       SHARD_ID: 0
       STANDALONE: "false"
-      COORDINATOR_URL: http://coordinator:8000
+      COORDINATOR_URL: ${COORDINATOR_URL:-http://coordinator:8000}
       ADVERTISE_URL: http://s0-b:9000
       PEER_URL: http://s0-a:9000
       INITIAL_ROLE: replica
-      DATA_DIR: /data
-      REPLICATION_TIMEOUT_SEC: 2
+      DATA_DIR: ${DATA_DIR:-/data}
+      HEARTBEAT_INTERVAL_SEC: ${HEARTBEAT_INTERVAL_SEC:-2.0}
+      REPLICATION_TIMEOUT_SEC: ${REPLICATION_TIMEOUT_SEC:-2.0}
+      OPLOG_RETAIN: ${OPLOG_RETAIN:-10000}
     volumes:
       - s0-b-data:/data
 
@@ -106,12 +117,14 @@ services:
       NODE_ID: s1-a
       SHARD_ID: 1
       STANDALONE: "false"
-      COORDINATOR_URL: http://coordinator:8000
+      COORDINATOR_URL: ${COORDINATOR_URL:-http://coordinator:8000}
       ADVERTISE_URL: http://s1-a:9000
       PEER_URL: http://s1-b:9000
       INITIAL_ROLE: primary
-      DATA_DIR: /data
-      REPLICATION_TIMEOUT_SEC: 2
+      DATA_DIR: ${DATA_DIR:-/data}
+      HEARTBEAT_INTERVAL_SEC: ${HEARTBEAT_INTERVAL_SEC:-2.0}
+      REPLICATION_TIMEOUT_SEC: ${REPLICATION_TIMEOUT_SEC:-2.0}
+      OPLOG_RETAIN: ${OPLOG_RETAIN:-10000}
     volumes:
       - s1-a-data:/data
 
@@ -125,12 +138,14 @@ services:
       NODE_ID: s1-b
       SHARD_ID: 1
       STANDALONE: "false"
-      COORDINATOR_URL: http://coordinator:8000
+      COORDINATOR_URL: ${COORDINATOR_URL:-http://coordinator:8000}
       ADVERTISE_URL: http://s1-b:9000
       PEER_URL: http://s1-a:9000
       INITIAL_ROLE: replica
-      DATA_DIR: /data
-      REPLICATION_TIMEOUT_SEC: 2
+      DATA_DIR: ${DATA_DIR:-/data}
+      HEARTBEAT_INTERVAL_SEC: ${HEARTBEAT_INTERVAL_SEC:-2.0}
+      REPLICATION_TIMEOUT_SEC: ${REPLICATION_TIMEOUT_SEC:-2.0}
+      OPLOG_RETAIN: ${OPLOG_RETAIN:-10000}
     volumes:
       - s1-b-data:/data
 
@@ -144,12 +159,14 @@ services:
       NODE_ID: s2-a
       SHARD_ID: 2
       STANDALONE: "false"
-      COORDINATOR_URL: http://coordinator:8000
+      COORDINATOR_URL: ${COORDINATOR_URL:-http://coordinator:8000}
       ADVERTISE_URL: http://s2-a:9000
       PEER_URL: http://s2-b:9000
       INITIAL_ROLE: primary
-      DATA_DIR: /data
-      REPLICATION_TIMEOUT_SEC: 2
+      DATA_DIR: ${DATA_DIR:-/data}
+      HEARTBEAT_INTERVAL_SEC: ${HEARTBEAT_INTERVAL_SEC:-2.0}
+      REPLICATION_TIMEOUT_SEC: ${REPLICATION_TIMEOUT_SEC:-2.0}
+      OPLOG_RETAIN: ${OPLOG_RETAIN:-10000}
     volumes:
       - s2-a-data:/data
 
@@ -163,12 +180,14 @@ services:
       NODE_ID: s2-b
       SHARD_ID: 2
       STANDALONE: "false"
-      COORDINATOR_URL: http://coordinator:8000
+      COORDINATOR_URL: ${COORDINATOR_URL:-http://coordinator:8000}
       ADVERTISE_URL: http://s2-b:9000
       PEER_URL: http://s2-a:9000
       INITIAL_ROLE: replica
-      DATA_DIR: /data
-      REPLICATION_TIMEOUT_SEC: 2
+      DATA_DIR: ${DATA_DIR:-/data}
+      HEARTBEAT_INTERVAL_SEC: ${HEARTBEAT_INTERVAL_SEC:-2.0}
+      REPLICATION_TIMEOUT_SEC: ${REPLICATION_TIMEOUT_SEC:-2.0}
+      OPLOG_RETAIN: ${OPLOG_RETAIN:-10000}
     volumes:
       - s2-b-data:/data
 
@@ -178,6 +197,7 @@ services:
     hostname: rabbitmq
     networks:
       - ems-net
+    restart: "no"
     ports:
       - "15672:15672"
     volumes:
@@ -193,84 +213,81 @@ services:
       start_period: 10s
 
   request-service:
+    <<: *python-service-base
     image: ems/request-service:1.0
     build:
       context: .
       dockerfile: services/request-service/Dockerfile
     container_name: ems-request-service
-    networks:
-      - ems-net
     ports:
       - "8001:8001"
     environment:
       PORT: 8001
-      COORDINATOR_URL: http://coordinator:8000
-      RESOURCE_SERVICE_URL: http://resource-service:8002
-      EVENT_PUBLISHER: rabbit
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: 5672
+      COORDINATOR_URL: ${COORDINATOR_URL:-http://coordinator:8000}
+      RESOURCE_SERVICE_URL: ${RESOURCE_SERVICE_URL:-http://resource-service:8002}
+      EVENT_PUBLISHER: ${EVENT_PUBLISHER:-rabbit}
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
+      RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
       RABBITMQ_USER: ${RABBITMQ_USER:-ems}
       RABBITMQ_PASS: ${RABBITMQ_PASS:-ems-dev-password}
-      SWEEP_ENABLED: "true"
-      SWEEP_INTERVAL_SEC: "15.0"
-      SWEEP_GRACE_SEC: "10.0"
-      HTTP_TIMEOUT_SEC: "3.0"
+      SWEEP_ENABLED: ${SWEEP_ENABLED:-true}
+      SWEEP_INTERVAL_SEC: ${SWEEP_INTERVAL_SEC:-15.0}
+      SWEEP_GRACE_SEC: ${SWEEP_GRACE_SEC:-10.0}
+      HTTP_TIMEOUT_SEC: ${HTTP_TIMEOUT_SEC:-3.0}
     depends_on:
       coordinator:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health/live')"]
       interval: 5s
       timeout: 3s
       retries: 3
       start_period: 5s
 
   resource-service:
+    <<: *python-service-base
     image: ems/resource-service:1.0
     build:
       context: .
       dockerfile: services/resource-service/Dockerfile
     container_name: ems-resource-service
-    networks:
-      - ems-net
     ports:
       - "8002:8002"
     environment:
       PORT: 8002
-      COORDINATOR_URL: http://coordinator:8000
-      REQUEST_SERVICE_URL: http://request-service:8001
-      HTTP_TIMEOUT_SEC: "3.0"
-      RECONCILE_ENABLED: "true"
-      RECONCILE_INTERVAL_SEC: "5.0"
-      RECONCILE_GRACE_SEC: "60.0"
+      COORDINATOR_URL: ${COORDINATOR_URL:-http://coordinator:8000}
+      REQUEST_SERVICE_URL: ${REQUEST_SERVICE_URL:-http://request-service:8001}
+      HTTP_TIMEOUT_SEC: ${HTTP_TIMEOUT_SEC:-3.0}
+      RECONCILE_ENABLED: ${RECONCILE_ENABLED:-true}
+      RECONCILE_INTERVAL_SEC: ${RECONCILE_INTERVAL_SEC:-5.0}
+      RECONCILE_GRACE_SEC: ${RECONCILE_GRACE_SEC:-60.0}
     depends_on:
       coordinator:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health/live')"]
       interval: 5s
       timeout: 3s
       retries: 3
       start_period: 5s
 
   matching-service:
+    <<: *python-service-base
     image: ems/matching-service:1.0
     build:
       context: .
       dockerfile: services/matching-service/Dockerfile
-    networks:
-      - ems-net
     environment:
-      REQUEST_SERVICE_URL: http://request-service:8001
-      RESOURCE_SERVICE_URL: http://resource-service:8002
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: 5672
+      REQUEST_SERVICE_URL: ${REQUEST_SERVICE_URL:-http://request-service:8001}
+      RESOURCE_SERVICE_URL: ${RESOURCE_SERVICE_URL:-http://resource-service:8002}
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
+      RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
       RABBITMQ_USER: ${RABBITMQ_USER:-ems}
       RABBITMQ_PASS: ${RABBITMQ_PASS:-ems-dev-password}
-      MAX_RETRIES: 3
-      MAX_MATCH_DISTANCE_KM: ""
+      MAX_RETRIES: ${MAX_RETRIES:-3}
+      MAX_MATCH_DISTANCE_KM: ${MAX_MATCH_DISTANCE_KM:-}
       FAULT_MATCH_DELAY_MS: ${FAULT_MATCH_DELAY_MS:-0}
       FAULT_MATCH_FAIL: ${FAULT_MATCH_FAIL:-off}
     depends_on:
@@ -281,7 +298,7 @@ services:
       resource-service:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8003/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8003/health/live')"]
       interval: 5s
       timeout: 3s
       retries: 3
