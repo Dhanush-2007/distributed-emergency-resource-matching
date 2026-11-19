@@ -542,3 +542,64 @@ Releases an assigned resource back to `AVAILABLE`.
 
 ### 7.3 Background Reconciler
 Runs every `RECONCILE_INTERVAL_SEC` (default 60s). Scans `ASSIGNED` resources. For each resource past grace period, checks `GET /internal/requests/{assignedRequestId}` on Request Service. If request is `404`, or request status is not `MATCHED`/`IN_PROGRESS`, releases resource back to `AVAILABLE`.
+
+---
+
+## 8. RabbitMQ & Matching Service (Port 8003, Stage 7)
+
+### 8.1 Messaging Topology
+
+RabbitMQ broker handles asynchronous matching decoupling Request and Matching services.
+
+#### Exchanges (Direct, Durable)
+- `emergency.events`: Primary events exchange.
+- `emergency.retry`: Holding exchange for retries with message TTL.
+- `emergency.dlx`: Dead-letter exchange for messages exceeding max retries or unrecoverable malformed payloads.
+
+#### Queues & Dead-Letter Configuration
+- `request.match`:
+  - Durable: `true`
+  - Dead Letter Exchange: `emergency.retry`
+  - Routing key: `request.match` (bound to `emergency.events`)
+- `request.match.retry`:
+  - Durable: `true`
+  - Message TTL: `5000` ms (`x-message-ttl`)
+  - Dead Letter Exchange: `emergency.events`
+  - Dead Letter Routing Key: `request.match`
+  - Routing key: `request.match` (bound to `emergency.retry`)
+- `request.match.dlq`:
+  - Durable: `true`
+  - Routing key: `request.match` (bound to `emergency.dlx`)
+
+#### Event Payload Schema
+```json
+{
+  "eventId": "f7d3d1f0-...",
+  "eventType": "request.created",
+  "timestamp": "2026-11-20T00:00:00Z",
+  "requestId": "6ed56b56-...",
+  "type": "water",
+  "location": { "lat": 12.9716, "lon": 77.5946 }
+}
+```
+
+### 8.2 Outbox & Sweeper
+Request Service writes records to coordinator storage with `eventPending=True`. Upon successful publish to `emergency.events`, `eventPending` is cleared to `False`. If the broker is unreachable, the request creation succeeds (`matchQueued=False`) and the background `OutboxSweeper` polls storage, republishes stale pending events, and clears `eventPending`.
+
+### 8.3 Matching Service
+- **Consumes**: `request.match` with manual ack and `prefetch_count=1`.
+- **Workflow**:
+  1. Fetch request from Request Service via `GET /internal/requests/{id}`. If not found, drop/ack. If not `PENDING`, drop/ack.
+  2. Idempotency check via Resource Service `GET /internal/resources/by-request/{id}`. If already assigned, record `MATCHED` and ack.
+  3. Query candidates via Resource Service `GET /internal/resources/candidates?type={type}`.
+  4. Compute haversine distances, filter within `MAX_MATCH_DISTANCE_KM` (if set), sort by distance ascending, tie-break by `resourceId`.
+  5. Attempt atomic reservation `POST /internal/resources/{id}/reserve`.
+  6. On success: record `POST /internal/requests/{id}/matchresult` (`outcome="MATCHED"`).
+  7. If all candidates fail or none eligible: record `POST /internal/requests/{id}/matchresult` (`outcome="NO_MATCH"`).
+  8. Ack message upon successful outcome recording.
+  9. On transient failures, message is published to `emergency.retry` with header `x-retry-count`. When retries exceed `MAX_RETRIES` (3), message is routed to `request.match.dlq`.
+
+#### Probes & Health (Port 8003)
+- `GET /health`: JSON `{"status": "ok", "service": "matching-service", "consumer_ready": true}`.
+- `GET /health/live`: `200 OK`.
+- `GET /health/ready`: `200 OK` if consumer connection to broker is established; `503` otherwise.

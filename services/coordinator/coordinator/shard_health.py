@@ -40,6 +40,14 @@ def _get_status(node: Any) -> str | None:
     return getattr(node, "status", None)
 
 
+def _get_role(node: Any) -> str | None:
+    if node is None:
+        return None
+    if isinstance(node, dict):
+        return node.get("role")
+    return getattr(node, "role", None)
+
+
 def _get_last_seq(node: Any) -> int | None:
     if node is None:
         return None
@@ -67,6 +75,8 @@ def derive_shard_state(
     if not _is_node_up(primary_node, now, missed_heartbeats_limit, heartbeat_interval_sec):
         return "UNAVAILABLE"
     if _get_status(primary_node) != "READY":
+        return "UNAVAILABLE"
+    if _get_role(primary_node) not in (None, "PRIMARY"):
         return "UNAVAILABLE"
 
     # Primary is UP and READY

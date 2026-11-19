@@ -34,9 +34,11 @@ from request_service.events import (
     EventPublisher,
     InMemoryEventPublisher,
     NoopEventPublisher,
+    RabbitPublisher,
     create_match_event,
 )
 from request_service.settings import Settings
+from request_service.sweeper import OutboxSweeper
 
 logger = setup_json_logger(service_name="request-service")
 
@@ -63,10 +65,26 @@ def create_app(
 
     if event_publisher is not None:
         publisher = event_publisher
+    elif cfg.event_publisher.lower() == "rabbit":
+        publisher = RabbitPublisher(
+            host=cfg.rabbitmq_host,
+            port=cfg.rabbitmq_port,
+            user=cfg.rabbitmq_user,
+            password=cfg.rabbitmq_pass,
+        )
     elif cfg.event_publisher.lower() == "in_memory":
         publisher = InMemoryEventPublisher()
     else:
         publisher = NoopEventPublisher()
+
+    sweeper: OutboxSweeper | None = None
+    if cfg.sweep_enabled:
+        sweeper = OutboxSweeper(
+            storage_client=coord_client,
+            publisher=publisher,
+            interval_sec=cfg.sweep_interval_sec,
+            grace_sec=cfg.sweep_grace_sec,
+        )
 
     owns_http = False
     if http_client is None:
@@ -75,7 +93,13 @@ def create_app(
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):  # type: ignore[misc]
+        if sweeper is not None:
+            sweeper.start()
         yield
+        if sweeper is not None:
+            sweeper.stop()
+        if hasattr(publisher, "close"):
+            publisher.close()
         coord_client.close()
         if owns_http and hasattr(http_client, "close"):
             try:
@@ -90,6 +114,7 @@ def create_app(
     app.state.storage_client = coord_client
     app.state.publisher = publisher
     app.state.http_client = http_client
+    app.state.sweeper = sweeper
 
     @app.post("/requests", status_code=201)
     def create_request(body: CreateRequestBody, response: Response):
@@ -108,18 +133,31 @@ def create_app(
             "updatedAt": created_time,
         }
 
-        # Publish match event
         evt = create_match_event(
             request_id=req_id,
             req_type=body.type.value,
             location=body.location.model_dump(),
             created_at=created_time,
         )
-        published = publisher.publish(evt)
-        if published:
-            record["eventPending"] = False
 
-        val, ver = coord_client.create_if_absent(request_key(req_id), record)
+        if not isinstance(publisher, RabbitPublisher):
+            published = publisher.publish(evt)
+            if published:
+                record["eventPending"] = False
+            val, ver = coord_client.create_if_absent(request_key(req_id), record)
+        else:
+            val, ver = coord_client.create_if_absent(request_key(req_id), record)
+            published = publisher.publish(evt)
+            if published:
+                def clear_pending(rec: dict[str, Any]) -> dict[str, Any]:
+                    rec["eventPending"] = False
+                    return rec
+
+                try:
+                    val, ver = coord_client.update(request_key(req_id), clear_pending)
+                except Exception:  # noqa: BLE001, S110
+                    pass
+
         response.headers["Location"] = f"/requests/{req_id}"
         logger.info(
             "Created request",

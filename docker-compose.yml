@@ -18,6 +18,8 @@ volumes:
     name: ems-s2-a-data
   s2-b-data:
     name: ems-s2-b-data
+  rabbitmq-data:
+    name: ems-rabbitmq-data
 
 # Shared storage node definition (YAML extension)
 x-storage-node: &storage-node-base
@@ -170,6 +172,26 @@ services:
     volumes:
       - s2-b-data:/data
 
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: ems-rabbitmq
+    hostname: rabbitmq
+    networks:
+      - ems-net
+    ports:
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-ems}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-ems-dev-password}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
   request-service:
     image: ems/request-service:1.0
     build:
@@ -184,10 +206,19 @@ services:
       PORT: 8001
       COORDINATOR_URL: http://coordinator:8000
       RESOURCE_SERVICE_URL: http://resource-service:8002
-      EVENT_PUBLISHER: noop
+      EVENT_PUBLISHER: rabbit
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER:-ems}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-ems-dev-password}
+      SWEEP_ENABLED: "true"
+      SWEEP_INTERVAL_SEC: "15.0"
+      SWEEP_GRACE_SEC: "10.0"
       HTTP_TIMEOUT_SEC: "3.0"
     depends_on:
       coordinator:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
@@ -219,6 +250,38 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  matching-service:
+    image: ems/matching-service:1.0
+    build:
+      context: .
+      dockerfile: services/matching-service/Dockerfile
+    networks:
+      - ems-net
+    environment:
+      REQUEST_SERVICE_URL: http://request-service:8001
+      RESOURCE_SERVICE_URL: http://resource-service:8002
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER:-ems}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-ems-dev-password}
+      MAX_RETRIES: 3
+      MAX_MATCH_DISTANCE_KM: ""
+      FAULT_MATCH_DELAY_MS: ${FAULT_MATCH_DELAY_MS:-0}
+      FAULT_MATCH_FAIL: ${FAULT_MATCH_FAIL:-off}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      request-service:
+        condition: service_healthy
+      resource-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8003/health')"]
       interval: 5s
       timeout: 3s
       retries: 3

@@ -183,7 +183,8 @@ class FailoverManager:
                 with self._registry._lock:
                     replica.role = "PRIMARY"
                     replica.epoch = new_epoch
-                    p_node.role = "REPLICA"
+                    if p_node is not None:
+                        p_node.role = "REPLICA"
                 with self._lock:
                     self._pending_epochs.pop(shard_id, None)
                     self._ever_registered_primaries.add(replica.node_id)
@@ -192,7 +193,7 @@ class FailoverManager:
                     extra={
                         "event": "failover.promote",
                         "shardId": shard_id,
-                        "oldPrimary": p_node.node_id,
+                        "oldPrimary": p_node.node_id if p_node else None,
                         "newPrimary": replica.node_id,
                         "epoch": new_epoch,
                     },

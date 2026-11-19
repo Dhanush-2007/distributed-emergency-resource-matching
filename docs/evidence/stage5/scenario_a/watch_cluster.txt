@@ -1,19 +1,19 @@
 === EMS CLUSTER STATUS ===
-Timestamp: 2026-11-20 00:09:43
+Timestamp: 2026-11-20 02:07:02
 
 SHARDS:
 Shard    State        Primary      Epoch    Degraded   DegradedSeq 
 -----------------------------------------------------------------
-0        HEALTHY      -            4        False      0           
-1        DEGRADED     -            6        True       0           
-2        HEALTHY      -            6        False      0           
+0        HEALTHY      -            2        False      0           
+1        DEGRADED     -            5        True       0           
+2        HEALTHY      -            3        False      0           
 
 NODES:
 NodeId     Shard    Role       Health   Status       LastSeq    AckSeq   Counts              
 ------------------------------------------------------------------------------------------
-s0-a       0        REPLICA    UP       READY        145        -        {'request': 51, 'resource': 20, 'other': 40}
-s0-b       0        PRIMARY    UP       READY        145        -        {'request': 51, 'resource': 20, 'other': 40}
-s1-a       1        REPLICA    DOWN     READY        186        -        {'request': 93, 'resource': 20, 'other': 29}
-s1-b       1        PRIMARY    UP       READY        187        -        {'request': 94, 'resource': 20, 'other': 29}
-s2-a       2        REPLICA    UP       READY        152        -        {'request': 56, 'resource': 20, 'other': 36}
-s2-b       2        PRIMARY    UP       READY        152        -        {'request': 56, 'resource': 20, 'other': 36}
+s0-a       0        REPLICA    UP       READY        267        -        {'request': 80, 'resource': 15, 'other': 5}
+s0-b       0        PRIMARY    UP       READY        267        -        {'request': 80, 'resource': 15, 'other': 5}
+s1-a       1        PRIMARY    UP       READY        249        -        {'request': 94, 'resource': 8, 'other': 6}
+s1-b       1        REPLICA    DOWN     READY        247        -        {'request': 92, 'resource': 8, 'other': 6}
+s2-a       2        PRIMARY    UP       READY        244        -        {'request': 72, 'resource': 13, 'other': 4}
+s2-b       2        REPLICA    UP       READY        244        -        {'request': 72, 'resource': 13, 'other': 4}
