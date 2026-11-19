@@ -1,58 +1,58 @@
 NAME                               READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/coordinator        1/1     1            1           97s
-deployment.apps/matching-service   1/1     1            1           95s
-deployment.apps/request-service    1/1     1            1           96s
-deployment.apps/resource-service   1/1     1            1           96s
+deployment.apps/coordinator        1/1     1            1           36m
+deployment.apps/matching-service   1/1     1            1           36m
+deployment.apps/request-service    1/1     1            1           36m
+deployment.apps/resource-service   1/1     1            1           36m
 
 NAME                        READY   AGE
-statefulset.apps/ems-s0-a   1/1     98s
-statefulset.apps/ems-s0-b   1/1     98s
-statefulset.apps/ems-s1-a   1/1     98s
-statefulset.apps/ems-s1-b   1/1     98s
-statefulset.apps/ems-s2-a   1/1     98s
-statefulset.apps/ems-s2-b   1/1     97s
-statefulset.apps/rabbitmq   1/1     98s
+statefulset.apps/ems-s0-a   1/1     36m
+statefulset.apps/ems-s0-b   1/1     36m
+statefulset.apps/ems-s1-a   1/1     36m
+statefulset.apps/ems-s1-b   1/1     36m
+statefulset.apps/ems-s2-a   1/1     36m
+statefulset.apps/ems-s2-b   1/1     36m
+statefulset.apps/rabbitmq   1/1     36m
 
 NAME                                TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)              AGE
-service/coordinator                 ClusterIP   10.98.180.197    <none>        8000/TCP             97s
-service/coordinator-nodeport        NodePort    10.100.56.25     <none>        8000:30080/TCP       97s
-service/ems-s0-a                    ClusterIP   None             <none>        9000/TCP             98s
-service/ems-s0-b                    ClusterIP   None             <none>        9000/TCP             98s
-service/ems-s1-a                    ClusterIP   None             <none>        9000/TCP             98s
-service/ems-s1-b                    ClusterIP   None             <none>        9000/TCP             98s
-service/ems-s2-a                    ClusterIP   None             <none>        9000/TCP             98s
-service/ems-s2-b                    ClusterIP   None             <none>        9000/TCP             98s
-service/matching-service            ClusterIP   10.107.139.241   <none>        8003/TCP             95s
-service/rabbitmq                    ClusterIP   10.106.223.155   <none>        5672/TCP,15672/TCP   98s
-service/rabbitmq-headless           ClusterIP   None             <none>        5672/TCP,15672/TCP   98s
-service/rabbitmq-ui                 NodePort    10.110.243.227   <none>        15672:31672/TCP      98s
-service/request-service             ClusterIP   10.109.118.111   <none>        8001/TCP             96s
-service/request-service-nodeport    NodePort    10.103.50.68     <none>        8001:30081/TCP       96s
-service/resource-service            ClusterIP   10.96.91.215     <none>        8002/TCP             96s
-service/resource-service-nodeport   NodePort    10.97.149.52     <none>        8002:30082/TCP       95s
+service/coordinator                 ClusterIP   10.98.59.118     <none>        8000/TCP             36m
+service/coordinator-nodeport        NodePort    10.108.165.47    <none>        8000:30080/TCP       36m
+service/ems-s0-a                    ClusterIP   None             <none>        9000/TCP             36m
+service/ems-s0-b                    ClusterIP   None             <none>        9000/TCP             36m
+service/ems-s1-a                    ClusterIP   None             <none>        9000/TCP             36m
+service/ems-s1-b                    ClusterIP   None             <none>        9000/TCP             36m
+service/ems-s2-a                    ClusterIP   None             <none>        9000/TCP             36m
+service/ems-s2-b                    ClusterIP   None             <none>        9000/TCP             36m
+service/matching-service            ClusterIP   10.110.120.255   <none>        8003/TCP             36m
+service/rabbitmq                    ClusterIP   10.98.150.198    <none>        5672/TCP,15672/TCP   36m
+service/rabbitmq-headless           ClusterIP   None             <none>        5672/TCP,15672/TCP   36m
+service/rabbitmq-ui                 NodePort    10.106.234.232   <none>        15672:31672/TCP      36m
+service/request-service             ClusterIP   10.100.18.118    <none>        8001/TCP             36m
+service/request-service-nodeport    NodePort    10.108.174.225   <none>        8001:30081/TCP       36m
+service/resource-service            ClusterIP   10.106.249.142   <none>        8002/TCP             36m
+service/resource-service-nodeport   NodePort    10.100.74.143    <none>        8002:30082/TCP       36m
 
 NAME                                    READY   STATUS    RESTARTS   AGE
-pod/coordinator-7849c5f66c-95ct6        1/1     Running   0          97s
-pod/ems-s0-a-0                          1/1     Running   0          98s
-pod/ems-s0-b-0                          1/1     Running   0          98s
-pod/ems-s1-a-0                          1/1     Running   0          98s
-pod/ems-s1-b-0                          1/1     Running   0          98s
-pod/ems-s2-a-0                          1/1     Running   0          98s
-pod/ems-s2-b-0                          1/1     Running   0          97s
-pod/matching-service-56758c7f68-8wpsx   1/1     Running   0          95s
-pod/rabbitmq-0                          1/1     Running   0          98s
-pod/request-service-78d465b98-svmhq     1/1     Running   0          96s
-pod/resource-service-6cff4d5d67-tpblx   1/1     Running   0          96s
+pod/coordinator-7849c5f66c-rbwpn        1/1     Running   0          9m27s
+pod/ems-s0-a-0                          1/1     Running   0          36m
+pod/ems-s0-b-0                          1/1     Running   0          9m58s
+pod/ems-s1-a-0                          1/1     Running   0          10m
+pod/ems-s1-b-0                          1/1     Running   0          26m
+pod/ems-s2-a-0                          1/1     Running   0          36m
+pod/ems-s2-b-0                          1/1     Running   0          36m
+pod/matching-service-56758c7f68-p2p4q   1/1     Running   0          36m
+pod/rabbitmq-0                          1/1     Running   0          9m9s
+pod/request-service-78d465b98-46wbs     1/1     Running   0          10m
+pod/resource-service-6cff4d5d67-btzl4   1/1     Running   0          36m
 
 NAME                                             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
-persistentvolumeclaim/coordinator-state          Bound    pvc-89db7e10-34e6-4e28-9b7f-39ed4c300ab3   100Mi      RWO            standard       <unset>                 97s
-persistentvolumeclaim/data-ems-s0-a-0            Bound    pvc-bb16d0c0-88fd-473a-b1e3-dfaf5d2da8b2   200Mi      RWO            standard       <unset>                 98s
-persistentvolumeclaim/data-ems-s0-b-0            Bound    pvc-0d2bb0f5-342b-4766-bcb6-fef4b76a39a2   200Mi      RWO            standard       <unset>                 98s
-persistentvolumeclaim/data-ems-s1-a-0            Bound    pvc-fb2cb697-6263-4a6c-9303-42742ad923c5   200Mi      RWO            standard       <unset>                 98s
-persistentvolumeclaim/data-ems-s1-b-0            Bound    pvc-36f49a9c-6e0c-4b91-bb95-acee72b52cd5   200Mi      RWO            standard       <unset>                 98s
-persistentvolumeclaim/data-ems-s2-a-0            Bound    pvc-9a1238c4-8a24-4e51-a620-10a0cb1c9b25   200Mi      RWO            standard       <unset>                 98s
-persistentvolumeclaim/data-ems-s2-b-0            Bound    pvc-49df08b2-5490-4e4f-a9af-6cea6ded14fe   200Mi      RWO            standard       <unset>                 97s
-persistentvolumeclaim/rabbitmq-data-rabbitmq-0   Bound    pvc-f3f49e20-f7c3-435e-9853-62cf5db6fd46   1Gi        RWO            standard       <unset>                 98s
+persistentvolumeclaim/coordinator-state          Bound    pvc-13336955-76e6-46d7-9f79-e45a75d52658   100Mi      RWO            standard       <unset>                 36m
+persistentvolumeclaim/data-ems-s0-a-0            Bound    pvc-ba938dea-c14f-41fd-bf46-5b494a4799b3   200Mi      RWO            standard       <unset>                 36m
+persistentvolumeclaim/data-ems-s0-b-0            Bound    pvc-079f8e01-2841-4470-b525-31522f009a78   200Mi      RWO            standard       <unset>                 36m
+persistentvolumeclaim/data-ems-s1-a-0            Bound    pvc-8b1e6b3a-15e0-484e-817b-54e9516ca7a2   200Mi      RWO            standard       <unset>                 36m
+persistentvolumeclaim/data-ems-s1-b-0            Bound    pvc-ab83c3b3-d9a4-4e6e-bb94-91530a724db4   200Mi      RWO            standard       <unset>                 36m
+persistentvolumeclaim/data-ems-s2-a-0            Bound    pvc-488287b9-3192-4995-8698-20f056dfc7b1   200Mi      RWO            standard       <unset>                 36m
+persistentvolumeclaim/data-ems-s2-b-0            Bound    pvc-6273c60a-fe97-4a7e-be67-77bb6a1018c1   200Mi      RWO            standard       <unset>                 36m
+persistentvolumeclaim/rabbitmq-data-rabbitmq-0   Bound    pvc-cc3744eb-5393-4848-8b90-4bbd28c25cfe   1Gi        RWO            standard       <unset>                 36m
 
 /diagnostics/shards: {
   "0": {
@@ -61,11 +61,11 @@ persistentvolumeclaim/rabbitmq-data-rabbitmq-0   Bound    pvc-f3f49e20-f7c3-435e
     "epoch": 1,
     "primary": "s0-a",
     "degraded": false,
-    "records": 2,
+    "records": 272,
     "recordCount": {
-      "request": 0,
-      "resource": 2,
-      "other": 0
+      "request": 199,
+      "resource": 66,
+      "other": 7
     },
     "nodes": [
       {
@@ -74,7 +74,7 @@ persistentvolumeclaim/rabbitmq-data-rabbitmq-0   Bound    pvc-f3f49e20-f7c3-435e
         "role": "REPLICA",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 2
+        "lastSeq": 713
       },
       {
         "id": "s0-a",
@@ -82,38 +82,38 @@ persistentvolumeclaim/rabbitmq-data-rabbitmq-0   Bound    pvc-f3f49e20-f7c3-435e
         "role": "PRIMARY",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 2
+        "lastSeq": 713
       }
     ]
   },
   "1": {
     "shardId": 1,
     "state": "HEALTHY",
-    "epoch": 1,
-    "primary": "s1-a",
+    "epoch": 4,
+    "primary": "s1-b",
     "degraded": false,
-    "records": 0,
+    "records": 269,
     "recordCount": {
-      "request": 0,
-      "resource": 0,
-      "other": 0
+      "request": 205,
+      "resource": 62,
+      "other": 2
     },
     "nodes": [
       {
         "id": "s1-b",
         "nodeId": "s1-b",
-        "role": "REPLICA",
+        "role": "PRIMARY",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 0
+        "lastSeq": 720
       },
       {
         "id": "s1-a",
         "nodeId": "s1-a",
-        "role": "PRIMARY",
+        "role": "REPLICA",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 0
+        "lastSeq": 720
       }
     ]
   },
@@ -123,11 +123,11 @@ persistentvolumeclaim/rabbitmq-data-rabbitmq-0   Bound    pvc-f3f49e20-f7c3-435e
     "epoch": 1,
     "primary": "s2-a",
     "degraded": false,
-    "records": 2,
+    "records": 267,
     "recordCount": {
-      "request": 0,
-      "resource": 2,
-      "other": 0
+      "request": 187,
+      "resource": 74,
+      "other": 6
     },
     "nodes": [
       {
@@ -136,7 +136,7 @@ persistentvolumeclaim/rabbitmq-data-rabbitmq-0   Bound    pvc-f3f49e20-f7c3-435e
         "role": "PRIMARY",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 2
+        "lastSeq": 710
       },
       {
         "id": "s2-b",
@@ -144,7 +144,7 @@ persistentvolumeclaim/rabbitmq-data-rabbitmq-0   Bound    pvc-f3f49e20-f7c3-435e
         "role": "REPLICA",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 2
+        "lastSeq": 710
       }
     ]
   }

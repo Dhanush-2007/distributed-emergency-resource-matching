@@ -1,0 +1,2 @@
+NAME                              READY   STATUS    RESTARTS   AGE   IP             NODE       NOMINATED NODE   READINESS GATES
+request-service-78d465b98-64p5b   1/1     Running   0          10s   10.244.0.155   minikube   <none>           <none>

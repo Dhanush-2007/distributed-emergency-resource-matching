@@ -1,0 +1,173 @@
+======================================================================
+STAGE 9 KUBERNETES VERIFICATION SUITE
+======================================================================
+
+[1/8] Running: Step 1: Workloads & Shard Health...
+  [kubectl] kubectl -n ems get deploy,sts,svc,pods,pvc
+  [kubectl] kubectl -n ems get pods -o json
+  [kubectl] kubectl -n ems get pvc -o json
+[1/8] PASS (1.3s): 13 workloads Ready, all PVCs Bound, 3 shards HEALTHY
+
+[2/8] Running: Step 2: DNS & End-to-End Matching...
+  [kubectl] kubectl -n ems exec deployment/request-service -- python -c import socket; services = ['coordinator', 'request-service', 'resource-service', 'rabbitmq']; [socket.gethostbyname(s) for s in services]; print('DNS_OK')
+  [kubectl] kubectl -n ems logs deployment/matching-service --tail=60
+[2/8] PASS (26.3s): DNS verified, request 42e7b813-22bf-4f35-80d2-213652367d9c matched nearest water resource b1f5a2d6-769b-48f4-a420-f5f8e5be78cd
+
+[3/8] Running: Step 3: Shard Distribution...
+[3/8] PASS (4.7s): Records distributed across all three shards
+
+[4/8] Running: Step 4: Pod Self-Healing Under Load...
+  [kubectl] kubectl -n ems get pods -l app=request-service
+  [kubectl] kubectl -n ems delete pod -l app=request-service --wait=false
+  [kubectl] kubectl -n ems get pods -l app=request-service
+  [kubectl] kubectl -n ems get pods -l app=request-service
+  [kubectl] kubectl -n ems get pods -l app=request-service
+  [kubectl] kubectl -n ems get pods -l app=request-service
+  [kubectl] kubectl -n ems get pods -l app=request-service
+  [kubectl] kubectl -n ems get pods -l app=request-service
+[4/8] PASS (7.9s): Request Service pod recovered, queried 1 times, no data lost
+
+[5/8] Running: Step 5: Matching Service Scaling...
+  [kubectl] kubectl -n ems scale deployment/matching-service --replicas=3
+  [kubectl] kubectl -n ems get deployment/matching-service -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get deployment/matching-service -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get deployment/matching-service -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get deployment/matching-service -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get deployment/matching-service -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get deployment/matching-service -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get deployment/matching-service -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems logs -l app=matching-service --tail=50 --prefix=true
+  [kubectl] kubectl -n ems scale deployment/matching-service --replicas=1
+[5/8] PASS (16.9s): Scale to 3 processed burst: 5 MATCHED, 25 NO_MATCH, no duplicate assignments
+
+[6/8] Running: Step 6: Storage Failure & Recovery...
+  [kubectl] kubectl -n ems scale statefulset/ems-s1-b --replicas=0
+  [kubectl] kubectl -n ems scale statefulset/ems-s1-b --replicas=1
+  [kubectl] kubectl -n ems scale statefulset/ems-s1-b --replicas=1
+  [kubectl] kubectl -n ems scale statefulset/ems-s1-a --replicas=1
+[6/8] PASS (17.1s): Primary s1-b failed under load, promoted s1-a, recovered to HEALTHY, 0 writes lost
+
+[7/8] Running: Step 7: PVC Persistence Across Restarts...
+  [kubectl] kubectl -n ems delete pod ems-s0-b-0 --wait=false
+  [kubectl] kubectl -n ems get pod ems-s0-b-0
+  [kubectl] kubectl -n ems get pod ems-s0-b-0
+  [kubectl] kubectl -n ems get pod ems-s0-b-0
+  [kubectl] kubectl -n ems get pod ems-s0-b-0
+  [kubectl] kubectl -n ems get pod ems-s0-b-0
+  [kubectl] kubectl -n ems get pod ems-s0-b-0
+  [kubectl] kubectl -n ems get pod ems-s0-b-0
+  [kubectl] kubectl -n ems get pod ems-s0-b-0
+  [kubectl] kubectl -n ems get pod ems-s0-b-0
+  [kubectl] kubectl -n ems get pod ems-s0-b-0
+  [kubectl] kubectl -n ems get pod ems-s0-b-0
+  [kubectl] kubectl -n ems get pod ems-s0-b-0
+  [kubectl] kubectl -n ems get pod ems-s0-b-0
+  [kubectl] kubectl -n ems get pod ems-s0-b-0
+  [kubectl] kubectl -n ems get pod ems-s0-b-0
+  [kubectl] kubectl -n ems get pod ems-s0-b-0
+  [kubectl] kubectl -n ems delete pod rabbitmq-0 --wait=false
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems get pod rabbitmq-0
+  [kubectl] kubectl -n ems delete pod -l app=coordinator --wait=false
+  [kubectl] kubectl -n ems get pods -l app=coordinator
+  [kubectl] kubectl -n ems get pods -l app=coordinator
+  [kubectl] kubectl -n ems get pods -l app=coordinator
+  [kubectl] kubectl -n ems get pods -l app=coordinator
+  [kubectl] kubectl -n ems get pods -l app=coordinator
+  [kubectl] kubectl -n ems get pods -l app=coordinator
+  [kubectl] kubectl -n ems get pods -l app=coordinator
+  [kubectl] kubectl -n ems get pods -l app=coordinator
+  [kubectl] kubectl -n ems get pods -l app=coordinator
+  [kubectl] kubectl -n ems get pods -l app=coordinator
+  [kubectl] kubectl -n ems get pods -l app=coordinator
+  [kubectl] kubectl -n ems get pods -l app=coordinator
+  [kubectl] kubectl -n ems get pods -l app=coordinator
+  [kubectl] kubectl -n ems get pods -l app=coordinator
+  [kubectl] kubectl -n ems get pods -l app=coordinator
+  [kubectl] kubectl -n ems get pods -l app=coordinator
+  [kubectl] kubectl -n ems get pods -l app=coordinator
+  [kubectl] kubectl -n ems get pods -l app=coordinator
+  [kubectl] kubectl -n ems get pods -l app=coordinator
+  [kubectl] kubectl -n ems get pods -l app=coordinator
+[7/8] PASS (48.7s): Storage, RabbitMQ, and Coordinator restarted; data, queues, and epochs intact
+
+[8/8] Running: Step 8: RabbitMQ Outage & Sweeper Recovery...
+  [kubectl] kubectl -n ems scale statefulset/rabbitmq --replicas=0
+  [kubectl] kubectl -n ems get statefulset/rabbitmq -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get statefulset/rabbitmq -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get statefulset/rabbitmq -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems scale statefulset/rabbitmq --replicas=1
+  [kubectl] kubectl -n ems get statefulset/rabbitmq -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get statefulset/rabbitmq -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get statefulset/rabbitmq -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get statefulset/rabbitmq -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get statefulset/rabbitmq -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get statefulset/rabbitmq -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get statefulset/rabbitmq -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get statefulset/rabbitmq -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get statefulset/rabbitmq -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get statefulset/rabbitmq -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get statefulset/rabbitmq -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get statefulset/rabbitmq -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get statefulset/rabbitmq -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get statefulset/rabbitmq -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get statefulset/rabbitmq -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get statefulset/rabbitmq -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get statefulset/rabbitmq -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get statefulset/rabbitmq -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems get statefulset/rabbitmq -o jsonpath={.status.readyReplicas}
+  [kubectl] kubectl -n ems scale statefulset/rabbitmq --replicas=1
+[8/8] PASS (31.2s): Request created during broker outage (matchQueued=False) and recovered to MATCHED via sweeper
+
+================================================================================
+VERIFICATION STEP                          | STATUS   | TIME     | DETAILS
+--------------------------------------------------------------------------------
+Step 1: Workloads & Shard Health           | PASS     | 1.3s     | 13 workloads Ready, all PVCs Bound, 3 sh
+Step 2: DNS & End-to-End Matching          | PASS     | 26.3s    | DNS verified, request 42e7b813-22bf-4f35
+Step 3: Shard Distribution                 | PASS     | 4.7s     | Records distributed across all three sha
+Step 4: Pod Self-Healing Under Load        | PASS     | 7.9s     | Request Service pod recovered, queried 1
+Step 5: Matching Service Scaling           | PASS     | 16.9s    | Scale to 3 processed burst: 5 MATCHED, 2
+Step 6: Storage Failure & Recovery         | PASS     | 17.1s    | Primary s1-b failed under load, promoted
+Step 7: PVC Persistence Across Restarts    | PASS     | 48.7s    | Storage, RabbitMQ, and Coordinator resta
+Step 8: RabbitMQ Outage & Sweeper Recovery | PASS     | 31.2s    | Request created during broker outage (ma
+================================================================================
+
+ALL STAGE 9 KUBERNETES CHECKS PASSED!
+

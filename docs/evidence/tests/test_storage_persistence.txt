@@ -1,0 +1,75 @@
+=== 1. Building storage node image ===
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.05kB 0.0s done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.11-slim
+#2 DONE 0.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 146B done
+#3 DONE 0.0s
+
+#4 [1/9] FROM docker.io/library/python:3.11-slim@sha256:9534e5a8e315485d4061ed659af0fd78a284c015f9b73661b41d6bab25604534
+#4 resolve docker.io/library/python:3.11-slim@sha256:9534e5a8e315485d4061ed659af0fd78a284c015f9b73661b41d6bab25604534 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 2.75kB done
+#5 DONE 0.0s
+
+#6 [8/9] COPY services/storage-node/storage_node/ /app/storage_node/
+#6 CACHED
+
+#7 [6/9] COPY common/ /app/common/
+#7 CACHED
+
+#8 [7/9] RUN pip install --no-cache-dir -e /app/common
+#8 CACHED
+
+#9 [2/9] RUN groupadd -g 10001 appuser &&     useradd -u 10001 -g appuser -s /bin/sh -m appuser &&     mkdir -p /data &&     chown -R appuser:appuser /data
+#9 CACHED
+
+#10 [3/9] WORKDIR /app
+#10 CACHED
+
+#11 [4/9] COPY services/storage-node/requirements.txt requirements.txt
+#11 CACHED
+
+#12 [5/9] RUN pip install --no-cache-dir -r requirements.txt
+#12 CACHED
+
+#13 [9/9] RUN chown -R appuser:appuser /app
+#13 CACHED
+
+#14 exporting to image
+#14 exporting layers done
+#14 exporting manifest sha256:ec5f4416e38299dfebf372c9db02ffa14267b4063984a6f104f2ae26b64b9fd2 done
+#14 exporting config sha256:bcec01127b12a0d4b5d0e0b610ebebe14b3fc703733aed4d6ab9ca858958e695 done
+#14 exporting attestation manifest sha256:c149f5d8e43807c97b0226b5d36fc60be8cc1d3ee803eaf1d423c656c8107e63 done
+#14 exporting manifest list sha256:fca8b73224099526c911e82e7d0f922c12b4502fd7e824c94b2f82212974dfe7 done
+#14 naming to docker.io/ems/storage-node:1.0 done
+#14 unpacking to docker.io/ems/storage-node:1.0 done
+#14 DONE 0.1s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/q8zn7ndn7upszkcd8r1e5l3mi
+=== Cleaning up ===
+=== 2. Creating named volume and starting container ===
+ems-storage-test-volume
+8e7d8ad537b6b20cfe0da71e41dba61c1524ace32c273f3471dcf77b113132d7
+Waiting for storage node to become ready...
+Storage node is up!
+=== 3. Writing test record ===
+PUT Response: {"key":"request:persist-0001","version":1,"seq":1,"replicated":false}
+=== 4. Restarting container (docker restart) ===
+ems-storage-node-persist-test
+Waiting for storage node after restart...
+Storage node restarted successfully!
+=== 5. Verifying record persistence after restart ===
+GET Response: {"key":"request:persist-0001","value":{"type":"water","status":"PENDING"},"version":1}
+Health Response: {"nodeId":"s0-a","shardId":0,"role":"PRIMARY","status":"READY","epoch":1,"lastSeq":1,"records":1,"recordCount":{"request":1,"resource":0,"other":0}}
+Record and sequence persisted across container restart!
+PASS
+=== Cleaning up ===

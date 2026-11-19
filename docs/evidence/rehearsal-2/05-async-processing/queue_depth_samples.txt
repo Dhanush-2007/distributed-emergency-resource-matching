@@ -1,0 +1,11 @@
+Sampling queue depth...
+Pre-burst: messages=0, ready=0, unacked=0
+Sample 1: messages=12, ready=11, unacked=1
+Sample 2: messages=12, ready=11, unacked=1
+Sample 3: messages=12, ready=11, unacked=1
+Sample 4: messages=12, ready=11, unacked=1
+Sample 5: messages=12, ready=11, unacked=1
+Sample 6: messages=12, ready=11, unacked=1
+Sample 7: messages=12, ready=11, unacked=1
+Sample 8: messages=12, ready=11, unacked=1
+Sample 9: messages=0, ready=0, unacked=0

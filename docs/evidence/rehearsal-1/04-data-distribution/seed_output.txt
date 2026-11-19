@@ -1,0 +1,15 @@
+
+--- Seeding 30 Resources ---
+
+--- Seeding 30 Requests ---
+
+=== Seeding Summary ===
+Type            Resources    Requests
+-------------------------------------
+water           5            7           
+food            8            4           
+medicine        4            7           
+transportation  6            5           
+shelter         7            7           
+-------------------------------------
+Total:          30           30          

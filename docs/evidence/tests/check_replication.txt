@@ -1,0 +1,12 @@
+Connecting to coordinator at http://localhost:8000...
+Writing keys across shards (creates, updates, deletes)...
+Data write complete. Waiting for convergence...
+
+--- Verifying SQLite Replication State ---
+Shard  | Primary      | Replica      | Seq (P/R)    | Live   | Tombstones | Status
+---------------------------------------------------------------------------
+s0     | ems-s0-a     | ems-s0-b     | 331/331      | 121    | 6          | MATCH
+s1     | ems-s1-a     | ems-s1-b     | 253/253      | 109    | 3          | MATCH
+s2     | ems-s2-a     | ems-s2-b     | 224/224      | 91     | 3          | MATCH
+
+PASS

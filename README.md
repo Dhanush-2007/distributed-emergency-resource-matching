@@ -440,15 +440,32 @@ The project is organized into incremental implementation stages:
 
 Each stage builds upon the previous one and must satisfy its testing and completion criteria before proceeding.
 
+### Running Demonstrations & Automated Tests
+
+```bash
+# Run all 9 demonstration scenarios sequentially (k8s or compose mode)
+./scripts/run_demo.sh k8s
+
+# Run two consecutive rehearsals to verify repeatability (SPEC 16.1)
+./scripts/rehearse.sh k8s
+
+# Run full comprehensive test suite across all 4 tiers (SPEC 13.1)
+./scripts/run_all_tests.sh
+```
+
 ## Documentation
 
-Additional project documentation will be maintained in the `docs/` directory:
+Comprehensive project documentation is available in the `docs/` directory:
 
-- `architecture.md` – System architecture and component interactions.
-- `api.md` – REST API specifications and data contracts.
-- `diagrams/` – Architecture and workflow diagrams.
-- `evidence/` – Screenshots, logs, and test evidence.
-- `report/` – Design decisions and project documentation.
+- [System Architecture](docs/architecture.md) – Component architecture, Mermaid diagrams, flows A–D, data models, and FSMs.
+- [API Reference](docs/api.md) – Complete REST API contracts, error envelopes, and curl examples.
+- [Demonstration Runbook](docs/runbook.md) – Step-by-step commands and verification for all 9 demonstration scenarios.
+- [Design & Engineering Report](docs/report/design-report.md) – Technical justifications for all 10 architectural choices, fault tolerance analysis, and results.
+- [Requirements Coverage Matrix](docs/report/requirements-coverage.md) – Traceability matrix mapping FR-1..8, SR-1..5, MR-1..3, FT-1..5, DK-1, K8-1..3, DM-1, TS-1, JU-1 to code, tests, and evidence.
+- [Completion Checklist](docs/checklist.md) – SPEC 17 checklist with concrete evidence for all 12 items.
+- [Local Kubernetes Guide](docs/k8s-local.md) – Minikube setup, manifests, and port-forwarding instructions.
+- [Evidence Directory](docs/evidence/README.md) – Index of logs, diagnostic dumps, and test transcripts.
+- [Postman Collection](postman/) – Complete collection and environment files for live API testing.
 
 ## Contributors
 

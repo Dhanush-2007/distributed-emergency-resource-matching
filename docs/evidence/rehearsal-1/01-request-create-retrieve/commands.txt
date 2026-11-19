@@ -1,0 +1,6 @@
+Command: curl -s -w '\n%{http_code}' -X POST http://localhost:8001/requests -H 'Content-Type: application/json' -d '{"type":"water","location":{"lat":12.9716,"lon":77.5946},"details":"Flood, 5 people"}'
+POST Response (201):
+
+Command: curl -s -w '
+%{http_code}' http://localhost:8001/requests/61c6568c-09f6-496c-a6a6-eb9d2e673440
+GET Response (200):

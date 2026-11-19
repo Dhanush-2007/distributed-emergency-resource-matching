@@ -626,3 +626,24 @@ The system provides standardized `make` targets and utility scripts to manage th
 - `scripts/app_load.py`: Submits sustained request load with 503 backoff retries and verifies all requests settle.
 - `scripts/test_fresh_clone.sh`: Verifies that a clean repository clone without a `.env` file starts and matches resources out of the box.
 - `scripts/test_storage_persistence.sh`: Proves that storage node data survives container restarts on a Docker named volume.
+
+
+---
+
+## 10. Postman Collection and Live Testing
+
+A complete Postman test suite is provided in the `postman/` directory:
+- Collection: [`postman/ems.postman_collection.json`](file:///Users/dhanush/Desktop/distributed-emergency-resource-matching/postman/ems.postman_collection.json)
+- Environment: [`postman/ems.postman_environment.json`](file:///Users/dhanush/Desktop/distributed-emergency-resource-matching/postman/ems.postman_environment.json)
+
+### Configured Environment Variables:
+- `REQ_BASE`: `http://localhost:8001` (Request Service)
+- `RES_BASE`: `http://localhost:8002` (Resource Service)
+- `COORD_BASE`: `http://localhost:8000` (Coordinator Diagnostics)
+
+### Usage:
+Import both files into Postman or run via `newman`:
+```bash
+newman run postman/ems.postman_collection.json -e postman/ems.postman_environment.json
+```
+The collection tests all seven public endpoints, input validation errors, not-found errors, optimistic concurrency version conflicts, and diagnostics routing.

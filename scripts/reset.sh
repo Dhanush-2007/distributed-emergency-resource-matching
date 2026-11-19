@@ -26,7 +26,7 @@ if [[ "$MODE" == "compose" ]]; then
     "${PYTHON_BIN}" scripts/seed.py --fixed
 
     echo "=== 5. Reset complete ==="
-    RES_COUNT=$(curl -s "http://localhost:8002/resources" | python3 -c "import sys, json; print(len(json.load(sys.stdin)))" 2>/dev/null || echo "4")
+    RES_COUNT=$(curl -s "http://localhost:8002/resources" | "${PYTHON_BIN}" -c "import sys, json; print(len(json.load(sys.stdin)))" 2>/dev/null || echo "4")
     echo "Resources verified in database: ${RES_COUNT}"
 
 elif [[ "$MODE" == "k8s" ]]; then
@@ -52,7 +52,7 @@ elif [[ "$MODE" == "k8s" ]]; then
     "${PYTHON_BIN}" scripts/seed.py --fixed
 
     echo "=== 6. Reset complete ==="
-    RES_COUNT=$(curl -s "http://localhost:8002/resources" | python3 -c "import sys, json; print(len(json.load(sys.stdin)))" 2>/dev/null || echo "4")
+    RES_COUNT=$(curl -s "http://localhost:8002/resources" | "${PYTHON_BIN}" -c "import sys, json; print(len(json.load(sys.stdin)))" 2>/dev/null || echo "4")
     echo "Resources verified in database: ${RES_COUNT}"
 
 else

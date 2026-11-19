@@ -1,0 +1,54 @@
+.venv/bin/python -m pytest --timeout=60 --timeout-method=thread -m "unit or component"
+============================= test session starts ==============================
+platform darwin -- Python 3.11.18, pytest-9.2.0, pluggy-1.7.0
+rootdir: /Users/dhanush/Desktop/distributed-emergency-resource-matching
+configfile: pytest.ini
+testpaths: tests
+plugins: timeout-2.4.0, anyio-4.16.0
+timeout: 60.0s
+timeout method: thread
+timeout func_only: False
+collected 275 items / 43 deselected / 232 selected
+
+tests/component/test_consumer.py ......                                  [  2%]
+tests/component/test_coordinator_client.py ........                      [  6%]
+tests/component/test_coordinator_core.py ...........                     [ 10%]
+tests/component/test_coordinator_diagnostics.py ......                   [ 13%]
+tests/component/test_coordinator_replication.py ...                      [ 14%]
+tests/component/test_coordinator_routing.py ..........                   [ 18%]
+tests/component/test_failover.py ........                                [ 22%]
+tests/component/test_failover_scenarios.py ..........                    [ 26%]
+tests/component/test_follower_recovery.py ....                           [ 28%]
+tests/component/test_health_checker.py .......                           [ 31%]
+tests/component/test_primary_replication.py ......                       [ 34%]
+tests/component/test_publish_sweeper.py .....                            [ 36%]
+tests/component/test_read_fallback.py ......                             [ 38%]
+tests/component/test_replica_apply.py ..........                         [ 43%]
+tests/component/test_request_service.py .........                        [ 46%]
+tests/component/test_resource_service.py ..........                      [ 51%]
+tests/component/test_role_fencing.py ........                            [ 54%]
+tests/component/test_snapshot_install.py ..                              [ 55%]
+tests/component/test_storage_api.py ...........                          [ 60%]
+tests/component/test_storage_db.py ...........                           [ 65%]
+tests/component/test_sync_snapshot.py .....                              [ 67%]
+tests/unit/test_errors.py ........                                       [ 70%]
+tests/unit/test_generate_storage.py ..                                   [ 71%]
+tests/unit/test_haversine.py ..                                          [ 72%]
+tests/unit/test_k8s_manifests.py ....                                    [ 74%]
+tests/unit/test_logging.py ....                                          [ 75%]
+tests/unit/test_matcher.py ............                                  [ 81%]
+tests/unit/test_models.py ........                                       [ 84%]
+tests/unit/test_postman.py .                                             [ 84%]
+tests/unit/test_rabbit_topology.py .....                                 [ 87%]
+tests/unit/test_shard_health.py .................                        [ 94%]
+tests/unit/test_sharding.py ...                                          [ 95%]
+tests/unit/test_storage_client.py .......                                [ 98%]
+tests/unit/test_transitions.py ...                                       [100%]
+
+=============================== warnings summary ===============================
+.venv/lib/python3.11/site-packages/fastapi/testclient.py:1
+  /Users/dhanush/Desktop/distributed-emergency-resource-matching/.venv/lib/python3.11/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================ 232 passed, 43 deselected, 1 warning in 23.14s ================

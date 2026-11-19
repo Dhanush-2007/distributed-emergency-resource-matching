@@ -14,11 +14,11 @@ Epochs before coordinator deletion:
     "epoch": 1,
     "primary": "s0-a",
     "degraded": false,
-    "records": 38,
+    "records": 316,
     "recordCount": {
-      "request": 26,
-      "resource": 12,
-      "other": 0
+      "request": 227,
+      "resource": 82,
+      "other": 7
     },
     "nodes": [
       {
@@ -27,7 +27,7 @@ Epochs before coordinator deletion:
         "role": "REPLICA",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 100
+        "lastSeq": 825
       },
       {
         "id": "s0-a",
@@ -35,38 +35,38 @@ Epochs before coordinator deletion:
         "role": "PRIMARY",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 100
+        "lastSeq": 825
       }
     ]
   },
   "1": {
     "shardId": 1,
     "state": "HEALTHY",
-    "epoch": 2,
-    "primary": "s1-b",
+    "epoch": 5,
+    "primary": "s1-a",
     "degraded": false,
-    "records": 45,
+    "records": 315,
     "recordCount": {
-      "request": 35,
-      "resource": 10,
-      "other": 0
+      "request": 240,
+      "resource": 73,
+      "other": 2
     },
     "nodes": [
       {
         "id": "s1-b",
         "nodeId": "s1-b",
-        "role": "PRIMARY",
+        "role": "REPLICA",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 122
+        "lastSeq": 845
       },
       {
         "id": "s1-a",
         "nodeId": "s1-a",
-        "role": "REPLICA",
+        "role": "PRIMARY",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 122
+        "lastSeq": 845
       }
     ]
   },
@@ -76,11 +76,11 @@ Epochs before coordinator deletion:
     "epoch": 1,
     "primary": "s2-a",
     "degraded": false,
-    "records": 61,
+    "records": 303,
     "recordCount": {
-      "request": 42,
-      "resource": 19,
-      "other": 0
+      "request": 213,
+      "resource": 84,
+      "other": 6
     },
     "nodes": [
       {
@@ -89,7 +89,7 @@ Epochs before coordinator deletion:
         "role": "PRIMARY",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 163
+        "lastSeq": 807
       },
       {
         "id": "s2-b",
@@ -97,7 +97,7 @@ Epochs before coordinator deletion:
         "role": "REPLICA",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 163
+        "lastSeq": 807
       }
     ]
   }
@@ -111,11 +111,11 @@ Epochs after coordinator restart:
     "epoch": 1,
     "primary": "s0-a",
     "degraded": false,
-    "records": 38,
+    "records": 316,
     "recordCount": {
-      "request": 26,
-      "resource": 12,
-      "other": 0
+      "request": 227,
+      "resource": 82,
+      "other": 7
     },
     "nodes": [
       {
@@ -124,7 +124,7 @@ Epochs after coordinator restart:
         "role": "PRIMARY",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 100
+        "lastSeq": 825
       },
       {
         "id": "s0-b",
@@ -132,38 +132,38 @@ Epochs after coordinator restart:
         "role": "REPLICA",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 100
+        "lastSeq": 825
       }
     ]
   },
   "1": {
     "shardId": 1,
     "state": "HEALTHY",
-    "epoch": 2,
-    "primary": "s1-b",
+    "epoch": 5,
+    "primary": "s1-a",
     "degraded": false,
-    "records": 45,
+    "records": 315,
     "recordCount": {
-      "request": 35,
-      "resource": 10,
-      "other": 0
+      "request": 240,
+      "resource": 73,
+      "other": 2
     },
     "nodes": [
       {
         "id": "s1-b",
         "nodeId": "s1-b",
-        "role": "PRIMARY",
+        "role": "REPLICA",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 122
+        "lastSeq": 845
       },
       {
         "id": "s1-a",
         "nodeId": "s1-a",
-        "role": "REPLICA",
+        "role": "PRIMARY",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 122
+        "lastSeq": 845
       }
     ]
   },
@@ -173,11 +173,11 @@ Epochs after coordinator restart:
     "epoch": 1,
     "primary": "s2-a",
     "degraded": false,
-    "records": 61,
+    "records": 303,
     "recordCount": {
-      "request": 42,
-      "resource": 19,
-      "other": 0
+      "request": 213,
+      "resource": 84,
+      "other": 6
     },
     "nodes": [
       {
@@ -186,7 +186,7 @@ Epochs after coordinator restart:
         "role": "REPLICA",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 163
+        "lastSeq": 807
       },
       {
         "id": "s2-a",
@@ -194,7 +194,7 @@ Epochs after coordinator restart:
         "role": "PRIMARY",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 163
+        "lastSeq": 807
       }
     ]
   }

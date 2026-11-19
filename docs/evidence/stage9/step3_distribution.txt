@@ -17,15 +17,15 @@ Shards distribution post-seed:
 {
   "0": {
     "shardId": 0,
-    "state": "HEALTHY",
+    "state": "DEGRADED",
     "epoch": 1,
     "primary": "s0-a",
     "degraded": false,
-    "records": 13,
+    "records": 291,
     "recordCount": {
-      "request": 1,
-      "resource": 12,
-      "other": 0
+      "request": 205,
+      "resource": 79,
+      "other": 7
     },
     "nodes": [
       {
@@ -34,7 +34,7 @@ Shards distribution post-seed:
         "role": "REPLICA",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 16
+        "lastSeq": 746
       },
       {
         "id": "s0-a",
@@ -42,52 +42,52 @@ Shards distribution post-seed:
         "role": "PRIMARY",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 16
+        "lastSeq": 750
       }
     ]
   },
   "1": {
     "shardId": 1,
-    "state": "DEGRADED",
-    "epoch": 1,
-    "primary": "s1-a",
+    "state": "HEALTHY",
+    "epoch": 4,
+    "primary": "s1-b",
     "degraded": false,
-    "records": 11,
+    "records": 292,
     "recordCount": {
-      "request": 3,
-      "resource": 8,
-      "other": 0
+      "request": 217,
+      "resource": 73,
+      "other": 2
     },
     "nodes": [
       {
         "id": "s1-b",
         "nodeId": "s1-b",
-        "role": "REPLICA",
+        "role": "PRIMARY",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 15
+        "lastSeq": 764
       },
       {
         "id": "s1-a",
         "nodeId": "s1-a",
-        "role": "PRIMARY",
+        "role": "REPLICA",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 17
+        "lastSeq": 764
       }
     ]
   },
   "2": {
     "shardId": 2,
-    "state": "DEGRADED",
+    "state": "HEALTHY",
     "epoch": 1,
     "primary": "s2-a",
     "degraded": false,
-    "records": 23,
+    "records": 282,
     "recordCount": {
-      "request": 7,
-      "resource": 16,
-      "other": 0
+      "request": 194,
+      "resource": 82,
+      "other": 6
     },
     "nodes": [
       {
@@ -96,7 +96,7 @@ Shards distribution post-seed:
         "role": "PRIMARY",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 46
+        "lastSeq": 739
       },
       {
         "id": "s2-b",
@@ -104,7 +104,7 @@ Shards distribution post-seed:
         "role": "REPLICA",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 48
+        "lastSeq": 739
       }
     ]
   }
