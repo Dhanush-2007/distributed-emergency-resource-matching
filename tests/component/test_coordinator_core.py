@@ -348,10 +348,12 @@ def test_health_up_then_down_with_fake_clock(temp_state_dir):
 
     # Advance clock by 5s (elapsed = 5.0 <= 6.0) -> still UP
     current_time = 105.0
+    app.state.health_checker.tick()
     assert app.state.registry.get_health("s0-a") == "UP"
 
-    # Advance clock past threshold (elapsed = 7.0 > 6.0) -> DOWN
+    # Advance clock past threshold (elapsed = 7.0 > 6.0) -> probe fails -> DOWN
     current_time = 107.0
+    app.state.health_checker.tick()
     assert app.state.registry.get_health("s0-a") == "DOWN"
 
     # Heartbeat arrives at t=107.0 -> UP again

@@ -78,6 +78,7 @@ class CoordinatorClient:
         on_status_change: Any = None,
         get_replica_ack_seq: Callable[[], int | None] | None = None,
         on_registered: Callable[[str, int], None] | None = None,
+        on_demoted: Callable[[int], None] | None = None,
     ) -> None:
         self._node_id = node_id
         self._shard_id = shard_id
@@ -92,6 +93,7 @@ class CoordinatorClient:
         self._on_status_change = on_status_change
         self._get_replica_ack_seq = get_replica_ack_seq
         self._on_registered = on_registered
+        self._on_demoted = on_demoted
 
         self._owns_http = False
         if http_client is None:
@@ -139,6 +141,10 @@ class CoordinatorClient:
     # ------------------------------------------------------------------
     # Thread body
     # ------------------------------------------------------------------
+
+    def run_once(self) -> None:
+        """Execute a single heartbeat cycle manually."""
+        self._heartbeat()
 
     def _run(self) -> None:
         # Phase 1: register (infinite retry with exponential backoff).
@@ -291,8 +297,28 @@ class CoordinatorClient:
         """Persist role and epoch received from the coordinator."""
         new_role = data.get("role")
         new_epoch = data.get("epoch")
-        if new_role is not None or new_epoch is not None:
-            self._db.update_meta(role=new_role, epoch=new_epoch)
+        if new_role is None and new_epoch is None:
+            return
+
+        current_role = (self._db.get_meta("role") or self._initial_role).upper()
+        current_epoch = int(self._db.get_meta("epoch") or 1)
+        role_to_apply = new_role.upper() if new_role else current_role
+        epoch_to_apply = int(new_epoch) if new_epoch is not None else current_epoch
+
+        # If response says REPLICA while node believes it is PRIMARY: demote!
+        if current_role == "PRIMARY" and role_to_apply == "REPLICA":
+            self._db.update_meta(role="REPLICA", epoch=epoch_to_apply)
+            self._set_status("CATCHING_UP")
+            if self._on_demoted is not None:
+                self._on_demoted(epoch_to_apply)
+        elif epoch_to_apply > current_epoch or role_to_apply != current_role:
+            self._db.update_meta(role=role_to_apply, epoch=epoch_to_apply)
+            if (
+                role_to_apply == "REPLICA"
+                and self._status != "READY"
+                and self._on_demoted is not None
+            ):
+                self._on_demoted(epoch_to_apply)
 
     def _set_status(self, status: str) -> None:
         with self._status_lock:

@@ -220,6 +220,17 @@ class FakeStorageCluster:
             body = db.scan(prefix)
             return httpx.Response(200, json=body)
 
+        elif path == "/health":
+            return httpx.Response(200, json={"status": "ok", "role": db.role, "epoch": db.epoch})
+
+        elif path == "/internal/role":
+            payload = json.loads(request.content)
+            req_role = payload.get("role")
+            req_epoch = int(payload.get("epoch", 1))
+            db.role = req_role
+            db.epoch = req_epoch
+            return httpx.Response(200, json={"role": req_role, "epoch": req_epoch, "lastSeq": db.seq})
+
         return httpx.Response(404, json={"detail": "Not found"})
 
     def get_client(self) -> httpx.Client:

@@ -21,6 +21,8 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from coordinator.diagnostics import DiagnosticsService
+from coordinator.failover import FailoverManager
+from coordinator.health_checker import HealthChecker
 from coordinator.registry import NodeRegistry
 from coordinator.router import ShardRouter
 from coordinator.shard_health import clear_degraded_if_caught_up
@@ -38,6 +40,9 @@ class Settings:
         missed_heartbeats_limit: int | None = None,
         state_dir: Path | str | None = None,
         http_timeout_sec: float | None = None,
+        health_check_interval_sec: float | None = None,
+        probe_timeout_sec: float | None = None,
+        health_check_enabled: bool | None = None,
     ) -> None:
         self.port: int = port if port is not None else int(os.getenv("PORT", "8000"))
         self.n_shards: int = (
@@ -52,6 +57,22 @@ class Settings:
             missed_heartbeats_limit
             if missed_heartbeats_limit is not None
             else int(os.getenv("MISSED_HEARTBEATS_LIMIT", "3"))
+        )
+        self.health_check_interval_sec: float = (
+            health_check_interval_sec
+            if health_check_interval_sec is not None
+            else float(os.getenv("HEALTH_CHECK_INTERVAL_SEC", "1"))
+        )
+        self.probe_timeout_sec: float = (
+            probe_timeout_sec
+            if probe_timeout_sec is not None
+            else float(os.getenv("PROBE_TIMEOUT_SEC", "1"))
+        )
+        self.health_check_enabled: bool = (
+            health_check_enabled
+            if health_check_enabled is not None
+            else os.getenv("HEALTH_CHECK_ENABLED", "true").lower()
+            in ("true", "1", "yes")
         )
 
         if state_dir is not None:
@@ -144,10 +165,35 @@ def create_app(
         shard_state=shard_state,
         n_shards=conf.n_shards,
     )
+    failover_manager = FailoverManager(
+        registry=registry,
+        shard_state=shard_state,
+        n_shards=conf.n_shards,
+        http_client=client_instance,
+        role_timeout_sec=conf.http_timeout_sec,
+        clock=clock,
+        heartbeat_interval_sec=conf.heartbeat_interval_sec,
+        missed_heartbeats_limit=conf.missed_heartbeats_limit,
+    )
+    health_checker = HealthChecker(
+        registry=registry,
+        heartbeat_interval_sec=conf.heartbeat_interval_sec,
+        missed_heartbeats_limit=conf.missed_heartbeats_limit,
+        probe_timeout_sec=conf.probe_timeout_sec,
+        health_check_interval_sec=conf.health_check_interval_sec,
+        http_client=client_instance,
+        clock=clock,
+        on_node_down=lambda node: failover_manager.evaluate_shard(node.shard_id),
+    )
+    health_checker.set_on_tick(failover_manager.evaluate_all_shards)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):  # type: ignore[misc]
+        if conf.health_check_enabled:
+            health_checker.start()
         yield
+        if conf.health_check_enabled:
+            health_checker.stop()
         if owns_http and hasattr(client_instance, "close"):
             client_instance.close()
 
@@ -162,6 +208,8 @@ def create_app(
     application.state.router = router
     application.state.diagnostics = diagnostics
     application.state.http_client = client_instance
+    application.state.health_checker = health_checker
+    application.state.failover_manager = failover_manager
 
     @application.get("/health/live")
     def health_live() -> dict[str, str]:
@@ -242,6 +290,9 @@ def create_app(
             status=payload.status,
             last_seq=payload.lastSeq,
         )
+
+        if assigned_role == "PRIMARY":
+            failover_manager.record_primary_registration(node_id)
 
         logger.info(
             "Node registered",
@@ -423,6 +474,12 @@ def create_app(
     @application.get("/diagnostics/shards")
     def diagnostics_shards() -> list[dict[str, Any]]:
         return diagnostics.get_shards()
+
+    @application.post("/diagnostics/shards/{shard_id}/force-promote")
+    def force_promote_shard(
+        shard_id: int, nodeId: str = Query(...)
+    ) -> dict[str, Any]:
+        return failover_manager.force_promote(shard_id, nodeId)
 
     return application
 

@@ -28,13 +28,13 @@ install:
 	$(VENV_PY) -m pip install -r requirements-dev.txt
 
 test:
-	$(VENV_PY) -m pytest -m "unit or component"
+	$(VENV_PY) -m pytest --timeout=60 --timeout-method=thread -m "unit or component"
 
 itest:
-	$(VENV_PY) -m pytest -m integration
+	$(VENV_PY) -m pytest --timeout=60 --timeout-method=thread -m integration
 
 ftest:
-	$(VENV_PY) -m pytest -m fault
+	$(VENV_PY) -m pytest --timeout=60 --timeout-method=thread -m fault
 
 lint:
 	$(VENV_PY) -m ruff check .

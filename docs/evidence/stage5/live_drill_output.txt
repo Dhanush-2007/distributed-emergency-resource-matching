@@ -1,0 +1,69 @@
+Starting load loop: rate=10/s, duration=60s, shard=1, target=http://localhost:8000
+[00s] ok=6    503=0    other=0    p50=  28.3ms  ack_keys=6
+[01s] ok=9    503=0    other=0    p50=  18.7ms  ack_keys=15
+[02s] ok=10   503=0    other=0    p50=  22.1ms  ack_keys=25
+[03s] ok=10   503=0    other=0    p50=  19.4ms  ack_keys=35
+[04s] ok=9    503=0    other=0    p50=  23.4ms  ack_keys=44
+[05s] ok=10   503=0    other=0    p50=  20.8ms  ack_keys=54
+[06s] ok=10   503=0    other=0    p50=  20.5ms  ack_keys=64
+[07s] ok=10   503=0    other=0    p50=  19.6ms  ack_keys=74
+[08s] ok=9    503=0    other=0    p50=  20.5ms  ack_keys=83
+[09s] ok=10   503=0    other=0    p50=  32.4ms  ack_keys=93
+[10s] ok=10   503=0    other=0    p50=  17.9ms  ack_keys=103
+[11s] ok=9    503=0    other=0    p50=  19.8ms  ack_keys=112
+[12s] ok=10   503=0    other=0    p50=  20.6ms  ack_keys=122
+[13s] ok=10   503=0    other=0    p50=  19.0ms  ack_keys=132
+[14s] ok=9    503=0    other=0    p50=  20.9ms  ack_keys=141
+[15s] ok=5    503=5    other=0    p50=  13.9ms  ack_keys=146
+[16s] ok=0    503=10   other=0    p50=  11.0ms  ack_keys=146
+[17s] ok=0    503=10   other=0    p50=  13.9ms  ack_keys=146
+[18s] ok=0    503=10   other=0    p50=  12.4ms  ack_keys=146
+[19s] ok=0    503=9    other=0    p50=   9.9ms  ack_keys=146
+[20s] ok=0    503=10   other=0    p50=  11.4ms  ack_keys=146
+[21s] ok=9    503=1    other=0    p50=  20.4ms  ack_keys=155
+[22s] ok=9    503=0    other=0    p50=  20.9ms  ack_keys=164
+[23s] ok=10   503=0    other=0    p50=  18.8ms  ack_keys=174
+[24s] ok=10   503=0    other=0    p50=  19.5ms  ack_keys=184
+[25s] ok=10   503=0    other=0    p50=  21.6ms  ack_keys=194
+[26s] ok=9    503=0    other=0    p50=  20.2ms  ack_keys=203
+[27s] ok=10   503=0    other=0    p50=  19.6ms  ack_keys=213
+[28s] ok=10   503=0    other=0    p50=  18.8ms  ack_keys=223
+[29s] ok=10   503=0    other=0    p50=  16.5ms  ack_keys=233
+[30s] ok=9    503=0    other=0    p50=  18.9ms  ack_keys=242
+[31s] ok=10   503=0    other=0    p50=  19.0ms  ack_keys=252
+[32s] ok=10   503=0    other=0    p50=  20.1ms  ack_keys=262
+[33s] ok=9    503=0    other=0    p50=  20.9ms  ack_keys=271
+[34s] ok=10   503=0    other=0    p50=  16.4ms  ack_keys=281
+[35s] ok=10   503=0    other=0    p50=  20.1ms  ack_keys=291
+[36s] ok=9    503=0    other=0    p50=  14.1ms  ack_keys=300
+[37s] ok=10   503=0    other=0    p50=  15.9ms  ack_keys=310
+[38s] ok=10   503=0    other=0    p50=  19.9ms  ack_keys=320
+[39s] ok=9    503=0    other=0    p50=  20.2ms  ack_keys=329
+[40s] ok=10   503=0    other=0    p50=  20.6ms  ack_keys=339
+[41s] ok=10   503=0    other=0    p50=  16.1ms  ack_keys=349
+[42s] ok=10   503=0    other=0    p50=  18.9ms  ack_keys=359
+[43s] ok=9    503=0    other=0    p50=  19.7ms  ack_keys=368
+[44s] ok=10   503=0    other=0    p50=  17.7ms  ack_keys=378
+[45s] ok=10   503=0    other=0    p50=  20.4ms  ack_keys=388
+[46s] ok=9    503=0    other=0    p50=  16.1ms  ack_keys=397
+[47s] ok=10   503=0    other=0    p50=  15.4ms  ack_keys=407
+[48s] ok=10   503=0    other=0    p50=  20.6ms  ack_keys=417
+[49s] ok=9    503=0    other=0    p50=  18.4ms  ack_keys=426
+[50s] ok=10   503=0    other=0    p50=  20.5ms  ack_keys=436
+[51s] ok=10   503=0    other=0    p50=  17.8ms  ack_keys=446
+[52s] ok=10   503=0    other=0    p50=  19.8ms  ack_keys=456
+[53s] ok=9    503=0    other=0    p50=  19.3ms  ack_keys=465
+[54s] ok=10   503=0    other=0    p50=  19.6ms  ack_keys=475
+[55s] ok=9    503=0    other=0    p50=  20.6ms  ack_keys=484
+[56s] ok=10   503=0    other=0    p50=  19.5ms  ack_keys=494
+[57s] ok=10   503=0    other=0    p50=  15.5ms  ack_keys=504
+[58s] ok=10   503=0    other=0    p50=  19.4ms  ack_keys=514
+[59s] ok=9    503=0    other=0    p50=  17.2ms  ack_keys=523
+
+Load phase finished. Verifying 528 acknowledged keys...
+=== LOAD LOOP SUMMARY ===
+Total Acknowledged Keys: 528
+Verified Readable:       528
+Total 503 Retries:       55
+LOST Keys:               0
+PASS: Zero acknowledged keys lost.

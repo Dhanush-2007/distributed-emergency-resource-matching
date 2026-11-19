@@ -161,6 +161,20 @@ class Gap(EmsError):
         )
 
 
+class NotReady(EmsError):
+    def __init__(
+        self,
+        message: str = "Node is not ready",
+        details: list[dict[str, Any]] | None = None,
+    ) -> None:
+        super().__init__(
+            http_status=409,
+            code="NOT_READY",
+            message=message,
+            details=details,
+        )
+
+
 def _extract_cid(request: Request) -> str | None:
     for k, v in request.headers.items():
         if k.lower() == "x-correlation-id":

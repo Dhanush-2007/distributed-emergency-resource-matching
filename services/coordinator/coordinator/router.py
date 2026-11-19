@@ -47,7 +47,7 @@ class ShardRouter:
             )
 
         node = self._registry.get(primary_id)
-        if node is None:
+        if node is None or node.role != "PRIMARY":
             raise StorageUnavailable(
                 "Storage shard unavailable",
                 headers={"Retry-After": "3"},
@@ -68,6 +68,33 @@ class ShardRouter:
 
         epoch = self._shard_state.get_epoch(shard_id) or node.epoch
         return node, epoch
+
+    def _get_read_fallback_replica(self, shard_id: int) -> NodeRecord | None:
+        """Find an in-sync replica eligible for read fallback."""
+        shard_info = self._shard_state.get_shard(shard_id) or {}
+        if shard_info.get("degraded", False):
+            return None
+
+        primary_id = self._shard_state.get_primary(shard_id)
+        p_node = self._registry.get(primary_id) if primary_id else None
+        p_last_seq = p_node.last_seq if p_node else 0
+
+        replicas = [
+            n
+            for n in self._registry.get_nodes_for_shard(shard_id)
+            if n.role == "REPLICA"
+        ]
+        if not replicas:
+            return None
+
+        replica = replicas[0]
+        if (
+            replica.health == "UP"
+            and replica.status == "READY"
+            and replica.last_seq >= p_last_seq
+        ):
+            return replica
+        return None
 
     def put_data(
         self,
@@ -127,44 +154,69 @@ class ShardRouter:
         key: str,
         correlation_id: str | None = None,
     ) -> tuple[int, dict[str, Any]]:
-        """Forward GET request to the primary node for key's shard."""
+        """Forward GET request to primary, falling back to in-sync replica if unavailable."""
         sid = shard_of(key, self._n_shards)
-        node, epoch = self._resolve_primary(sid)
+        primary_node: NodeRecord | None = None
+        epoch = 1
 
-        logger.info(
-            "Routed data operation",
-            extra={
-                "event": "route",
-                "key": key,
-                "shardId": sid,
-                "nodeId": node.node_id,
-                "role": node.role,
-                "epoch": epoch,
-                "op": "GET",
-            },
-        )
+        try:
+            primary_node, epoch = self._resolve_primary(sid)
+        except StorageUnavailable:
+            primary_node = None
 
-        base_url = node.endpoint.rstrip("/")
         headers = {}
         if correlation_id:
             headers["X-Correlation-Id"] = correlation_id
 
-        try:
-            resp = self._http_client.get(
-                f"{base_url}/internal/data/{key}",
-                headers=headers,
+        if primary_node is not None:
+            logger.info(
+                "Routed data operation",
+                extra={
+                    "event": "route",
+                    "key": key,
+                    "shardId": sid,
+                    "nodeId": primary_node.node_id,
+                    "role": primary_node.role,
+                    "epoch": epoch,
+                    "op": "GET",
+                },
             )
-        except (httpx.ConnectError, httpx.TimeoutException, httpx.RequestError):
-            raise StorageUnavailable(
-                "Storage unavailable", headers={"Retry-After": "3"}
-            ) from None
+            base_url = primary_node.endpoint.rstrip("/")
+            try:
+                resp = self._http_client.get(
+                    f"{base_url}/internal/data/{key}",
+                    headers=headers,
+                )
+                if resp.status_code < 500:
+                    return resp.status_code, resp.json()
+            except (httpx.ConnectError, httpx.TimeoutException, httpx.RequestError):
+                pass
 
-        if resp.status_code >= 500:
-            raise StorageUnavailable(
-                "Storage unavailable", headers={"Retry-After": "3"}
+        # Primary DOWN, failed, or timed out. Check fallback replica.
+        fallback_replica = self._get_read_fallback_replica(sid)
+        if fallback_replica is not None:
+            logger.info(
+                "Fallback read to replica",
+                extra={
+                    "event": "route.fallback",
+                    "key": key,
+                    "shardId": sid,
+                    "nodeId": fallback_replica.node_id,
+                    "op": "GET",
+                },
             )
+            base_url = fallback_replica.endpoint.rstrip("/")
+            try:
+                resp = self._http_client.get(
+                    f"{base_url}/internal/data/{key}",
+                    headers=headers,
+                )
+                if resp.status_code < 500:
+                    return resp.status_code, resp.json()
+            except (httpx.ConnectError, httpx.TimeoutException, httpx.RequestError):
+                pass
 
-        return resp.status_code, resp.json()
+        raise StorageUnavailable("Storage unavailable", headers={"Retry-After": "3"})
 
     def delete_data(
         self,
@@ -225,43 +277,68 @@ class ShardRouter:
             headers["X-Correlation-Id"] = correlation_id
 
         for sid in range(self._n_shards):
+            scan_success = False
+            primary_node = None
             try:
-                node, epoch = self._resolve_primary(sid)
+                primary_node, epoch = self._resolve_primary(sid)
             except StorageUnavailable:
-                if not allow_partial:
-                    raise StorageUnavailable(
-                        "One or more storage shards unavailable",
-                        headers={"Retry-After": "3"},
-                    ) from None
-                unavailable_shards.append(sid)
-                continue
+                primary_node = None
 
-            logger.info(
-                "Routed data operation",
-                extra={
-                    "event": "route",
-                    "key": prefix,
-                    "shardId": sid,
-                    "nodeId": node.node_id,
-                    "role": node.role,
-                    "epoch": epoch,
-                    "op": "SCAN",
-                },
-            )
-
-            base_url = node.endpoint.rstrip("/")
-            try:
-                resp = self._http_client.get(
-                    f"{base_url}/internal/scan",
-                    params={"prefix": prefix},
-                    headers=headers,
+            if primary_node is not None:
+                logger.info(
+                    "Routed data operation",
+                    extra={
+                        "event": "route",
+                        "key": prefix,
+                        "shardId": sid,
+                        "nodeId": primary_node.node_id,
+                        "role": primary_node.role,
+                        "epoch": epoch,
+                        "op": "SCAN",
+                    },
                 )
-                if resp.status_code >= 500:
-                    raise StorageUnavailable("Storage unavailable")
-                data = resp.json()
-                items = data.get("items", [])
-                all_items.extend(items)
-            except Exception:  # noqa: BLE001
+                base_url = primary_node.endpoint.rstrip("/")
+                try:
+                    resp = self._http_client.get(
+                        f"{base_url}/internal/scan",
+                        params={"prefix": prefix},
+                        headers=headers,
+                    )
+                    if resp.status_code < 500:
+                        data = resp.json()
+                        all_items.extend(data.get("items", []))
+                        scan_success = True
+                except Exception as exc:  # noqa: BLE001
+                    logger.debug("Primary scan failed for shard %s: %s", sid, exc)
+
+            if not scan_success:
+                fallback_replica = self._get_read_fallback_replica(sid)
+                if fallback_replica is not None:
+                    logger.info(
+                        "Fallback read to replica",
+                        extra={
+                            "event": "route.fallback",
+                            "key": prefix,
+                            "shardId": sid,
+                            "nodeId": fallback_replica.node_id,
+                            "op": "SCAN",
+                        },
+                    )
+                    base_url = fallback_replica.endpoint.rstrip("/")
+                    try:
+                        resp = self._http_client.get(
+                            f"{base_url}/internal/scan",
+                            params={"prefix": prefix},
+                            headers=headers,
+                        )
+                        if resp.status_code < 500:
+                            data = resp.json()
+                            all_items.extend(data.get("items", []))
+                            scan_success = True
+                    except Exception as exc:  # noqa: BLE001
+                        logger.debug("Replica scan fallback failed for shard %s: %s", sid, exc)
+
+            if not scan_success:
                 if not allow_partial:
                     raise StorageUnavailable(
                         "One or more storage shards unavailable",

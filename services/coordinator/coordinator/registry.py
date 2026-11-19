@@ -1,10 +1,13 @@
 """Thread-safe in-memory registry of storage nodes."""
 
+import logging
 import threading
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -19,13 +22,8 @@ class NodeRecord:
     last_heartbeat: float
     replica_ack_seq: int | None = None
     record_count: dict[str, int] = field(default_factory=dict)
-
-    def health(self, now: float, interval: float, limit: int) -> str:
-        """Derived health: UP if within heartbeat timeout window, else DOWN."""
-        threshold = interval * limit
-        if (now - self.last_heartbeat) <= threshold:
-            return "UP"
-        return "DOWN"
+    health: str = "UP"
+    missed_logged: bool = False
 
 
 class NodeRegistry:
@@ -65,6 +63,19 @@ class NodeRegistry:
                 existing.status = status
                 existing.last_seq = last_seq
                 existing.last_heartbeat = now
+                existing.missed_logged = False
+                was_down = existing.health == "DOWN"
+                existing.health = "UP"
+                if was_down:
+                    logger.info(
+                        "Node is UP",
+                        extra={
+                            "event": "node.up",
+                            "nodeId": node_id,
+                            "shardId": shard_id,
+                            "endpoint": endpoint,
+                        },
+                    )
                 return existing
 
             record = NodeRecord(
@@ -78,8 +89,19 @@ class NodeRegistry:
                 last_heartbeat=now,
                 replica_ack_seq=None,
                 record_count={"request": 0, "resource": 0, "other": 0},
+                health="UP",
+                missed_logged=False,
             )
             self._nodes[node_id] = record
+            logger.info(
+                "Node is UP",
+                extra={
+                    "event": "node.up",
+                    "nodeId": node_id,
+                    "shardId": shard_id,
+                    "endpoint": endpoint,
+                },
+            )
             return record
 
     def get(self, node_id: str) -> NodeRecord | None:
@@ -116,24 +138,44 @@ class NodeRegistry:
             record.replica_ack_seq = replica_ack_seq
             record.record_count = dict(record_count)
             record.last_heartbeat = self._clock()
+            record.missed_logged = False
+            was_down = record.health == "DOWN"
+            record.health = "UP"
+            if was_down:
+                logger.info(
+                    "Node is UP",
+                    extra={
+                        "event": "node.up",
+                        "nodeId": node_id,
+                        "shardId": shard_id,
+                        "endpoint": record.endpoint,
+                    },
+                )
             return record
 
+    def get_all_records(self) -> list[NodeRecord]:
+        """Return a snapshot of all node records."""
+        with self._lock:
+            return list(self._nodes.values())
+
+    def set_health(self, node_id: str, health: str) -> None:
+        """Explicitly set node stored health."""
+        with self._lock:
+            record = self._nodes.get(node_id)
+            if record is not None:
+                record.health = health
+
     def get_health(self, node_id: str) -> str | None:
-        """Return derived health (UP/DOWN) for a specific node, or None if unknown."""
+        """Return stored health (UP/DOWN) for a specific node, or None if unknown."""
         with self._lock:
             record = self._nodes.get(node_id)
             if record is None:
                 return None
-            return record.health(
-                self._clock(),
-                self._heartbeat_interval,
-                self._missed_heartbeats_limit,
-            )
+            return record.health
 
     def list_nodes(self) -> list[dict[str, Any]]:
-        """List all nodes in registry with derived health."""
+        """List all nodes in registry with stored health."""
         with self._lock:
-            now = self._clock()
             results = []
             for record in self._nodes.values():
                 results.append({
@@ -147,10 +189,6 @@ class NodeRegistry:
                     "replicaAckSeq": record.replica_ack_seq,
                     "recordCount": dict(record.record_count),
                     "lastHeartbeat": record.last_heartbeat,
-                    "health": record.health(
-                        now,
-                        self._heartbeat_interval,
-                        self._missed_heartbeats_limit,
-                    ),
+                    "health": record.health,
                 })
             return results

@@ -248,7 +248,9 @@ def test_503_retry_after_when_primary_unregistered_or_down(temp_state_dir):
     assert r_ok.status_code == 201
 
     # Advance clock past heartbeat timeout (t=107.0 > 100.0 + 6.0) -> node health is DOWN
+    cluster.set_down("s0-a", True)
     current_time = 107.0
+    app.state.health_checker.tick()
     r_down = client.get(f"/internal/data/{k0}")
     assert r_down.status_code == 503
     assert r_down.headers.get("Retry-After") == "3"

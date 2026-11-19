@@ -52,7 +52,7 @@ def test_diagnostics_list_3_nodes_up(http_client):
     assert len(shards) == 3
     for shard in shards:
         assert shard["state"] == "HEALTHY"
-        assert shard["primary"] in ("s0-a", "s1-a", "s2-a")
+        assert shard["primary"] in ("s0-a", "s1-a", "s2-a", "s0-b", "s1-b", "s2-b")
 
 
 def test_same_key_always_routes_to_same_shard(http_client):

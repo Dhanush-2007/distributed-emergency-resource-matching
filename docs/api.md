@@ -317,3 +317,73 @@ Shard States:
 - `HEALTHY`: Primary is `UP` + `READY`, replica is `UP` + `READY`, sequences are equal, and `degraded` is `false`.
 - `DEGRADED`: Primary is `UP` + `READY`, but replica is missing, lagged, or shard is marked `degraded`.
 - `UNAVAILABLE`: Primary is not `UP` and `READY`.
+
+---
+
+## 5. Failover, Fencing & Role Management (Stage 5)
+
+### 5.1 Storage Role Endpoint
+
+#### `POST /internal/role`
+Authoritatively reassigns a storage node's role and fencing epoch.
+
+- **Caller**: Coordinator failover manager during primary promotion or old-primary demotion.
+- **Request Body**:
+```json
+{
+  "role": "PRIMARY",
+  "epoch": 2
+}
+```
+- **Success Response**: `200 OK`
+```json
+{
+  "role": "PRIMARY",
+  "epoch": 2,
+  "lastSeq": 105
+}
+```
+- **Error Responses**:
+  - `400 INVALID_INPUT`: Invalid role name (must be `PRIMARY` or `REPLICA`).
+  - `409 STALE_EPOCH`: Requested epoch is strictly lower than node's current epoch.
+  - `409 NOT_READY`: Requested promotion to `PRIMARY` while node status is not `READY` (e.g. `CATCHING_UP`).
+
+---
+
+### 5.2 Force Promotion Endpoint
+
+#### `POST /diagnostics/shards/{shardId}/force-promote?nodeId={nodeId}`
+Operator intervention escape hatch to force promotion of a named node to `PRIMARY` regardless of whether it is lagged or degraded.
+
+- **Path Parameters**: `shardId` (int): Shard identifier.
+- **Query Parameters**: `nodeId` (string): Target node identifier.
+- **Behavior**:
+  - Validates target node exists on shard and is `UP`.
+  - Increments shard epoch (`epoch + 1`) and persists atomically to coordinator disk state file.
+  - Logs `WARNING: Shard <id> has stale replica (<id>) with seq <M> < primary seq <N>; promotion may lose data. Proceed?` if the target node has lower sequence than primary.
+  - Authoritatively calls `POST /internal/role` on target node.
+- **Success Response**: `200 OK`
+```json
+{
+  "status": "ok",
+  "shardId": 1,
+  "primaryNodeId": "s1-b",
+  "epoch": 2,
+  "degraded": true
+}
+```
+- **Error Responses**:
+  - `400 INVALID_INPUT`: Invalid shard ID or node does not belong to shard.
+  - `503 STORAGE_UNAVAILABLE`: Target node is `DOWN` or role call failed (`Retry-After: 3`).
+
+---
+
+### 5.3 Failure Detection & Read Fallback
+
+- **Node Health States**: Each node has an explicit stored health state `UP` or `DOWN`.
+  - Background probe thread sends `GET /health/live` to each registered node every `HEALTH_CHECK_INTERVAL_SEC` (default 1s) with timeout `PROBE_TIMEOUT_SEC` (default 1s).
+  - A node is marked `DOWN` if its heartbeat is missing past `HEARTBEAT_TIMEOUT_SEC` (default 6s) or if its HTTP probe fails.
+  - Marking a primary `DOWN` triggers immediate automated failover: the healthy in-sync replica is promoted with `epoch + 1`.
+- **Read Fallback on Outage**:
+  - For read operations (`GET /internal/data/{key}` and `GET /internal/scan`), if the primary is `DOWN` or returns a connection/timeout error, the coordinator transparently attempts a single retry against an in-sync replica with equal `lastSeq`.
+  - Mutation operations (`PUT`, `DELETE`) are strictly never retried to preserve linearizability and prevent split-brain writes.

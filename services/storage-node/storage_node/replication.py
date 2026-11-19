@@ -89,6 +89,10 @@ class ReplicaMonitor:
         self.mark_not_ok()
         return False
 
+    def run_once(self) -> bool:
+        """Run a single peer probe iteration manually."""
+        return self.check_peer_once()
+
     def _run(self) -> None:
         # Probe immediately on start
         self.check_peer_once()

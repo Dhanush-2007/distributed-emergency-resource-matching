@@ -9,8 +9,10 @@ from typing import Any
 import httpx
 from ems_common.errors import (
     Gap,
+    InvalidInput,
     NotFound,
     NotPrimary,
+    NotReady,
     NotReplica,
     StaleEpoch,
     StorageUnavailable,
@@ -72,6 +74,11 @@ class PutDataRequest(BaseModel):
     epoch: int | None = None
 
 
+class RoleChangeRequest(BaseModel):
+    role: str
+    epoch: int
+
+
 def create_app(
     node_id: str | None = None,
     shard_id: int | None = None,
@@ -121,9 +128,29 @@ def create_app(
         else settings.replication_timeout
     )
 
+    _manual_status: str | None = None
+
+    def _set_coord_status(new_status: str) -> None:
+        nonlocal _manual_status
+        _manual_status = new_status
+        if _coord_client is not None:
+            _coord_client._set_status(new_status)
+
+    def _demote_to_replica(new_epoch: int) -> None:
+        local_db.update_meta(role="REPLICA", epoch=new_epoch)
+        _set_coord_status("CATCHING_UP")
+        if _replica_monitor is not None:
+            _replica_monitor.mark_not_ok()
+        if _recovery_manager is not None:
+            _recovery_manager.start_recovery_thread()
+        logger.warning(
+            "Node demoted to REPLICA",
+            extra={"event": "node.demoted", "nodeId": nid, "epoch": new_epoch},
+        )
+
     def _on_registered(assigned_role: str, assigned_epoch: int) -> None:
         if assigned_role == "REPLICA" and _recovery_manager is not None:
-            _recovery_manager.run_full_recovery()
+            _recovery_manager.start_recovery_thread()
 
     def _on_coord_status_change(new_status: str) -> None:
         pass
@@ -147,12 +174,8 @@ def create_app(
                         else settings.heartbeat_interval
                     ),
                     http_client=http_client,
-                    on_status_change=lambda s: _coord_client._set_status(s)
-                    if _coord_client
-                    else None,
-                    status_getter=lambda: _coord_client.status
-                    if _coord_client
-                    else "STARTING",
+                    on_status_change=lambda s: _set_coord_status(s),
+                    status_getter=_node_status,
                 )
                 _recovery_manager.start()
 
@@ -180,6 +203,7 @@ def create_app(
                 "http_client": http_client,
                 "get_replica_ack_seq": _get_replica_ack_seq,
                 "on_registered": _on_registered,
+                "on_demoted": _demote_to_replica,
             }
             if initial_backoff is not None:
                 kwargs["initial_backoff"] = initial_backoff
@@ -214,9 +238,15 @@ def create_app(
     register_error_handlers(application)
 
     application.state.get_replica_monitor = lambda: _replica_monitor
+    application.state.get_coord_client = lambda: _coord_client
+    application.state.get_recovery_manager = lambda: _recovery_manager
 
     def _node_status() -> str:
         """Return the current node status string."""
+        if getattr(application.state, "manual_status", None) is not None:
+            return application.state.manual_status
+        if _manual_status is not None:
+            return _manual_status
         if is_standalone:
             return "READY"
         if _coord_client is None:
@@ -229,6 +259,53 @@ def create_app(
             raise StorageUnavailable(
                 "Node is not yet registered with the coordinator"
             )
+
+    @application.post("/internal/role")
+    def change_role(payload: RoleChangeRequest) -> dict[str, Any]:
+        req_role = payload.role.strip().upper()
+        current_role = (local_db.get_meta("role") or "REPLICA").upper()
+        current_epoch = int(local_db.get_meta("epoch") or 1)
+
+        if payload.epoch < current_epoch:
+            raise StaleEpoch(
+                f"Requested epoch {payload.epoch} is lower than current epoch {current_epoch}",
+                details=[{"epoch": current_epoch}],
+            )
+
+        if req_role == current_role and payload.epoch == current_epoch:
+            last_seq = local_db.stats()["last_seq"]
+            return {"role": current_role, "epoch": current_epoch, "lastSeq": last_seq}
+
+        if req_role == "PRIMARY":
+            st = _node_status()
+            if st != "READY":
+                raise NotReady(
+                    f"Cannot promote to PRIMARY when status is {st}",
+                    details=[{"status": st}],
+                )
+            local_db.update_meta(role="PRIMARY", epoch=payload.epoch)
+            if _replica_monitor is not None:
+                _replica_monitor.mark_not_ok()
+            _set_coord_status("READY")
+            last_seq = local_db.stats()["last_seq"]
+            logger.info(
+                "Node promoted to PRIMARY",
+                extra={
+                    "event": "node.promoted",
+                    "nodeId": nid,
+                    "role": "PRIMARY",
+                    "epoch": payload.epoch,
+                    "lastSeq": last_seq,
+                },
+            )
+            return {"role": "PRIMARY", "epoch": payload.epoch, "lastSeq": last_seq}
+
+        if req_role == "REPLICA":
+            _demote_to_replica(payload.epoch)
+            last_seq = local_db.stats()["last_seq"]
+            return {"role": "REPLICA", "epoch": payload.epoch, "lastSeq": last_seq}
+
+        raise InvalidInput(f"Invalid role: {payload.role}")
 
     @application.get("/health/live")
     def health_live() -> dict[str, str]:
@@ -251,9 +328,6 @@ def create_app(
         node_role = stats["role"]
         node_epoch = stats["epoch"]
 
-        if node_role != "REPLICA":
-            raise NotReplica()
-
         # Validate epoch and seq
         incoming_epoch = int(payload.get("epoch", 0))
         incoming_seq = int(payload.get("seq", 0))
@@ -264,6 +338,9 @@ def create_app(
 
         if incoming_epoch < node_epoch:
             raise StaleEpoch(details=[{"epoch": node_epoch}])
+
+        if node_role != "REPLICA":
+            raise NotReplica(details=[{"epoch": node_epoch}])
         if incoming_epoch > node_epoch:
             # adopt newer epoch
             local_db.update_meta(epoch=incoming_epoch)
@@ -381,6 +458,9 @@ def create_app(
                 f"Stale epoch {payload.epoch} provided, current epoch is {node_epoch}"
             )
 
+        demote_epoch: int | None = None
+        stale_exc: StaleEpoch | None = None
+
         with _write_lock:
             res = local_db.put(
                 key=key,
@@ -394,27 +474,41 @@ def create_app(
                 from storage_node.replication import replicate_or_degrade
 
                 repl_client = http_client or httpx.Client()
-                replicated, ack_seq = replicate_or_degrade(
-                    peer_url=effective_peer_url,
-                    coordinator_url=effective_coord_url,
-                    replica_monitor=_replica_monitor,
-                    http_client=repl_client,
-                    replication_timeout=effective_repl_timeout,
-                    node_id=nid,
-                    shard_id=sid,
-                    epoch=node_epoch,
-                    seq=res.seq,
-                    op="PUT",
-                    key=key,
-                    value=payload.value,
-                    version=res.version,
-                )
-                if ack_seq is not None:
-                    _replica_ack_seq = (
-                        max(_replica_ack_seq, ack_seq)
-                        if _replica_ack_seq is not None
-                        else ack_seq
+                try:
+                    replicated, ack_seq = replicate_or_degrade(
+                        peer_url=effective_peer_url,
+                        coordinator_url=effective_coord_url,
+                        replica_monitor=_replica_monitor,
+                        http_client=repl_client,
+                        replication_timeout=effective_repl_timeout,
+                        node_id=nid,
+                        shard_id=sid,
+                        epoch=node_epoch,
+                        seq=res.seq,
+                        op="PUT",
+                        key=key,
+                        value=payload.value,
+                        version=res.version,
                     )
+                except StaleEpoch as exc:
+                    stale_ep = node_epoch
+                    for d in exc.details:
+                        if isinstance(d, dict) and "epoch" in d:
+                            stale_ep = max(stale_ep, int(d["epoch"]))
+                    demote_epoch = stale_ep
+                    stale_exc = exc
+                else:
+                    if ack_seq is not None:
+                        _replica_ack_seq = (
+                            max(_replica_ack_seq, ack_seq)
+                            if _replica_ack_seq is not None
+                            else ack_seq
+                        )
+
+        if demote_epoch is not None:
+            _demote_to_replica(demote_epoch)
+            assert stale_exc is not None
+            raise stale_exc
 
         if res.created:
             response.status_code = status.HTTP_201_CREATED
@@ -481,6 +575,9 @@ def create_app(
                 f"Stale epoch {epoch} provided, current epoch is {node_epoch}"
             )
 
+        demote_epoch: int | None = None
+        stale_exc: StaleEpoch | None = None
+
         with _write_lock:
             res = local_db.delete(key=key, epoch=node_epoch)
 
@@ -489,27 +586,41 @@ def create_app(
                 from storage_node.replication import replicate_or_degrade
 
                 repl_client = http_client or httpx.Client()
-                replicated, ack_seq = replicate_or_degrade(
-                    peer_url=effective_peer_url,
-                    coordinator_url=effective_coord_url,
-                    replica_monitor=_replica_monitor,
-                    http_client=repl_client,
-                    replication_timeout=effective_repl_timeout,
-                    node_id=nid,
-                    shard_id=sid,
-                    epoch=node_epoch,
-                    seq=res.seq,
-                    op="DELETE",
-                    key=key,
-                    value=None,
-                    version=res.version,
-                )
-                if ack_seq is not None:
-                    _replica_ack_seq = (
-                        max(_replica_ack_seq, ack_seq)
-                        if _replica_ack_seq is not None
-                        else ack_seq
+                try:
+                    replicated, ack_seq = replicate_or_degrade(
+                        peer_url=effective_peer_url,
+                        coordinator_url=effective_coord_url,
+                        replica_monitor=_replica_monitor,
+                        http_client=repl_client,
+                        replication_timeout=effective_repl_timeout,
+                        node_id=nid,
+                        shard_id=sid,
+                        epoch=node_epoch,
+                        seq=res.seq,
+                        op="DELETE",
+                        key=key,
+                        value=None,
+                        version=res.version,
                     )
+                except StaleEpoch as exc:
+                    stale_ep = node_epoch
+                    for d in exc.details:
+                        if isinstance(d, dict) and "epoch" in d:
+                            stale_ep = max(stale_ep, int(d["epoch"]))
+                    demote_epoch = stale_ep
+                    stale_exc = exc
+                else:
+                    if ack_seq is not None:
+                        _replica_ack_seq = (
+                            max(_replica_ack_seq, ack_seq)
+                            if _replica_ack_seq is not None
+                            else ack_seq
+                        )
+
+        if demote_epoch is not None:
+            _demote_to_replica(demote_epoch)
+            assert stale_exc is not None
+            raise stale_exc
 
         logger.info(
             "Deleted key",

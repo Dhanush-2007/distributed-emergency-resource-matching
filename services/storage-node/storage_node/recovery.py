@@ -39,6 +39,7 @@ class FollowerRecoveryManager:
         self._stop_event = threading.Event()
         self._wake_sync_event = threading.Event()
         self._thread: threading.Thread | None = None
+        self._recovery_thread: threading.Thread | None = None
         self._lock = threading.Lock()
 
     def start(self) -> None:
@@ -57,11 +58,25 @@ class FollowerRecoveryManager:
         self._wake_sync_event.set()
         if self._thread is not None:
             self._thread.join(timeout=timeout)
+        if self._recovery_thread is not None:
+            self._recovery_thread.join(timeout=timeout)
         if self._owns_http and hasattr(self._http, "close"):
             try:
                 self._http.close()
             except Exception as exc:  # noqa: BLE001
                 logger.debug("Error closing recovery http client: %s", exc)
+
+    def start_recovery_thread(self) -> None:
+        """Ensure full recovery runs asynchronously in a daemon thread."""
+        with self._lock:
+            if self._recovery_thread is not None and self._recovery_thread.is_alive():
+                return
+            self._recovery_thread = threading.Thread(
+                target=self.run_full_recovery,
+                name=f"follower-catchup-{self._node_id}",
+                daemon=True,
+            )
+            self._recovery_thread.start()
 
     def trigger_sync(self) -> None:
         """Wake up the follower sync loop immediately (e.g. upon 409 GAP)."""

@@ -92,6 +92,13 @@ def setup_json_logger(
         handler.setFormatter(JSONFormatter(service_name=service_name))
         logger.addHandler(handler)
 
+    root = logging.getLogger()
+    root.setLevel(level)
+    if not root.handlers:
+        root_handler = logging.StreamHandler()
+        root_handler.setFormatter(JSONFormatter(service_name=service_name))
+        root.addHandler(root_handler)
+
     return logger
 
 
