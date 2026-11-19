@@ -41,6 +41,7 @@ def cluster(tmp_path):
             time.sleep(0.05)
 
         yield h
+        h.close()
 
 
 def test_scenario_replica_down_primary_up(cluster):

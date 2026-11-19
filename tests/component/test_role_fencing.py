@@ -39,6 +39,7 @@ def test_promote_ready_replica_accepts_writes_with_new_epoch(tmp_path):
         w_old = rc.put("/internal/data/key:3", json={"value": {"v": 3}, "epoch": 1})
         assert w_old.status_code == 409
         assert w_old.json()["error"]["code"] == "STALE_EPOCH"
+        h.close()
 
 
 def test_promote_while_catching_up_returns_409_not_ready(tmp_path):
@@ -50,6 +51,7 @@ def test_promote_while_catching_up_returns_409_not_ready(tmp_path):
         p_res = rc.post("/internal/role", json={"role": "PRIMARY", "epoch": 2})
         assert p_res.status_code == 409
         assert p_res.json()["error"]["code"] == "NOT_READY"
+        h.close()
 
 
 def test_old_primary_demotes_self_when_replicate_gets_stale_epoch(tmp_path):
@@ -117,6 +119,7 @@ def test_heartbeat_response_demotes_primary(tmp_path):
 
         assert h.primary_db.get_meta("role") == "REPLICA"
         assert int(h.primary_db.get_meta("epoch")) == 2
+        h.close()
 
 
 def test_restarted_node_stored_primary_becomes_replica_by_coordinator(tmp_path):
@@ -136,6 +139,7 @@ def test_restarted_node_stored_primary_becomes_replica_by_coordinator(tmp_path):
 
         assert h.primary_db.get_meta("role") == "REPLICA"
         assert int(h.primary_db.get_meta("epoch")) == 3
+        h.close()
 
 
 def test_role_endpoint_idempotency(tmp_path):
@@ -151,6 +155,7 @@ def test_role_endpoint_idempotency(tmp_path):
         assert r2.status_code == 200
         assert r2.json()["role"] == "REPLICA"
         assert r2.json()["epoch"] == 1
+        h.close()
 
 
 def test_stale_role_epoch_rejected(tmp_path):
@@ -162,6 +167,7 @@ def test_stale_role_epoch_rejected(tmp_path):
         res = rc.post("/internal/role", json={"role": "PRIMARY", "epoch": 2})
         assert res.status_code == 409
         assert res.json()["error"]["code"] == "STALE_EPOCH"
+        h.close()
 
 
 def test_stale_epoch_replication_no_deadlock_regression(tmp_path):
@@ -193,6 +199,7 @@ def test_stale_epoch_replication_no_deadlock_regression(tmp_path):
         # Demoted to REPLICA with adopted epoch 2
         assert h.primary_db.get_meta("role") == "REPLICA"
         assert int(h.primary_db.get_meta("epoch")) == 2
+        h.close()
 
     duration = time.time() - t0
     assert duration < 5.0, f"Test took {duration:.2f}s, exceeding 5s limit"

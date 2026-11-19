@@ -387,3 +387,158 @@ Operator intervention escape hatch to force promotion of a named node to `PRIMAR
 - **Read Fallback on Outage**:
   - For read operations (`GET /internal/data/{key}` and `GET /internal/scan`), if the primary is `DOWN` or returns a connection/timeout error, the coordinator transparently attempts a single retry against an in-sync replica with equal `lastSeq`.
   - Mutation operations (`PUT`, `DELETE`) are strictly never retried to preserve linearizability and prevent split-brain writes.
+
+---
+
+## 6. Request Service API (Port 8001, Stage 6)
+
+The Request Service manages emergency aid requests, orchestrates match events, enforces client status transitions, and automatically triggers resource releases when requests reach terminal states (`COMPLETED` or `CANCELLED`).
+
+### 6.1 Public Endpoints
+
+#### `POST /requests`
+Create a new emergency request and queue asynchronous matching.
+- **Request Body**:
+```json
+{
+  "type": "water",
+  "location": { "lat": 12.9716, "lon": 77.5946 },
+  "details": "Drinking water needed"
+}
+```
+- **Success Response**: `201 Created`
+  - `Location: /requests/{requestId}`
+```json
+{
+  "requestId": "3f2c9a1e-8b1a-4f56-91e2-b1c2d3e4f5a6",
+  "type": "water",
+  "location": { "lat": 12.9716, "lon": 77.5946 },
+  "details": "Drinking water needed",
+  "status": "PENDING",
+  "matchedResourceId": null,
+  "matchAttemptCount": 0,
+  "createdAt": "2026-11-15T10:00:00Z",
+  "updatedAt": "2026-11-15T10:00:00Z",
+  "version": 1,
+  "matchQueued": false
+}
+```
+
+#### `GET /requests/{id}`
+Retrieve a request by UUID.
+- **Success Response**: `200 OK` (returns public record with `version`).
+- **Errors**: `400 INVALID_INPUT` (malformed UUID), `404 NOT_FOUND` (unknown ID).
+
+#### `GET /requests`
+List requests, supporting partial results if storage shards are down.
+- **Query Parameters**:
+  - `type` (optional): `water`, `food`, `medicine`, `transportation`, `shelter`.
+  - `status` (optional): `PENDING`, `MATCHED`, `IN_PROGRESS`, `COMPLETED`, `NO_MATCH`, `CANCELLED`.
+- **Success Response**: `200 OK`
+```json
+{
+  "items": [ /* list of requests sorted by (createdAt, requestId) */ ],
+  "count": 1,
+  "partial": false
+}
+```
+
+#### `PUT /requests/{id}/status`
+Update request status according to valid client transition rules.
+- **Request Body**: `{"status": "IN_PROGRESS"}` or `{"status": "COMPLETED"}` or `{"status": "CANCELLED"}`.
+- **Success Response**: `200 OK` (returns updated request).
+- **Side Effects**: If transitioning to `COMPLETED` or `CANCELLED` and `matchedResourceId` was assigned, calls `POST /internal/resources/{matchedResourceId}/release`.
+- **Errors**: `409 INVALID_TRANSITION` (e.g., trying to set `PENDING`, `MATCHED`, or `NO_MATCH`).
+
+#### `POST /match/{requestId}`
+Manual re-trigger for matching.
+- **Success Response**: `200 OK` `{"requestId": "...", "status": "PENDING", "matchQueued": false}`
+- **Errors**: `409 INVALID_TRANSITION` (if request is `MATCHED`, `IN_PROGRESS`, `COMPLETED`, or `CANCELLED`).
+
+### 6.2 Internal Endpoints
+
+#### `GET /internal/requests/{id}`
+Used by Matching Service and Reconciler; returns full stored record including `eventPending` and `version`.
+
+#### `POST /internal/requests/{id}/matchresult` (or `/match-result`)
+Records outcome from Matching Service.
+- **Request Body**: `{"outcome": "MATCHED", "resourceId": "...", "version": 1}` or `{"outcome": "NO_MATCH"}`.
+- **Success Response**: `200 OK` (idempotent if already matched with same resource).
+- **Errors**: `409 VERSION_CONFLICT`, `409 INVALID_TRANSITION` (if request no longer `PENDING`).
+
+---
+
+## 7. Resource Service API (Port 8002, Stage 6)
+
+The Resource Service manages emergency aid resources and volunteers, handles candidate searches, provides atomic reservations via optimistic conditional writes, and runs a background reconciler for orphaned assignments.
+
+### 7.1 Public Endpoints
+
+#### `POST /resources`
+Register a resource.
+- **Request Body**:
+```json
+{
+  "name": "Red Cross water truck 1",
+  "type": "water",
+  "location": { "lat": 12.9352, "lon": 77.6245 },
+  "availability": true
+}
+```
+- **Success Response**: `201 Created`
+  - `Location: /resources/{resourceId}`
+```json
+{
+  "resourceId": "19416df0-26aa-464c-8e07-94d798a49d3f",
+  "name": "Red Cross water truck 1",
+  "type": "water",
+  "location": { "lat": 12.9352, "lon": 77.6245 },
+  "availability": true,
+  "status": "AVAILABLE",
+  "assignedRequestId": null,
+  "createdAt": "2026-11-15T10:00:00Z",
+  "updatedAt": "2026-11-15T10:00:00Z",
+  "version": 1
+}
+```
+*Invariant*: `availability == (status == "AVAILABLE")`.
+
+#### `GET /resources/{id}`
+Retrieve a single resource by UUID.
+
+#### `GET /resources`
+List resources across all shards (requires full scan).
+- **Query Parameters**:
+  - `type` (optional): `water`, `food`, `medicine`, `transportation`, `shelter`.
+  - `status` (optional): `AVAILABLE`, `ASSIGNED`, `OFFLINE`.
+  - `availability` (optional): `true`, `false`.
+- **Success Response**: `200 OK` `{"items": [...], "count": 1}`
+
+#### `PUT /resources/{id}/status`
+Update resource availability or status.
+- **Request Body**: `{"status": "AVAILABLE"}` or `{"status": "OFFLINE"}`.
+- **Success Response**: `200 OK` (updates status and matching boolean `availability`).
+- **Errors**: `409 INVALID_TRANSITION` (clients cannot set status to `ASSIGNED`).
+
+### 7.2 Internal Endpoints
+
+#### `GET /internal/resources/candidates?type={type}`
+Candidate lookup for matching service (`status == AVAILABLE`, `availability == true`). Supports partial results (`"partial": true/false`).
+
+#### `GET /internal/resources/by-request/{requestId}`
+Find resource assigned to a specific request ID (makes matching retries idempotent).
+- **Errors**: `404 NOT_FOUND` if no resource assigned to request.
+
+#### `POST /internal/resources/{id}/reserve`
+Atomic reservation of an available resource.
+- **Request Body**: `{"requestId": "...", "expectedVersion": 1}`.
+- **Success Response**: `200 OK` (sets `status: "ASSIGNED"`, `availability: false`, `assignedRequestId: requestId`). Idempotent if already assigned to the same request.
+- **Errors**: `409 RESOURCE_ALREADY_ASSIGNED` (already assigned to another request), `409 VERSION_CONFLICT` (version mismatch).
+
+#### `POST /internal/resources/{id}/release`
+Releases an assigned resource back to `AVAILABLE`.
+- **Request Body**: `{"requestId": "..."}`.
+- **Success Response**: `200 OK` `{"released": true/false, "resource": {...}}`. Idempotent.
+
+### 7.3 Background Reconciler
+Runs every `RECONCILE_INTERVAL_SEC` (default 60s). Scans `ASSIGNED` resources. For each resource past grace period, checks `GET /internal/requests/{assignedRequestId}` on Request Service. If request is `404`, or request status is not `MATCHED`/`IN_PROGRESS`, releases resource back to `AVAILABLE`.

@@ -175,6 +175,20 @@ class NotReady(EmsError):
         )
 
 
+class ResourceAlreadyAssigned(EmsError):
+    def __init__(
+        self,
+        message: str = "Resource already assigned",
+        details: list[dict[str, Any]] | None = None,
+    ) -> None:
+        super().__init__(
+            http_status=409,
+            code="RESOURCE_ALREADY_ASSIGNED",
+            message=message,
+            details=details,
+        )
+
+
 def _extract_cid(request: Request) -> str | None:
     for k, v in request.headers.items():
         if k.lower() == "x-correlation-id":

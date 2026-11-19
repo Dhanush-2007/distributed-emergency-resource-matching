@@ -42,6 +42,7 @@ class SingleShardClusterHarness:
         self.s1_b_db.update_meta(role="REPLICA", epoch=1)
 
         self.down_nodes: set[str] = set()
+        self.closed = False
 
         self._coord_client: TestClient | None = None
         self._s1_a_client: TestClient | None = None
@@ -57,7 +58,7 @@ class SingleShardClusterHarness:
             self.down_nodes.discard(node_id)
 
     def _route_request(self, target: str, request: httpx.Request) -> httpx.Response:
-        if target in self.down_nodes:
+        if self.closed or target in self.down_nodes:
             raise httpx.ConnectError(f"Node {target} is unreachable")
 
         sub_path = request.url.raw_path.decode()
@@ -201,3 +202,17 @@ class SingleShardClusterHarness:
         rm = app.state.get_replica_monitor()
         if rm:
             rm.run_once()
+
+    def close(self) -> None:
+        self.closed = True
+        for app in (self.s1_a_app, self.s1_b_app):
+            if app is not None:
+                rm = getattr(app.state, "get_recovery_manager", lambda: None)()
+                if rm:
+                    rm.stop(timeout=1.0)
+                rep = getattr(app.state, "get_replica_monitor", lambda: None)()
+                if rep:
+                    rep.stop(timeout=1.0)
+                cc = getattr(app.state, "get_coord_client", lambda: None)()
+                if cc:
+                    cc.stop(timeout=1.0)

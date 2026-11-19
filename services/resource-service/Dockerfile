@@ -1,0 +1,31 @@
+FROM python:3.11-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+# Create non-root user appuser (uid 10001)
+RUN groupadd -g 10001 appuser && \
+    useradd -u 10001 -g appuser -s /bin/sh -m appuser
+
+WORKDIR /app
+
+# Copy requirements first and pip install
+COPY services/resource-service/requirements.txt requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy common library and pip install it
+COPY common/ /app/common/
+RUN pip install --no-cache-dir -e /app/common
+
+# Copy service code
+COPY services/resource-service/resource_service/ /app/resource_service/
+RUN chown -R appuser:appuser /app
+
+USER appuser
+
+EXPOSE 8002
+
+HEALTHCHECK --interval=5s --timeout=3s --start-period=5s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')" || exit 1
+
+CMD ["uvicorn", "resource_service.main:app", "--host", "0.0.0.0", "--port", "8002"]

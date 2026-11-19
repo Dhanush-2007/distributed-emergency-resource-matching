@@ -6,7 +6,7 @@ PY := python3.11
 VENV_PY := .venv/bin/python
 endif
 
-.PHONY: install test itest ftest lint up down image-storage image-coordinator images
+.PHONY: install test itest ftest lint up down image-storage image-coordinator image-request image-resource images
 
 image-storage:
 	docker build -f services/storage-node/Dockerfile -t ems/storage-node:1.0 .
@@ -14,7 +14,13 @@ image-storage:
 image-coordinator:
 	docker build -f services/coordinator/Dockerfile -t ems/coordinator:1.0 .
 
-images: image-storage image-coordinator
+image-request:
+	docker build -f services/request-service/Dockerfile -t ems/request-service:1.0 .
+
+image-resource:
+	docker build -f services/resource-service/Dockerfile -t ems/resource-service:1.0 .
+
+images: image-storage image-coordinator image-request image-resource
 
 install:
 	$(PY) -m venv .venv

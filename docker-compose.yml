@@ -169,3 +169,57 @@ services:
       REPLICATION_TIMEOUT_SEC: 2
     volumes:
       - s2-b-data:/data
+
+  request-service:
+    image: ems/request-service:1.0
+    build:
+      context: .
+      dockerfile: services/request-service/Dockerfile
+    container_name: ems-request-service
+    networks:
+      - ems-net
+    ports:
+      - "8001:8001"
+    environment:
+      PORT: 8001
+      COORDINATOR_URL: http://coordinator:8000
+      RESOURCE_SERVICE_URL: http://resource-service:8002
+      EVENT_PUBLISHER: noop
+      HTTP_TIMEOUT_SEC: "3.0"
+    depends_on:
+      coordinator:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  resource-service:
+    image: ems/resource-service:1.0
+    build:
+      context: .
+      dockerfile: services/resource-service/Dockerfile
+    container_name: ems-resource-service
+    networks:
+      - ems-net
+    ports:
+      - "8002:8002"
+    environment:
+      PORT: 8002
+      COORDINATOR_URL: http://coordinator:8000
+      REQUEST_SERVICE_URL: http://request-service:8001
+      HTTP_TIMEOUT_SEC: "3.0"
+      RECONCILE_ENABLED: "true"
+      RECONCILE_INTERVAL_SEC: "5.0"
+      RECONCILE_GRACE_SEC: "60.0"
+    depends_on:
+      coordinator:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
