@@ -1,1 +1,97 @@
-# Placeholder. The Compose stack is not implemented yet.
+networks:
+  ems-net:
+    name: ems-net
+    driver: bridge
+
+volumes:
+  coord-state:
+    name: ems-coord-state
+  s0-a-data:
+    name: ems-s0-a-data
+  s1-a-data:
+    name: ems-s1-a-data
+  s2-a-data:
+    name: ems-s2-a-data
+
+# Shared storage node definition (YAML extension)
+# Note: -b replica nodes (s0-b, s1-b, s2-b) are added in Stage 4.
+x-storage-node: &storage-node-base
+  image: ems/storage-node:1.0
+  networks:
+    - ems-net
+  depends_on:
+    coordinator:
+      condition: service_healthy
+
+services:
+  coordinator:
+    image: ems/coordinator:1.0
+    build:
+      context: .
+      dockerfile: services/coordinator/Dockerfile
+    container_name: ems-coordinator
+    networks:
+      - ems-net
+    ports:
+      - "8000:8000"
+    volumes:
+      - coord-state:/state
+    environment:
+      STATE_DIR: /state
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/live')"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  s0-a:
+    <<: *storage-node-base
+    build:
+      context: .
+      dockerfile: services/storage-node/Dockerfile
+    container_name: ems-s0-a
+    environment:
+      NODE_ID: s0-a
+      SHARD_ID: 0
+      STANDALONE: "false"
+      COORDINATOR_URL: http://coordinator:8000
+      ADVERTISE_URL: http://s0-a:9000
+      INITIAL_ROLE: primary
+      DATA_DIR: /data
+    volumes:
+      - s0-a-data:/data
+
+  s1-a:
+    <<: *storage-node-base
+    build:
+      context: .
+      dockerfile: services/storage-node/Dockerfile
+    container_name: ems-s1-a
+    environment:
+      NODE_ID: s1-a
+      SHARD_ID: 1
+      STANDALONE: "false"
+      COORDINATOR_URL: http://coordinator:8000
+      ADVERTISE_URL: http://s1-a:9000
+      INITIAL_ROLE: primary
+      DATA_DIR: /data
+    volumes:
+      - s1-a-data:/data
+
+  s2-a:
+    <<: *storage-node-base
+    build:
+      context: .
+      dockerfile: services/storage-node/Dockerfile
+    container_name: ems-s2-a
+    environment:
+      NODE_ID: s2-a
+      SHARD_ID: 2
+      STANDALONE: "false"
+      COORDINATOR_URL: http://coordinator:8000
+      ADVERTISE_URL: http://s2-a:9000
+      INITIAL_ROLE: primary
+      DATA_DIR: /data
+    volumes:
+      - s2-a-data:/data

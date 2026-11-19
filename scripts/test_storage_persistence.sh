@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-IMAGE_NAME="ems-storage-node:latest"
+IMAGE_NAME="ems/storage-node:1.0"
 CONTAINER_NAME="ems-storage-node-persist-test"
 VOLUME_NAME="ems-storage-test-volume"
 PORT=9000
