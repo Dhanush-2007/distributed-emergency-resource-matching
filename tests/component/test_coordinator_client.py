@@ -243,6 +243,8 @@ def test_node_survives_coordinator_downtime(temp_data_dir):
         if request.url.path == "/internal/nodes/register":
             first_registered.set()
             return httpx.Response(200, json={"role": "PRIMARY", "epoch": 1})
+        if request.url.path == "/internal/nodes/degraded":
+            return httpx.Response(200, json={"state": "DEGRADED"})
         # Heartbeat connection error
         raise httpx.ConnectError("Network is down")
 

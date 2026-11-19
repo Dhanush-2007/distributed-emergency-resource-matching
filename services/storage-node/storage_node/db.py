@@ -46,12 +46,21 @@ class ReplicationGap(Exception):
 class StorageDB:
     """Manages SQLite storage node operations for key-value records, oplog, and meta."""
 
-    def __init__(self, db_path: str | Path) -> None:
+    def __init__(
+        self,
+        db_path: str | Path,
+        oplog_retain: int | None = None,
+    ) -> None:
         self.db_path = str(db_path)
         # Ensure parent directory exists if a path is given
         parent = Path(self.db_path).parent
         if parent and str(parent) != ".":
             parent.mkdir(parents=True, exist_ok=True)
+
+        if oplog_retain is not None:
+            self.oplog_retain = oplog_retain
+        else:
+            self.oplog_retain = int(os.getenv("OPLOG_RETAIN", "10000"))
 
         self._lock = threading.Lock()
         self._conn = sqlite3.connect(
@@ -94,21 +103,20 @@ class StorageDB:
                 );
             """)
             # Initialize default metadata if absent
+            init_role = os.getenv("INITIAL_ROLE", "PRIMARY").upper()
             cur.execute("INSERT OR IGNORE INTO meta (k, v) VALUES ('last_applied_seq', '0');")
             cur.execute("INSERT OR IGNORE INTO meta (k, v) VALUES ('epoch', '1');")
             cur.execute(
                 "INSERT OR IGNORE INTO meta (k, v) VALUES ('role', ?);",
-                (os.getenv("INITIAL_ROLE", "PRIMARY"),),
+                (init_role,),
             )
             cur.execute("INSERT OR IGNORE INTO meta (k, v) VALUES ('last_log_epoch', '0');")
             
 
-    OPLOG_RETAIN: int = 10000  # default retain count
-
     def _prune_oplog(self, cur: sqlite3.Cursor) -> None:
         """Prune oplog entries older than the retain window."""
         last_seq = int(self._get_meta(cur, "last_applied_seq"))
-        retain_seq = last_seq - self.OPLOG_RETAIN
+        retain_seq = last_seq - self.oplog_retain
         if retain_seq > 0:
             cur.execute("DELETE FROM oplog WHERE seq <= ?;", (retain_seq,))
 
@@ -202,7 +210,12 @@ class StorageDB:
                     "UPDATE meta SET v = ? WHERE k = 'last_applied_seq';",
                     (str(new_seq),),
                 )
+                cur.execute(
+                    "UPDATE meta SET v = ? WHERE k = 'last_log_epoch';",
+                    (str(epoch),),
+                )
 
+                self._prune_oplog(cur)
                 cur.execute("COMMIT;")
                 return PutResult(version=new_version, seq=new_seq, created=created)
             except Exception:
@@ -304,6 +317,7 @@ class StorageDB:
                     "UPDATE meta SET v = ? WHERE k = 'last_log_epoch';",
                     (str(epoch),),
                 )
+                self._prune_oplog(cur)
                 cur.execute("COMMIT;")
                 return "APPLIED"
             except Exception:
@@ -352,7 +366,12 @@ class StorageDB:
                     "UPDATE meta SET v = ? WHERE k = 'last_applied_seq';",
                     (str(new_seq),),
                 )
+                cur.execute(
+                    "UPDATE meta SET v = ? WHERE k = 'last_log_epoch';",
+                    (str(epoch),),
+                )
 
+                self._prune_oplog(cur)
                 cur.execute("COMMIT;")
                 return DeleteResult(version=new_version, seq=new_seq)
             except Exception:
@@ -418,6 +437,7 @@ class StorageDB:
             return {
                 "records": records_count,
                 "last_seq": last_seq,
+                "lastSeq": last_seq,
                 "epoch": epoch,
                 "role": role,
                 "recordCount": record_count,
@@ -448,6 +468,198 @@ class StorageDB:
             except Exception:
                 cur.execute("ROLLBACK;")
                 raise
+
+    def get_meta(self, key: str) -> str:
+        with self._lock:
+            cur = self._conn.cursor()
+            return self._get_meta(cur, key)
+
+    def oplog_since(self, since: int, limit: int = 500) -> list[dict[str, Any]]:
+        with self._lock:
+            cur = self._conn.cursor()
+            cur.execute(
+                """
+                SELECT seq, epoch, key, op, value, version, ts
+                FROM oplog
+                WHERE seq > ?
+                ORDER BY seq ASC
+                LIMIT ?;
+                """,
+                (since, limit),
+            )
+            rows = cur.fetchall()
+            entries = []
+            for r in rows:
+                val = json.loads(r["value"]) if r["value"] is not None else None
+                entries.append({
+                    "seq": r["seq"],
+                    "epoch": r["epoch"],
+                    "key": r["key"],
+                    "op": r["op"],
+                    "value": val,
+                    "version": r["version"],
+                    "ts": r["ts"],
+                })
+            return entries
+
+    def entry_epoch_at(self, seq: int) -> int | None:
+        if seq == 0:
+            return 0
+        with self._lock:
+            cur = self._conn.cursor()
+            snap_seq_str = self._get_meta(cur, "snapshot_seq")
+            if snap_seq_str and snap_seq_str.isdigit() and int(snap_seq_str) == seq:
+                snap_epoch_str = self._get_meta(cur, "snapshot_epoch")
+                return int(snap_epoch_str) if snap_epoch_str.isdigit() else None
+
+            cur.execute("SELECT epoch FROM oplog WHERE seq = ?;", (seq,))
+            row = cur.fetchone()
+            if row is not None:
+                return int(row["epoch"])
+            return None
+
+    def export_snapshot(self) -> dict[str, Any]:
+        with self._lock:
+            cur = self._conn.cursor()
+            last_seq = int(self._get_meta(cur, "last_applied_seq"))
+            epoch = int(self._get_meta(cur, "epoch"))
+            last_log_epoch_str = self._get_meta(cur, "last_log_epoch")
+            last_log_epoch = int(last_log_epoch_str) if last_log_epoch_str.isdigit() else 0
+
+            cur.execute("SELECT key, value, version, deleted, updated_at FROM kv ORDER BY key ASC;")
+            rows = cur.fetchall()
+            records = []
+            for r in rows:
+                val = json.loads(r["value"]) if r["value"] is not None else {}
+                records.append({
+                    "key": r["key"],
+                    "value": val,
+                    "version": r["version"],
+                    "deleted": r["deleted"],
+                    "updatedAt": r["updated_at"],
+                })
+
+            return {
+                "lastSeq": last_seq,
+                "epoch": epoch,
+                "lastLogEpoch": last_log_epoch,
+                "records": records,
+            }
+
+    def install_snapshot(self, snapshot: dict[str, Any]) -> None:
+        snap_seq = int(snapshot.get("lastSeq", 0))
+        snap_epoch = int(snapshot.get("epoch", 1))
+        snap_last_log_epoch = int(snapshot.get("lastLogEpoch", snap_epoch))
+        records = snapshot.get("records", [])
+
+        db_file = Path(self.db_path)
+        data_dir = db_file.parent
+        tmp_db_path = data_dir / f"tmp_snap_{os.getpid()}_{threading.get_ident()}.db"
+
+        if tmp_db_path.exists():
+            tmp_db_path.unlink()
+
+        # Build temporary DB
+        conn = sqlite3.connect(tmp_db_path, isolation_level=None)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        cur.execute("PRAGMA journal_mode=WAL;")
+        cur.execute("PRAGMA synchronous=FULL;")
+        cur.execute("""
+            CREATE TABLE kv (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL,
+                version INTEGER NOT NULL,
+                deleted INTEGER NOT NULL DEFAULT 0,
+                updated_at TEXT NOT NULL
+            );
+        """)
+        cur.execute("""
+            CREATE TABLE oplog (
+                seq INTEGER PRIMARY KEY,
+                epoch INTEGER NOT NULL,
+                key TEXT NOT NULL,
+                op TEXT NOT NULL,
+                value TEXT,
+                version INTEGER NOT NULL,
+                ts TEXT NOT NULL
+            );
+        """)
+        cur.execute("""
+            CREATE TABLE meta (
+                k TEXT PRIMARY KEY,
+                v TEXT NOT NULL
+            );
+        """)
+
+        # Get own current role and epoch before locking out
+        with self._lock:
+            cur_own = self._conn.cursor()
+            own_role = self._get_meta(cur_own, "role") or "REPLICA"
+            own_epoch_str = self._get_meta(cur_own, "epoch")
+            own_epoch = int(own_epoch_str) if own_epoch_str.isdigit() else 1
+
+        new_epoch = max(own_epoch, snap_epoch)
+
+        cur.execute("BEGIN IMMEDIATE;")
+        for rec in records:
+            k = rec["key"]
+            val_json = json.dumps(rec["value"]) if rec.get("value") is not None else "{}"
+            ver = int(rec["version"])
+            del_flag = 1 if rec.get("deleted") else 0
+            up_at = rec.get("updatedAt", datetime.now(UTC).isoformat())
+            cur.execute(
+                "INSERT INTO kv (key, value, version, deleted, updated_at) VALUES (?, ?, ?, ?, ?);",
+                (k, val_json, ver, del_flag, up_at),
+            )
+
+        cur.execute("INSERT INTO meta (k, v) VALUES ('last_applied_seq', ?);", (str(snap_seq),))
+        cur.execute("INSERT INTO meta (k, v) VALUES ('epoch', ?);", (str(new_epoch),))
+        cur.execute("INSERT INTO meta (k, v) VALUES ('role', ?);", (own_role,))
+        cur.execute("INSERT INTO meta (k, v) VALUES ('last_log_epoch', ?);", (str(snap_last_log_epoch),))
+        cur.execute("INSERT INTO meta (k, v) VALUES ('snapshot_seq', ?);", (str(snap_seq),))
+        cur.execute("INSERT INTO meta (k, v) VALUES ('snapshot_epoch', ?);", (str(snap_epoch),))
+        cur.execute("COMMIT;")
+        conn.close()
+
+        # Swap atomically under write lock
+        with self._lock:
+            self._conn.close()
+            # Clean up live wal/shm if present
+            wal_file = Path(f"{self.db_path}-wal")
+            shm_file = Path(f"{self.db_path}-shm")
+            if wal_file.exists():
+                try:
+                    wal_file.unlink()
+                except OSError:
+                    pass
+            if shm_file.exists():
+                try:
+                    shm_file.unlink()
+                except OSError:
+                    pass
+
+            # Also tmp wal/shm
+            tmp_wal = Path(f"{tmp_db_path}-wal")
+            tmp_shm = Path(f"{tmp_db_path}-shm")
+            if tmp_wal.exists():
+                try:
+                    tmp_wal.unlink()
+                except OSError:
+                    pass
+            if tmp_shm.exists():
+                try:
+                    tmp_shm.unlink()
+                except OSError:
+                    pass
+
+            os.replace(tmp_db_path, self.db_path)
+            self._conn = sqlite3.connect(
+                self.db_path,
+                check_same_thread=False,
+                isolation_level=None,
+            )
+            self._conn.row_factory = sqlite3.Row
 
     def close(self) -> None:
         with self._lock:

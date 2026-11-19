@@ -572,6 +572,21 @@ If a primary returns and **no** promotion happened while it was away (the shard 
 >
 > The single coordinator is a single point of failure, and without a consensus protocol the epoch fencing is an educational safeguard, not a production-grade split-brain guarantee. Raft-style leader election and coordinator replication are future work.
 
+### 7.9 Clarifications (Stages 4-5)
+
+1. **Coordinator degraded persistence**: The coordinator shard-state file also persists "degraded" (bool) and "degradedSeq" (int) per shard. Missing fields load as false/0.
+2. **Degraded reporting endpoint**: POST /internal/nodes/degraded body {"nodeId","shardId","epoch","lastSeq"}: accepted only from the shard's current primary with the current epoch (else 409 NOT_PRIMARY / 409 STALE_EPOCH; unknown shard 400). Sets degraded=true, degradedSeq=max(degradedSeq,lastSeq), persists, returns 200 {"state":"DEGRADED"}.
+3. **Clearing degraded state**: The coordinator clears degraded only when the replica is UP, READY, replica.lastSeq >= degradedSeq and replica.lastSeq == primary.lastSeq (latest heartbeats).
+4. **Shard health states**: Shard state: HEALTHY = primary UP+READY, replica UP+READY, lastSeq equal, not degraded. DEGRADED = a primary that is UP+READY serves but the replica is missing or not in sync. UNAVAILABLE = no primary that is UP and READY.
+5. **Degraded write rule**: A primary reports degraded before EVERY write it acknowledges with replicated=false (one call per such write); if the coordinator cannot be reached the write returns 503.
+6. **Replica monitor**: A primary runs a replica monitor (GET PEER_URL/health every HEARTBEAT_INTERVAL_SEC, 1 s timeout). It attempts /internal/replicate only if the last probe saw the peer READY with role REPLICA; otherwise it goes straight to the degraded-write rule. Any replicate failure (timeout, connection error, 409 GAP) marks the peer "not ok" until the next probe.
+7. **Storage metadata keys**: Storage meta keys: last_applied_seq, epoch, role, last_log_epoch (epoch of the last oplog entry), snapshot_seq and snapshot_epoch (set when a snapshot is installed; used by the log-matching check when the entry at "since" is no longer in the oplog).
+8. **Replica epoch adoption**: A replica adopts a higher epoch from /internal/replicate; a lower epoch gives 409 STALE_EPOCH with details [{"epoch": <replica epoch>}].
+9. **Idle replica convergence**: A READY replica also pulls GET /internal/sync every HEARTBEAT_INTERVAL_SEC so it converges while idle. A follower whose primary is unreachable stays CATCHING_UP and is never promotable.
+10. **First primary assignment**: First primary assignment for a shard prefers a node whose role hint is PRIMARY; a REPLICA hint never becomes the first primary.
+11. **Promotion sequence**: Promotion (Stage 5): the coordinator persists epoch+1 and the new primary, sets degraded=true with degradedSeq=replica.lastSeq, then calls POST /internal/role. Writes route to the new primary only after it acknowledges. No promotion is attempted for a primary that has not registered since the coordinator started.
+12. **Health probe contracts**: A storage node's /health/ready returns 503 unless status is READY; /health/live is always 200.
+
 ## 8. Messaging and matching design
 
 ### 8.1 RabbitMQ topology

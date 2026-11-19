@@ -167,3 +167,153 @@ Returns all live records matching a key prefix, ordered by key ascending.
   "count": 1
 }
 ```
+
+---
+
+## 3. Storage Replication & Synchronization API (Stage 4)
+
+### 3.1 Replication Apply
+
+#### `POST /internal/replicate`
+Applies an oplog operation to a replica.
+
+- **Caller**: Primary node during write replication.
+- **Request Body**:
+```json
+{
+  "op": "PUT",
+  "key": "request:3f2c9a1e-0001",
+  "value": { "type": "water", "status": "PENDING" },
+  "version": 1,
+  "seq": 10,
+  "epoch": 1,
+  "ts": "2026-11-19T21:00:00Z"
+}
+```
+- **Success Responses**:
+  - `200 OK`: `{"status": "applied", "seq": 10}` or `{"status": "duplicate", "seq": 10}` (idempotent replay of previously applied sequence)
+- **Error Responses**:
+  - `409 NOT_REPLICA`: Called on a node whose role is not `REPLICA`.
+  - `409 STALE_EPOCH`: `payload.epoch != node.epoch`.
+  - `409 GAP`: `payload.seq > last_applied_seq + 1`. Follower must catch up via sync or snapshot.
+
+---
+
+### 3.2 Follower Sync & Snapshot
+
+#### `GET /internal/sync?since={seq}&epoch={epoch}&limit={limit}`
+Retrieves log entries strictly after `since`.
+
+- **Query Parameters**:
+  - `since` (int): Sequence number follower has already applied.
+  - `epoch` (int): Follower's epoch at `since`.
+  - `limit` (int, default 100): Maximum number of entries.
+- **Response**:
+```json
+{
+  "snapshotRequired": false,
+  "fromSeq": 11,
+  "toSeq": 15,
+  "entries": [
+    {
+      "seq": 11,
+      "epoch": 1,
+      "op": "PUT",
+      "key": "request:1",
+      "value": { "type": "water" },
+      "version": 1,
+      "ts": "2026-11-19T21:00:00Z"
+    }
+  ]
+}
+```
+If `snapshotRequired` is `true`, follower must fetch snapshot via `/internal/snapshot`.
+
+#### `GET /internal/snapshot`
+Streams all live and deleted records, along with latest sequence and epoch.
+
+- **Response**:
+```json
+{
+  "lastSeq": 100,
+  "epoch": 1,
+  "lastLogEpoch": 1,
+  "records": [
+    {
+      "key": "request:1",
+      "value": { "type": "water" },
+      "version": 1,
+      "deleted": 0,
+      "updatedAt": "2026-11-19T21:00:00Z"
+    }
+  ]
+}
+```
+
+---
+
+## 4. Coordinator Replication Awareness (Stage 4)
+
+#### `POST /internal/nodes/degraded`
+Reports that a primary is serving un-replicated writes because its replica is unavailable or lagged.
+
+- **Caller**: Shard primary before acknowledging any un-replicated write.
+- **Request Body**:
+```json
+{
+  "nodeId": "s0-a",
+  "shardId": 0,
+  "epoch": 1,
+  "lastSeq": 15
+}
+```
+- **Success**: `200 OK`
+```json
+{
+  "state": "DEGRADED"
+}
+```
+- **Error Responses**:
+  - `400 INVALID_INPUT`: Unknown shard ID.
+  - `409 NOT_PRIMARY`: Caller is not the current primary for the shard.
+  - `409 STALE_EPOCH`: Caller epoch does not match current shard epoch.
+
+#### `GET /diagnostics/shards`
+Returns cluster shard states with replication awareness.
+
+- **Response**:
+```json
+[
+  {
+    "shardId": 0,
+    "state": "HEALTHY",
+    "epoch": 1,
+    "primary": "s0-a",
+    "degraded": false,
+    "records": 43,
+    "recordCount": { "request": 20, "resource": 15, "other": 8 },
+    "nodes": [
+      {
+        "id": "s0-a",
+        "nodeId": "s0-a",
+        "role": "PRIMARY",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 62
+      },
+      {
+        "id": "s0-b",
+        "nodeId": "s0-b",
+        "role": "REPLICA",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 62
+      }
+    ]
+  }
+]
+```
+Shard States:
+- `HEALTHY`: Primary is `UP` + `READY`, replica is `UP` + `READY`, sequences are equal, and `degraded` is `false`.
+- `DEGRADED`: Primary is `UP` + `READY`, but replica is missing, lagged, or shard is marked `degraded`.
+- `UNAVAILABLE`: Primary is not `UP` and `READY`.

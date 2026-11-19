@@ -6,7 +6,7 @@ PY := python3.11
 VENV_PY := .venv/bin/python
 endif
 
-.PHONY: install test lint up down image-storage image-coordinator images
+.PHONY: install test itest ftest lint up down image-storage image-coordinator images
 
 image-storage:
 	docker build -f services/storage-node/Dockerfile -t ems/storage-node:1.0 .
@@ -32,6 +32,9 @@ test:
 
 itest:
 	$(VENV_PY) -m pytest -m integration
+
+ftest:
+	$(VENV_PY) -m pytest -m fault
 
 lint:
 	$(VENV_PY) -m ruff check .

@@ -8,6 +8,7 @@ from ems_common.errors import InvalidInput
 from ems_common.sharding import shard_of
 
 from coordinator.registry import NodeRegistry
+from coordinator.shard_health import derive_shard_state
 from coordinator.shard_state import ShardStateManager
 
 
@@ -92,64 +93,68 @@ class DiagnosticsService:
         return nodes
 
     def get_shards(self) -> list[dict[str, Any]]:
-        """List state, epoch, primary, and counts for every shard."""
+        """List state, epoch, primary, degraded, and counts for every shard."""
         shards: list[dict[str, Any]] = []
-
+        now = self._registry._clock()
         all_nodes = self._registry.list_nodes()
 
         for sid in range(self._n_shards):
-            stored_primary = self._shard_state.get_primary(sid)
-            stored_epoch = self._shard_state.get_epoch(sid) or 1
+            shard_info = self._shard_state.get_shard(sid) or {
+                "epoch": 1,
+                "primaryNodeId": "",
+                "degraded": False,
+                "degradedSeq": 0,
+            }
+            stored_primary = shard_info.get("primaryNodeId") or None
+            stored_epoch = shard_info.get("epoch", 1)
+            is_degraded = bool(shard_info.get("degraded", False))
 
             # Filter nodes belonging to this shard
             shard_nodes = [
                 {
                     "id": n["nodeId"],
                     "nodeId": n["nodeId"],
-                    "health": n["health"],
                     "role": n["role"],
+                    "health": n["health"],
+                    "status": n["status"],
+                    "lastSeq": n["lastSeq"],
                 }
                 for n in all_nodes
                 if n["shardId"] == sid
             ]
 
-            if not stored_primary:
-                shards.append({
-                    "shardId": sid,
-                    "state": "UNAVAILABLE",
-                    "epoch": stored_epoch,
-                    "primary": None,
-                    "records": 0,
-                    "recordCount": {"request": 0, "resource": 0, "other": 0},
-                    "nodes": shard_nodes,
-                })
-                continue
+            primary_node = (
+                self._registry.get(stored_primary) if stored_primary else None
+            )
+            replica_nodes = [
+                n
+                for n in self._registry.get_nodes_for_shard(sid)
+                if n.node_id != stored_primary
+            ]
+            replica_node = replica_nodes[0] if replica_nodes else None
 
-            primary_node = self._registry.get(stored_primary)
-            if primary_node is None:
-                shards.append({
-                    "shardId": sid,
-                    "state": "UNAVAILABLE",
-                    "epoch": stored_epoch,
-                    "primary": stored_primary,
-                    "records": 0,
-                    "recordCount": {"request": 0, "resource": 0, "other": 0},
-                    "nodes": shard_nodes,
-                })
-                continue
+            state = derive_shard_state(
+                shard_info=shard_info,
+                primary_node=primary_node,
+                replica_node=replica_node,
+                now=now,
+                missed_heartbeats_limit=self._registry._missed_heartbeats_limit,
+                heartbeat_interval_sec=self._registry._heartbeat_interval,
+            )
 
-            primary_health = self._registry.get_health(stored_primary)
-            is_healthy = primary_health == "UP" and primary_node.status == "READY"
-            state = "HEALTHY" if is_healthy else "UNAVAILABLE"
-
-            rc = dict(primary_node.record_count)
-            total_records = sum(rc.values())
+            if primary_node is not None:
+                rc = dict(primary_node.record_count)
+                total_records = sum(rc.values())
+            else:
+                rc = {"request": 0, "resource": 0, "other": 0}
+                total_records = 0
 
             shards.append({
                 "shardId": sid,
                 "state": state,
                 "epoch": stored_epoch,
                 "primary": stored_primary,
+                "degraded": is_degraded,
                 "records": total_records,
                 "recordCount": rc,
                 "nodes": shard_nodes,

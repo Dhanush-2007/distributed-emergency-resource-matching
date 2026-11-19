@@ -8,7 +8,13 @@ from pathlib import Path
 from typing import Any
 
 import httpx
-from ems_common.errors import InvalidInput, NotFound, register_error_handlers
+from ems_common.errors import (
+    InvalidInput,
+    NotFound,
+    NotPrimary,
+    StaleEpoch,
+    register_error_handlers,
+)
 from ems_common.logging import register_logging_middleware, setup_json_logger
 from fastapi import FastAPI, Query, Request, Response
 from fastapi.responses import JSONResponse
@@ -17,6 +23,7 @@ from pydantic import BaseModel, Field
 from coordinator.diagnostics import DiagnosticsService
 from coordinator.registry import NodeRegistry
 from coordinator.router import ShardRouter
+from coordinator.shard_health import clear_degraded_if_caught_up
 from coordinator.shard_state import ShardStateManager
 
 
@@ -95,6 +102,13 @@ class HeartbeatRequest(BaseModel):
 class PutDataRequest(BaseModel):
     value: dict[str, Any] = Field(...)
     ifVersion: int | None = None
+
+
+class NodeDegradedRequest(BaseModel):
+    nodeId: str
+    shardId: int
+    epoch: int
+    lastSeq: int
 
 
 def create_app(
@@ -284,7 +298,75 @@ def create_app(
             },
         )
 
+        # Check recovery if shard is currently marked degraded
+        shard_info = shard_state.get_shard(sid)
+        if shard_info and shard_info.get("degraded", False):
+            nodes_for_shard = registry.get_nodes_for_shard(sid)
+            p_node = next((n for n in nodes_for_shard if n.node_id == primary_id), None)
+            r_node = next((n for n in nodes_for_shard if n.node_id != primary_id), None)
+            now = clock()
+            updated_info = clear_degraded_if_caught_up(
+                shard_info,
+                primary_node=p_node,
+                replica_node=r_node,
+                now=now,
+                missed_heartbeats_limit=conf.missed_heartbeats_limit,
+                heartbeat_interval_sec=conf.heartbeat_interval_sec,
+            )
+            if not updated_info.get("degraded", False):
+                shard_state.update_shard(sid, updated_info)
+                logger.info(
+                    "Shard recovered from degraded state",
+                    extra={
+                        "event": "shard.recovered",
+                        "shardId": sid,
+                        "primary": primary_id,
+                        "replica": r_node.node_id if r_node else None,
+                        "seq": r_node.last_seq if r_node else None,
+                    },
+                )
+
         return {"role": role, "epoch": epoch}
+
+    @application.post("/internal/nodes/degraded")
+    def report_degraded(payload: NodeDegradedRequest) -> dict[str, str]:
+        if payload.shardId < 0 or payload.shardId >= conf.n_shards:
+            raise InvalidInput(
+                f"shardId must be between 0 and {conf.n_shards - 1}",
+                details=[{
+                    "field": "shardId",
+                    "problem": f"out of range [0, {conf.n_shards - 1}]",
+                }],
+            )
+
+        current_primary = shard_state.get_primary(payload.shardId)
+        if not current_primary or payload.nodeId != current_primary:
+            raise NotPrimary(
+                f"Node {payload.nodeId} is not primary for shard {payload.shardId}",
+                details=[{"field": "nodeId", "problem": "not primary"}],
+            )
+
+        current_epoch = shard_state.get_epoch(payload.shardId) or 1
+        if payload.epoch != current_epoch:
+            raise StaleEpoch(
+                f"Epoch {payload.epoch} is stale (current: {current_epoch})",
+                details=[{"field": "epoch", "problem": "stale epoch"}],
+            )
+
+        shard_state.set_degraded(
+            payload.shardId, degraded=True, degraded_seq=payload.lastSeq
+        )
+        logger.warning(
+            "Shard entered degraded state",
+            extra={
+                "event": "shard.degraded",
+                "shardId": payload.shardId,
+                "nodeId": payload.nodeId,
+                "epoch": payload.epoch,
+                "lastSeq": payload.lastSeq,
+            },
+        )
+        return {"state": "DEGRADED"}
 
     # ------------------------------------------------------------------
     # Data routing endpoints

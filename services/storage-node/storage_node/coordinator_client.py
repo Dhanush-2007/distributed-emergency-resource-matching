@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import logging
 import threading
+from collections.abc import Callable
 from typing import Any, Protocol, runtime_checkable
 
 logger = logging.getLogger(__name__)
@@ -75,6 +76,8 @@ class CoordinatorClient:
         initial_backoff: float = 0.5,
         max_backoff: float = 5.0,
         on_status_change: Any = None,
+        get_replica_ack_seq: Callable[[], int | None] | None = None,
+        on_registered: Callable[[str, int], None] | None = None,
     ) -> None:
         self._node_id = node_id
         self._shard_id = shard_id
@@ -87,6 +90,8 @@ class CoordinatorClient:
         self._initial_backoff = initial_backoff
         self._max_backoff = max_backoff
         self._on_status_change = on_status_change
+        self._get_replica_ack_seq = get_replica_ack_seq
+        self._on_registered = on_registered
 
         self._owns_http = False
         if http_client is None:
@@ -162,7 +167,17 @@ class CoordinatorClient:
                 if resp.status_code == 200:
                     data = resp.json()
                     self._apply_coordinator_response(data)
-                    self._set_status("READY")
+                    assigned_role = (data.get("role") or self._initial_role).upper()
+                    assigned_epoch = int(data.get("epoch", 1))
+
+                    if assigned_role == "PRIMARY":
+                        self._set_status("READY")
+                    else:
+                        self._set_status("CATCHING_UP")
+
+                    if self._on_registered is not None:
+                        self._on_registered(assigned_role, assigned_epoch)
+
                     logger.info(
                         "Registered with coordinator",
                         extra={
@@ -256,6 +271,7 @@ class CoordinatorClient:
 
     def _build_heartbeat_payload(self) -> dict[str, Any]:
         stats = self._db.stats()
+        ack_seq = self._get_replica_ack_seq() if self._get_replica_ack_seq is not None else None
         return {
             "nodeId": self._node_id,
             "shardId": self._shard_id,
@@ -263,7 +279,7 @@ class CoordinatorClient:
             "epoch": stats["epoch"],
             "status": self._status,
             "lastSeq": stats["last_seq"],
-            "replicaAckSeq": None,
+            "replicaAckSeq": ack_seq,
             "recordCount": stats["recordCount"],
         }
 

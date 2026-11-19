@@ -126,7 +126,7 @@ def test_nodes_and_shards_response_shapes(temp_state_dir):
             "endpoint": "http://s0-b:9000",
             "role": "REPLICA",
             "epoch": 2,
-            "lastSeq": 8,
+            "lastSeq": 10,
             "status": "READY",
         },
     )
@@ -171,6 +171,7 @@ def test_nodes_and_shards_response_shapes(temp_state_dir):
         "state",
         "epoch",
         "primary",
+        "degraded",
         "records",
         "recordCount",
         "nodes",
@@ -180,6 +181,7 @@ def test_nodes_and_shards_response_shapes(temp_state_dir):
     assert shard0["state"] == "HEALTHY"
     assert shard0["epoch"] == 2
     assert shard0["primary"] == "s0-a"
+    assert shard0["degraded"] is False
     assert isinstance(shard0["nodes"], list)
     assert len(shard0["nodes"]) == 2
     assert any(n["id"] == "s0-a" and n["role"] == "PRIMARY" for n in shard0["nodes"])
@@ -218,6 +220,19 @@ def test_shard_state_flips_healthy_to_unavailable_on_stale_heartbeat(temp_state_
             "status": "READY",
         },
     )
+    # Register s0-b at t=100.0
+    client.post(
+        "/internal/nodes/register",
+        json={
+            "nodeId": "s0-b",
+            "shardId": 0,
+            "endpoint": "http://s0-b:9000",
+            "role": "REPLICA",
+            "epoch": 1,
+            "lastSeq": 0,
+            "status": "READY",
+        },
+    )
 
     # At t=100.0, shard 0 is HEALTHY
     shards = client.get("/diagnostics/shards").json()
@@ -240,6 +255,19 @@ def test_shard_state_flips_healthy_to_unavailable_on_stale_heartbeat(temp_state_
             "nodeId": "s0-a",
             "shardId": 0,
             "role": "PRIMARY",
+            "epoch": 1,
+            "status": "READY",
+            "lastSeq": 1,
+            "replicaAckSeq": None,
+            "recordCount": {"request": 0, "resource": 0, "other": 0},
+        },
+    )
+    client.post(
+        "/internal/nodes/heartbeat",
+        json={
+            "nodeId": "s0-b",
+            "shardId": 0,
+            "role": "REPLICA",
             "epoch": 1,
             "status": "READY",
             "lastSeq": 1,

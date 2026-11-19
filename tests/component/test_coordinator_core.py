@@ -44,7 +44,12 @@ def test_first_node_becomes_primary_epoch_1(temp_state_dir):
     assert state_file.exists()
     with open(state_file, "r", encoding="utf-8") as f:
         data = json.load(f)
-    assert data["shards"]["0"] == {"epoch": 1, "primaryNodeId": "s0-a"}
+    assert data["shards"]["0"] == {
+        "epoch": 1,
+        "primaryNodeId": "s0-a",
+        "degraded": False,
+        "degradedSeq": 0,
+    }
 
 
 @pytest.mark.component

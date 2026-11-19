@@ -34,15 +34,17 @@ def http_client():
 
 
 def test_diagnostics_list_3_nodes_up(http_client):
-    """Diagnostics endpoints report all 3 nodes UP and HEALTHY."""
+    """Diagnostics endpoints report all nodes UP and HEALTHY."""
     res = http_client.get("/diagnostics/nodes")
     assert res.status_code == 200
     nodes = res.json()
-    assert len(nodes) == 3
+    assert len(nodes) in (3, 6)
     for node in nodes:
         assert node["health"] == "UP"
         assert node["status"] == "READY"
-        assert node["role"] == "PRIMARY"
+        assert node["role"] in ("PRIMARY", "REPLICA")
+    primaries = [n for n in nodes if n["role"] == "PRIMARY"]
+    assert len(primaries) == 3
 
     shards_res = http_client.get("/diagnostics/shards")
     assert shards_res.status_code == 200

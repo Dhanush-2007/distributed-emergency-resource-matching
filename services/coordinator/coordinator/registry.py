@@ -87,6 +87,11 @@ class NodeRegistry:
         with self._lock:
             return self._nodes.get(node_id)
 
+    def get_nodes_for_shard(self, shard_id: int) -> list[NodeRecord]:
+        """Return all node records for a specific shard."""
+        with self._lock:
+            return [node for node in self._nodes.values() if node.shard_id == shard_id]
+
     def update_heartbeat(
         self,
         node_id: str,

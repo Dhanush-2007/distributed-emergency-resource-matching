@@ -39,6 +39,8 @@ class ShardStateManager:
                         str(sid): {
                             "epoch": int(sinfo.get("epoch", 1)),
                             "primaryNodeId": str(sinfo.get("primaryNodeId", "")),
+                            "degraded": bool(sinfo.get("degraded", False)),
+                            "degradedSeq": int(sinfo.get("degradedSeq", 0)),
                         }
                         for sid, sinfo in shards_data.items()
                         if isinstance(sinfo, dict)
@@ -108,9 +110,43 @@ class ShardStateManager:
     def set_primary(self, shard_id: int | str, node_id: str, epoch: int) -> None:
         sid = str(shard_id)
         with self._lock:
+            existing = self._shards.get(sid, {})
             self._shards[sid] = {
                 "epoch": int(epoch),
                 "primaryNodeId": str(node_id),
+                "degraded": bool(existing.get("degraded", False)),
+                "degradedSeq": int(existing.get("degradedSeq", 0)),
+            }
+        self.save()
+
+    def set_degraded(
+        self, shard_id: int | str, degraded: bool, degraded_seq: int | None = None
+    ) -> None:
+        sid = str(shard_id)
+        with self._lock:
+            if sid not in self._shards:
+                self._shards[sid] = {
+                    "epoch": 1,
+                    "primaryNodeId": "",
+                    "degraded": bool(degraded),
+                    "degradedSeq": int(degraded_seq or 0),
+                }
+            else:
+                self._shards[sid]["degraded"] = bool(degraded)
+                if degraded_seq is not None:
+                    self._shards[sid]["degradedSeq"] = max(
+                        self._shards[sid].get("degradedSeq", 0), int(degraded_seq)
+                    )
+        self.save()
+
+    def update_shard(self, shard_id: int | str, shard_info: dict[str, Any]) -> None:
+        sid = str(shard_id)
+        with self._lock:
+            self._shards[sid] = {
+                "epoch": int(shard_info.get("epoch", 1)),
+                "primaryNodeId": str(shard_info.get("primaryNodeId", "")),
+                "degraded": bool(shard_info.get("degraded", False)),
+                "degradedSeq": int(shard_info.get("degradedSeq", 0)),
             }
         self.save()
 

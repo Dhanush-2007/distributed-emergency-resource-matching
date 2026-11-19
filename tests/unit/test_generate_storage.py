@@ -2,7 +2,10 @@ import importlib.util
 import os
 import unittest
 
+import pytest
 import yaml
+
+pytestmark = pytest.mark.unit
 
 
 def load_generator():
