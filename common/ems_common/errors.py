@@ -16,12 +16,14 @@ class EmsError(Exception):
         code: str,
         message: str,
         details: list[dict[str, Any]] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> None:
         super().__init__(message)
         self.http_status = http_status
         self.code = code
         self.message = message
         self.details = details or []
+        self.headers = headers or {}
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -94,12 +96,14 @@ class StorageUnavailable(EmsError):
         self,
         message: str = "Storage unavailable",
         details: list[dict[str, Any]] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> None:
         super().__init__(
             http_status=503,
             code="STORAGE_UNAVAILABLE",
             message=message,
             details=details,
+            headers=headers,
         )
 
 
@@ -143,7 +147,11 @@ def register_error_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(EmsError)
     async def ems_error_handler(request: Request, exc: EmsError) -> JSONResponse:
-        resp = JSONResponse(status_code=exc.http_status, content=exc.to_dict())
+        resp = JSONResponse(
+            status_code=exc.http_status,
+            content=exc.to_dict(),
+            headers=exc.headers if exc.headers else None,
+        )
         cid = _extract_cid(request)
         if cid:
             resp.headers["X-Correlation-Id"] = cid

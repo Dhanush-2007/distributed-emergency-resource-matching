@@ -19,7 +19,7 @@ def run_curl_examples():
     env["STANDALONE"] = "true"
 
     proc = subprocess.Popen(
-        [".venv/Scripts/python.exe", "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "9000"],
+        [".venv/Scripts/python.exe", "-m", "uvicorn", "storage_node.main:app", "--host", "127.0.0.1", "--port", "9000"],
         env=env,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

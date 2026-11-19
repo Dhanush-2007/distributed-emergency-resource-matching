@@ -6,8 +6,8 @@ import uuid
 from pathlib import Path
 
 import pytest
-from app.main import create_app
 from fastapi.testclient import TestClient
+from storage_node.main import create_app
 
 
 @pytest.fixture

@@ -43,6 +43,10 @@ def create_test_app() -> FastAPI:
     def trigger_storage_unavailable():
         raise StorageUnavailable("all shards down")
 
+    @app.get("/trigger/error-with-headers")
+    def trigger_error_with_headers():
+        raise StorageUnavailable("retry soon", headers={"Retry-After": "3"})
+
     @app.post("/trigger/validation")
     def trigger_validation(payload: DummyPayload):
         return {"status": "ok"}
@@ -123,6 +127,14 @@ def test_storage_unavailable(client):
             "details": [],
         }
     }
+
+
+@pytest.mark.unit
+def test_error_headers_applied_to_response(client):
+    res = client.get("/trigger/error-with-headers")
+    assert res.status_code == 503
+    assert res.headers.get("Retry-After") == "3"
+    assert res.json()["error"]["code"] == "STORAGE_UNAVAILABLE"
 
 
 @pytest.mark.unit

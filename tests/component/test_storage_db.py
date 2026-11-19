@@ -6,8 +6,8 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pytest
-from app.db import StorageDB
 from ems_common.errors import NotFound, VersionConflict
+from storage_node.db import StorageDB
 
 
 @pytest.fixture

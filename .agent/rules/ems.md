@@ -14,7 +14,7 @@ The authoritative design is `docs/SPEC.md`. Read the sections relevant to the ta
 
 ## Stack and layout
 - Python 3.11, FastAPI + uvicorn, pydantic v2, httpx, pika (RabbitMQ), SQLite for storage nodes, pytest, ruff.
-- Monorepo: `common/ems_common/` (shared library), `services/<name>/app/` (storage-node, coordinator, request-service, resource-service, matching-service), `k8s/`, `scripts/`, `tests/{unit,component,integration,fault}/`, `docs/`.
+- Monorepo: `common/ems_common/` (shared library), `services/<name>/<package_name>/` (storage-node → `storage_node`, coordinator → `coordinator`, request-service → `request_service`, resource-service → `resource_service`, matching-service → `matching_service`), `k8s/`, `scripts/`, `tests/{unit,component,integration,fault}/`, `docs/`.
 - Ports: coordinator 8000, request-service 8001, resource-service 8002, matching-service 8003, storage nodes 9000, RabbitMQ 5672/15672.
 - Storage nodes are named s0-a, s0-b, s1-a, s1-b, s2-a, s2-b (the name does not imply primary or replica).
 

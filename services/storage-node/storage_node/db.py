@@ -289,12 +289,59 @@ class StorageDB:
             epoch = int(self._get_meta(cur, "epoch"))
             role = self._get_meta(cur, "role")
 
+            # Namespace counts: text before the first ":" in each live key.
+            cur.execute("SELECT key FROM kv WHERE deleted = 0;")
+            ns_request = 0
+            ns_resource = 0
+            ns_other = 0
+            for (key,) in cur.fetchall():
+                ns = key.split(":", 1)[0] if ":" in key else ""
+                if ns == "request":
+                    ns_request += 1
+                elif ns == "resource":
+                    ns_resource += 1
+                else:
+                    ns_other += 1
+
+            record_count = {
+                "request": ns_request,
+                "resource": ns_resource,
+                "other": ns_other,
+            }
+
             return {
                 "records": records_count,
                 "last_seq": last_seq,
                 "epoch": epoch,
                 "role": role,
+                "recordCount": record_count,
+                "record_count": record_count,
             }
+
+    def update_meta(
+        self,
+        role: str | None = None,
+        epoch: int | str | None = None,
+    ) -> None:
+        """Persist role and/or epoch received from the coordinator."""
+        with self._lock:
+            cur = self._conn.cursor()
+            cur.execute("BEGIN IMMEDIATE;")
+            try:
+                if role is not None:
+                    cur.execute(
+                        "UPDATE meta SET v = ? WHERE k = 'role';",
+                        (role.upper(),),
+                    )
+                if epoch is not None:
+                    cur.execute(
+                        "UPDATE meta SET v = ? WHERE k = 'epoch';",
+                        (str(epoch),),
+                    )
+                cur.execute("COMMIT;")
+            except Exception:
+                cur.execute("ROLLBACK;")
+                raise
 
     def close(self) -> None:
         with self._lock:

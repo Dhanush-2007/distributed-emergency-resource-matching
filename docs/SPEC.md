@@ -680,9 +680,10 @@ emergency-matching/
   common/ems_common/        sharding.py  models.py  errors.py  logging.py  haversine.py
                             storage_client.py (coordinator client + retry)  rabbit.py (topology, publisher)
   services/
-    storage-node/   app/{main,db,replication,recovery}.py   Dockerfile  requirements.txt
-    coordinator/    app/{main,registry,router,health_checker,failover}.py  Dockerfile
-    request-service/  resource-service/  matching-service/    (each: app/, Dockerfile, requirements.txt)
+    storage-node/   storage_node/{main,db,replication,recovery}.py   Dockerfile  requirements.txt
+    coordinator/    coordinator/{main,registry,router,health_checker,failover}.py  Dockerfile
+    request-service/  resource-service/  matching-service/    (each: <package_name>/, Dockerfile, requirements.txt)
+                      (request_service/, resource_service/, matching_service/)
   k8s/              00-namespace.yaml  01-config.yaml  02-secret.yaml  rabbitmq.yaml
                     storage-node.tpl.yaml  generate-storage.sh  coordinator.yaml  services.yaml
   scripts/          seed.py  load_loop.py  watch_cluster.py  find_key_for_shard.py  reset.sh  demo_*.sh

@@ -12,7 +12,7 @@ Activate virtual environment:
 Run storage node:
 ```powershell
 $env:PYTHONPATH="services/storage-node"
-python -m uvicorn app.main:app --host 127.0.0.1 --port 9000
+python -m uvicorn storage_node.main:app --host 127.0.0.1 --port 9000
 ```
 
 Or with custom node configuration:
@@ -23,7 +23,7 @@ $env:PORT="9000"
 $env:STANDALONE="true"
 $env:DATA_DIR="./data"
 $env:PYTHONPATH="services/storage-node"
-python -m uvicorn app.main:app --host 127.0.0.1 --port 9000
+python -m uvicorn storage_node.main:app --host 127.0.0.1 --port 9000
 ```
 
 ## Endpoints

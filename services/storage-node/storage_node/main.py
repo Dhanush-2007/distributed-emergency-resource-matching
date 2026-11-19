@@ -1,6 +1,7 @@
 """FastAPI application for a storage node."""
 
 import os
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
@@ -8,13 +9,14 @@ from ems_common.errors import (
     NotFound,
     NotPrimary,
     StaleEpoch,
+    StorageUnavailable,
     register_error_handlers,
 )
 from ems_common.logging import register_logging_middleware, setup_json_logger
 from fastapi import FastAPI, Query, Response, status
 from pydantic import BaseModel, Field
 
-from app.db import StorageDB
+from storage_node.db import StorageDB
 
 
 class Settings:
@@ -27,7 +29,6 @@ class Settings:
         data_path = Path(raw_data_dir)
         try:
             data_path.mkdir(parents=True, exist_ok=True)
-            # Test write access
             test_file = data_path / ".perm_check"
             test_file.touch()
             test_file.unlink()
@@ -41,12 +42,23 @@ class Settings:
         self.standalone: bool = (
             os.getenv("STANDALONE", "true").lower() in ("true", "1", "yes")
         )
+        self.coordinator_url: str = os.getenv(
+            "COORDINATOR_URL", "http://coordinator:8000"
+        )
+        self.advertise_url: str = os.getenv("ADVERTISE_URL", "")
+        self.initial_role: str = os.getenv("INITIAL_ROLE", "primary")
+        self.heartbeat_interval: float = float(
+            os.getenv("HEARTBEAT_INTERVAL_SEC", "2")
+        )
+        self.http_timeout: float = float(os.getenv("HTTP_TIMEOUT_SEC", "3"))
+
         self.db_path: Path = self.data_dir / f"{self.node_id}.db"
 
 
 settings = Settings()
 logger = setup_json_logger(service_name=f"storage-node-{settings.node_id}")
 db = StorageDB(settings.db_path)
+
 
 class PutDataRequest(BaseModel):
     value: dict[str, Any] = Field(...)
@@ -59,10 +71,20 @@ def create_app(
     shard_id: int | None = None,
     data_dir: Path | str | None = None,
     db_instance: StorageDB | None = None,
+    standalone: bool | None = None,
+    coordinator_url: str | None = None,
+    advertise_url: str | None = None,
+    initial_role: str | None = None,
+    heartbeat_interval: float | None = None,
+    http_timeout: float | None = None,
+    http_client: Any = None,
+    initial_backoff: float | None = None,
+    max_backoff: float | None = None,
 ) -> FastAPI:
     """Factory to create a configured storage node FastAPI application."""
     nid = node_id or settings.node_id
     sid = shard_id if shard_id is not None else settings.shard_id
+    is_standalone = standalone if standalone is not None else settings.standalone
 
     if db_instance is not None:
         local_db = db_instance
@@ -73,9 +95,67 @@ def create_app(
     else:
         local_db = db
 
-    application = FastAPI(title=f"Storage Node {nid}")
+    # coordinator_client is set only when not standalone
+    _coord_client: Any = None
+
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):  # type: ignore[misc]
+        nonlocal _coord_client
+        if not is_standalone:
+            from storage_node.coordinator_client import CoordinatorClient
+
+            kwargs: dict[str, Any] = {
+                "node_id": nid,
+                "shard_id": sid,
+                "advertise_url": (
+                    advertise_url
+                    if advertise_url is not None
+                    else (settings.advertise_url or f"http://{nid}:{settings.port}")
+                ),
+                "initial_role": initial_role or settings.initial_role,
+                "coordinator_url": coordinator_url or settings.coordinator_url,
+                "db": local_db,
+                "heartbeat_interval": (
+                    heartbeat_interval
+                    if heartbeat_interval is not None
+                    else settings.heartbeat_interval
+                ),
+                "http_timeout": (
+                    http_timeout
+                    if http_timeout is not None
+                    else settings.http_timeout
+                ),
+                "http_client": http_client,
+            }
+            if initial_backoff is not None:
+                kwargs["initial_backoff"] = initial_backoff
+            if max_backoff is not None:
+                kwargs["max_backoff"] = max_backoff
+
+            _coord_client = CoordinatorClient(**kwargs)
+            _coord_client.start()
+        yield
+        if _coord_client is not None:
+            _coord_client.stop()
+
+    application = FastAPI(title=f"Storage Node {nid}", lifespan=lifespan)
     register_logging_middleware(application)
     register_error_handlers(application)
+
+    def _node_status() -> str:
+        """Return the current node status string."""
+        if is_standalone:
+            return "READY"
+        if _coord_client is None:
+            return "STARTING"
+        return _coord_client.status
+
+    def _assert_ready() -> None:
+        """Raise 503 if the node is not yet registered (non-standalone only)."""
+        if not is_standalone and _node_status() != "READY":
+            raise StorageUnavailable(
+                "Node is not yet registered with the coordinator"
+            )
 
     @application.get("/health/live")
     def health_live() -> dict[str, str]:
@@ -92,16 +172,19 @@ def create_app(
             "nodeId": nid,
             "shardId": sid,
             "role": stats["role"],
-            "status": "READY",
+            "status": _node_status(),
             "epoch": stats["epoch"],
             "lastSeq": stats["last_seq"],
             "records": stats["records"],
+            "recordCount": stats["recordCount"],
         }
 
     @application.put("/internal/data/{key:path}")
     def put_data(
         key: str, payload: PutDataRequest, response: Response
     ) -> dict[str, Any]:
+        _assert_ready()
+
         stats = local_db.stats()
         node_role = stats["role"]
         node_epoch = stats["epoch"]
@@ -170,6 +253,8 @@ def create_app(
         key: str,
         epoch: int | None = Query(None),
     ) -> dict[str, Any]:
+        _assert_ready()
+
         stats = local_db.stats()
         node_role = stats["role"]
         node_epoch = stats["epoch"]
