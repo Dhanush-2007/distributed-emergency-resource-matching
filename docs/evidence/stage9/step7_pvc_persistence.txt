@@ -1,0 +1,201 @@
+Deleting storage pod ems-s0-b-0...
+
+Storage pod ems-s0-b-0 restarted and healthy
+
+Deleting RabbitMQ pod rabbitmq-0...
+
+RabbitMQ pod restarted and healthy, durable queues preserved
+
+Epochs before coordinator deletion:
+{
+  "0": {
+    "shardId": 0,
+    "state": "HEALTHY",
+    "epoch": 1,
+    "primary": "s0-a",
+    "degraded": false,
+    "records": 38,
+    "recordCount": {
+      "request": 26,
+      "resource": 12,
+      "other": 0
+    },
+    "nodes": [
+      {
+        "id": "s0-b",
+        "nodeId": "s0-b",
+        "role": "REPLICA",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 100
+      },
+      {
+        "id": "s0-a",
+        "nodeId": "s0-a",
+        "role": "PRIMARY",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 100
+      }
+    ]
+  },
+  "1": {
+    "shardId": 1,
+    "state": "HEALTHY",
+    "epoch": 2,
+    "primary": "s1-b",
+    "degraded": false,
+    "records": 45,
+    "recordCount": {
+      "request": 35,
+      "resource": 10,
+      "other": 0
+    },
+    "nodes": [
+      {
+        "id": "s1-b",
+        "nodeId": "s1-b",
+        "role": "PRIMARY",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 122
+      },
+      {
+        "id": "s1-a",
+        "nodeId": "s1-a",
+        "role": "REPLICA",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 122
+      }
+    ]
+  },
+  "2": {
+    "shardId": 2,
+    "state": "HEALTHY",
+    "epoch": 1,
+    "primary": "s2-a",
+    "degraded": false,
+    "records": 61,
+    "recordCount": {
+      "request": 42,
+      "resource": 19,
+      "other": 0
+    },
+    "nodes": [
+      {
+        "id": "s2-a",
+        "nodeId": "s2-a",
+        "role": "PRIMARY",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 163
+      },
+      {
+        "id": "s2-b",
+        "nodeId": "s2-b",
+        "role": "REPLICA",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 163
+      }
+    ]
+  }
+}
+
+Epochs after coordinator restart:
+{
+  "0": {
+    "shardId": 0,
+    "state": "HEALTHY",
+    "epoch": 1,
+    "primary": "s0-a",
+    "degraded": false,
+    "records": 38,
+    "recordCount": {
+      "request": 26,
+      "resource": 12,
+      "other": 0
+    },
+    "nodes": [
+      {
+        "id": "s0-a",
+        "nodeId": "s0-a",
+        "role": "PRIMARY",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 100
+      },
+      {
+        "id": "s0-b",
+        "nodeId": "s0-b",
+        "role": "REPLICA",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 100
+      }
+    ]
+  },
+  "1": {
+    "shardId": 1,
+    "state": "HEALTHY",
+    "epoch": 2,
+    "primary": "s1-b",
+    "degraded": false,
+    "records": 45,
+    "recordCount": {
+      "request": 35,
+      "resource": 10,
+      "other": 0
+    },
+    "nodes": [
+      {
+        "id": "s1-b",
+        "nodeId": "s1-b",
+        "role": "PRIMARY",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 122
+      },
+      {
+        "id": "s1-a",
+        "nodeId": "s1-a",
+        "role": "REPLICA",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 122
+      }
+    ]
+  },
+  "2": {
+    "shardId": 2,
+    "state": "HEALTHY",
+    "epoch": 1,
+    "primary": "s2-a",
+    "degraded": false,
+    "records": 61,
+    "recordCount": {
+      "request": 42,
+      "resource": 19,
+      "other": 0
+    },
+    "nodes": [
+      {
+        "id": "s2-b",
+        "nodeId": "s2-b",
+        "role": "REPLICA",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 163
+      },
+      {
+        "id": "s2-a",
+        "nodeId": "s2-a",
+        "role": "PRIMARY",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 163
+      }
+    ]
+  }
+}

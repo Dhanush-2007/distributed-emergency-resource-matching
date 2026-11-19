@@ -116,6 +116,121 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: ems-s0-b
+  namespace: ems
+  labels:
+    app: ems-s0-b
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - name: http
+      port: 9000
+      targetPort: 9000
+  selector:
+    app: ems-s0-b
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ems-s0-b
+  namespace: ems
+  labels:
+    app: ems-s0-b
+    component: storage-node
+spec:
+  serviceName: ems-s0-b
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ems-s0-b
+  template:
+    metadata:
+      labels:
+        app: ems-s0-b
+        component: storage-node
+    spec:
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+      containers:
+        - name: storage-node
+          image: ems/storage-node:1.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: NODE_ID
+              value: "s0-b"
+            - name: SHARD_ID
+              value: "0"
+            - name: INITIAL_ROLE
+              value: "replica"
+            - name: STANDALONE
+              value: "false"
+            - name: DATA_DIR
+              value: "/data"
+            - name: PORT
+              value: "9000"
+            - name: COORDINATOR_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ems-config
+                  key: COORDINATOR_URL
+            - name: HEARTBEAT_INTERVAL_SEC
+              valueFrom:
+                configMapKeyRef:
+                  name: ems-config
+                  key: HEARTBEAT_INTERVAL_SEC
+            - name: HTTP_TIMEOUT_SEC
+              valueFrom:
+                configMapKeyRef:
+                  name: ems-config
+                  key: HTTP_TIMEOUT_SEC
+            - name: ADVERTISE_URL
+              value: "http://ems-s0-b-0.ems-s0-b.ems.svc.cluster.local:9000"
+            - name: PEER_URL
+              value: "http://ems-s0-a-0.ems-s0-a.ems.svc.cluster.local:9000"
+          ports:
+            - containerPort: 9000
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 9000
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 9000
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: 9000
+            failureThreshold: 30
+            periodSeconds: 2
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 200Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: ems-s1-a
   namespace: ems
   labels:
@@ -231,6 +346,121 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: ems-s1-b
+  namespace: ems
+  labels:
+    app: ems-s1-b
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - name: http
+      port: 9000
+      targetPort: 9000
+  selector:
+    app: ems-s1-b
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ems-s1-b
+  namespace: ems
+  labels:
+    app: ems-s1-b
+    component: storage-node
+spec:
+  serviceName: ems-s1-b
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ems-s1-b
+  template:
+    metadata:
+      labels:
+        app: ems-s1-b
+        component: storage-node
+    spec:
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+      containers:
+        - name: storage-node
+          image: ems/storage-node:1.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: NODE_ID
+              value: "s1-b"
+            - name: SHARD_ID
+              value: "1"
+            - name: INITIAL_ROLE
+              value: "replica"
+            - name: STANDALONE
+              value: "false"
+            - name: DATA_DIR
+              value: "/data"
+            - name: PORT
+              value: "9000"
+            - name: COORDINATOR_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ems-config
+                  key: COORDINATOR_URL
+            - name: HEARTBEAT_INTERVAL_SEC
+              valueFrom:
+                configMapKeyRef:
+                  name: ems-config
+                  key: HEARTBEAT_INTERVAL_SEC
+            - name: HTTP_TIMEOUT_SEC
+              valueFrom:
+                configMapKeyRef:
+                  name: ems-config
+                  key: HTTP_TIMEOUT_SEC
+            - name: ADVERTISE_URL
+              value: "http://ems-s1-b-0.ems-s1-b.ems.svc.cluster.local:9000"
+            - name: PEER_URL
+              value: "http://ems-s1-a-0.ems-s1-a.ems.svc.cluster.local:9000"
+          ports:
+            - containerPort: 9000
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 9000
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 9000
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: 9000
+            failureThreshold: 30
+            periodSeconds: 2
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 200Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: ems-s2-a
   namespace: ems
   labels:
@@ -307,6 +537,121 @@ spec:
               value: "http://ems-s2-a-0.ems-s2-a.ems.svc.cluster.local:9000"
             - name: PEER_URL
               value: "http://ems-s2-b-0.ems-s2-b.ems.svc.cluster.local:9000"
+          ports:
+            - containerPort: 9000
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 9000
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 9000
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: 9000
+            failureThreshold: 30
+            periodSeconds: 2
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 200Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ems-s2-b
+  namespace: ems
+  labels:
+    app: ems-s2-b
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - name: http
+      port: 9000
+      targetPort: 9000
+  selector:
+    app: ems-s2-b
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ems-s2-b
+  namespace: ems
+  labels:
+    app: ems-s2-b
+    component: storage-node
+spec:
+  serviceName: ems-s2-b
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ems-s2-b
+  template:
+    metadata:
+      labels:
+        app: ems-s2-b
+        component: storage-node
+    spec:
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+      containers:
+        - name: storage-node
+          image: ems/storage-node:1.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: NODE_ID
+              value: "s2-b"
+            - name: SHARD_ID
+              value: "2"
+            - name: INITIAL_ROLE
+              value: "replica"
+            - name: STANDALONE
+              value: "false"
+            - name: DATA_DIR
+              value: "/data"
+            - name: PORT
+              value: "9000"
+            - name: COORDINATOR_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ems-config
+                  key: COORDINATOR_URL
+            - name: HEARTBEAT_INTERVAL_SEC
+              valueFrom:
+                configMapKeyRef:
+                  name: ems-config
+                  key: HEARTBEAT_INTERVAL_SEC
+            - name: HTTP_TIMEOUT_SEC
+              valueFrom:
+                configMapKeyRef:
+                  name: ems-config
+                  key: HTTP_TIMEOUT_SEC
+            - name: ADVERTISE_URL
+              value: "http://ems-s2-b-0.ems-s2-b.ems.svc.cluster.local:9000"
+            - name: PEER_URL
+              value: "http://ems-s2-a-0.ems-s2-a.ems.svc.cluster.local:9000"
           ports:
             - containerPort: 9000
           volumeMounts:

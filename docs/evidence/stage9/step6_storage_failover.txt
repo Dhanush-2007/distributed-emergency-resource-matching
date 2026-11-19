@@ -1,0 +1,43 @@
+Shard 1 initial state: primary=s1-a, replica=s1-b, epoch=1
+
+Created probe request 765fefee-27b1-4ddb-9d02-cc88dbecc0dd on shard 1 (verified shard_of=1)
+
+Scaling primary sts/ems-s1-a to 0...
+
+Failover successful: new primary=s1-b, epoch=2, state=DEGRADED
+
+Scaling returning node sts/ems-s1-a back to 1...
+
+Shard 1 recovered to HEALTHY: {
+  "shardId": 1,
+  "state": "HEALTHY",
+  "epoch": 2,
+  "primary": "s1-b",
+  "degraded": false,
+  "records": 45,
+  "recordCount": {
+    "request": 35,
+    "resource": 10,
+    "other": 0
+  },
+  "nodes": [
+    {
+      "id": "s1-b",
+      "nodeId": "s1-b",
+      "role": "PRIMARY",
+      "health": "UP",
+      "status": "READY",
+      "lastSeq": 122
+    },
+    {
+      "id": "s1-a",
+      "nodeId": "s1-a",
+      "role": "REPLICA",
+      "health": "UP",
+      "status": "READY",
+      "lastSeq": 122
+    }
+  ]
+}
+
+Load loop results: {"attempted": 37, "success": 35, "lost": 0, "errors": 2}

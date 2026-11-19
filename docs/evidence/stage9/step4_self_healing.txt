@@ -1,0 +1,9 @@
+Pods before deletion:
+NAME                              READY   STATUS    RESTARTS   AGE
+request-service-78d465b98-svmhq   1/1     Running   0          101s
+
+Pods after deletion:
+NAME                              READY   STATUS    RESTARTS   AGE
+request-service-78d465b98-q9mv9   0/1     Running   0          3s
+
+Query stats during recovery: success=2, transient_errors=2

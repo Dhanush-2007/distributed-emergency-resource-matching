@@ -1,0 +1,151 @@
+NAME                               READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/coordinator        1/1     1            1           97s
+deployment.apps/matching-service   1/1     1            1           95s
+deployment.apps/request-service    1/1     1            1           96s
+deployment.apps/resource-service   1/1     1            1           96s
+
+NAME                        READY   AGE
+statefulset.apps/ems-s0-a   1/1     98s
+statefulset.apps/ems-s0-b   1/1     98s
+statefulset.apps/ems-s1-a   1/1     98s
+statefulset.apps/ems-s1-b   1/1     98s
+statefulset.apps/ems-s2-a   1/1     98s
+statefulset.apps/ems-s2-b   1/1     97s
+statefulset.apps/rabbitmq   1/1     98s
+
+NAME                                TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)              AGE
+service/coordinator                 ClusterIP   10.98.180.197    <none>        8000/TCP             97s
+service/coordinator-nodeport        NodePort    10.100.56.25     <none>        8000:30080/TCP       97s
+service/ems-s0-a                    ClusterIP   None             <none>        9000/TCP             98s
+service/ems-s0-b                    ClusterIP   None             <none>        9000/TCP             98s
+service/ems-s1-a                    ClusterIP   None             <none>        9000/TCP             98s
+service/ems-s1-b                    ClusterIP   None             <none>        9000/TCP             98s
+service/ems-s2-a                    ClusterIP   None             <none>        9000/TCP             98s
+service/ems-s2-b                    ClusterIP   None             <none>        9000/TCP             98s
+service/matching-service            ClusterIP   10.107.139.241   <none>        8003/TCP             95s
+service/rabbitmq                    ClusterIP   10.106.223.155   <none>        5672/TCP,15672/TCP   98s
+service/rabbitmq-headless           ClusterIP   None             <none>        5672/TCP,15672/TCP   98s
+service/rabbitmq-ui                 NodePort    10.110.243.227   <none>        15672:31672/TCP      98s
+service/request-service             ClusterIP   10.109.118.111   <none>        8001/TCP             96s
+service/request-service-nodeport    NodePort    10.103.50.68     <none>        8001:30081/TCP       96s
+service/resource-service            ClusterIP   10.96.91.215     <none>        8002/TCP             96s
+service/resource-service-nodeport   NodePort    10.97.149.52     <none>        8002:30082/TCP       95s
+
+NAME                                    READY   STATUS    RESTARTS   AGE
+pod/coordinator-7849c5f66c-95ct6        1/1     Running   0          97s
+pod/ems-s0-a-0                          1/1     Running   0          98s
+pod/ems-s0-b-0                          1/1     Running   0          98s
+pod/ems-s1-a-0                          1/1     Running   0          98s
+pod/ems-s1-b-0                          1/1     Running   0          98s
+pod/ems-s2-a-0                          1/1     Running   0          98s
+pod/ems-s2-b-0                          1/1     Running   0          97s
+pod/matching-service-56758c7f68-8wpsx   1/1     Running   0          95s
+pod/rabbitmq-0                          1/1     Running   0          98s
+pod/request-service-78d465b98-svmhq     1/1     Running   0          96s
+pod/resource-service-6cff4d5d67-tpblx   1/1     Running   0          96s
+
+NAME                                             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/coordinator-state          Bound    pvc-89db7e10-34e6-4e28-9b7f-39ed4c300ab3   100Mi      RWO            standard       <unset>                 97s
+persistentvolumeclaim/data-ems-s0-a-0            Bound    pvc-bb16d0c0-88fd-473a-b1e3-dfaf5d2da8b2   200Mi      RWO            standard       <unset>                 98s
+persistentvolumeclaim/data-ems-s0-b-0            Bound    pvc-0d2bb0f5-342b-4766-bcb6-fef4b76a39a2   200Mi      RWO            standard       <unset>                 98s
+persistentvolumeclaim/data-ems-s1-a-0            Bound    pvc-fb2cb697-6263-4a6c-9303-42742ad923c5   200Mi      RWO            standard       <unset>                 98s
+persistentvolumeclaim/data-ems-s1-b-0            Bound    pvc-36f49a9c-6e0c-4b91-bb95-acee72b52cd5   200Mi      RWO            standard       <unset>                 98s
+persistentvolumeclaim/data-ems-s2-a-0            Bound    pvc-9a1238c4-8a24-4e51-a620-10a0cb1c9b25   200Mi      RWO            standard       <unset>                 98s
+persistentvolumeclaim/data-ems-s2-b-0            Bound    pvc-49df08b2-5490-4e4f-a9af-6cea6ded14fe   200Mi      RWO            standard       <unset>                 97s
+persistentvolumeclaim/rabbitmq-data-rabbitmq-0   Bound    pvc-f3f49e20-f7c3-435e-9853-62cf5db6fd46   1Gi        RWO            standard       <unset>                 98s
+
+/diagnostics/shards: {
+  "0": {
+    "shardId": 0,
+    "state": "HEALTHY",
+    "epoch": 1,
+    "primary": "s0-a",
+    "degraded": false,
+    "records": 2,
+    "recordCount": {
+      "request": 0,
+      "resource": 2,
+      "other": 0
+    },
+    "nodes": [
+      {
+        "id": "s0-b",
+        "nodeId": "s0-b",
+        "role": "REPLICA",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 2
+      },
+      {
+        "id": "s0-a",
+        "nodeId": "s0-a",
+        "role": "PRIMARY",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 2
+      }
+    ]
+  },
+  "1": {
+    "shardId": 1,
+    "state": "HEALTHY",
+    "epoch": 1,
+    "primary": "s1-a",
+    "degraded": false,
+    "records": 0,
+    "recordCount": {
+      "request": 0,
+      "resource": 0,
+      "other": 0
+    },
+    "nodes": [
+      {
+        "id": "s1-b",
+        "nodeId": "s1-b",
+        "role": "REPLICA",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 0
+      },
+      {
+        "id": "s1-a",
+        "nodeId": "s1-a",
+        "role": "PRIMARY",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 0
+      }
+    ]
+  },
+  "2": {
+    "shardId": 2,
+    "state": "HEALTHY",
+    "epoch": 1,
+    "primary": "s2-a",
+    "degraded": false,
+    "records": 2,
+    "recordCount": {
+      "request": 0,
+      "resource": 2,
+      "other": 0
+    },
+    "nodes": [
+      {
+        "id": "s2-a",
+        "nodeId": "s2-a",
+        "role": "PRIMARY",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 2
+      },
+      {
+        "id": "s2-b",
+        "nodeId": "s2-b",
+        "role": "REPLICA",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 2
+      }
+    ]
+  }
+}

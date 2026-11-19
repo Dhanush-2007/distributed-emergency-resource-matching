@@ -5,10 +5,22 @@ metadata:
   namespace: ems
   labels:
     app: ems
-
 data:
   COORDINATOR_URL: "http://coordinator:8000"
   N_SHARDS: "3"
   HEARTBEAT_INTERVAL_SEC: "2"
   MISSED_HEARTBEATS_LIMIT: "3"
   HTTP_TIMEOUT_SEC: "3"
+  REQUEST_SERVICE_URL: "http://request-service:8001"
+  RESOURCE_SERVICE_URL: "http://resource-service:8002"
+  RABBITMQ_HOST: "rabbitmq"
+  RABBITMQ_PORT: "5672"
+  SWEEP_INTERVAL_SEC: "15"
+  SWEEP_GRACE_SEC: "10"
+  RECONCILE_INTERVAL_SEC: "60"
+  RECONCILE_GRACE_SEC: "60"
+  MAX_RETRIES: "3"
+  REPLICATION_TIMEOUT_SEC: "2"
+  HEALTH_CHECK_INTERVAL_SEC: "1"
+  PROBE_TIMEOUT_SEC: "1"
+  EVENT_PUBLISHER: "rabbit"

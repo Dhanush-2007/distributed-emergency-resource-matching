@@ -1,0 +1,111 @@
+--- Seeding 30 Resources ---
+
+--- Seeding 30 Requests ---
+
+=== Seeding Summary ===
+Type            Resources    Requests
+-------------------------------------
+water           5            7           
+food            8            4           
+medicine        4            7           
+transportation  6            5           
+shelter         7            7           
+-------------------------------------
+Total:          30           30
+
+Shards distribution post-seed:
+{
+  "0": {
+    "shardId": 0,
+    "state": "HEALTHY",
+    "epoch": 1,
+    "primary": "s0-a",
+    "degraded": false,
+    "records": 13,
+    "recordCount": {
+      "request": 1,
+      "resource": 12,
+      "other": 0
+    },
+    "nodes": [
+      {
+        "id": "s0-b",
+        "nodeId": "s0-b",
+        "role": "REPLICA",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 16
+      },
+      {
+        "id": "s0-a",
+        "nodeId": "s0-a",
+        "role": "PRIMARY",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 16
+      }
+    ]
+  },
+  "1": {
+    "shardId": 1,
+    "state": "DEGRADED",
+    "epoch": 1,
+    "primary": "s1-a",
+    "degraded": false,
+    "records": 11,
+    "recordCount": {
+      "request": 3,
+      "resource": 8,
+      "other": 0
+    },
+    "nodes": [
+      {
+        "id": "s1-b",
+        "nodeId": "s1-b",
+        "role": "REPLICA",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 15
+      },
+      {
+        "id": "s1-a",
+        "nodeId": "s1-a",
+        "role": "PRIMARY",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 17
+      }
+    ]
+  },
+  "2": {
+    "shardId": 2,
+    "state": "DEGRADED",
+    "epoch": 1,
+    "primary": "s2-a",
+    "degraded": false,
+    "records": 23,
+    "recordCount": {
+      "request": 7,
+      "resource": 16,
+      "other": 0
+    },
+    "nodes": [
+      {
+        "id": "s2-a",
+        "nodeId": "s2-a",
+        "role": "PRIMARY",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 46
+      },
+      {
+        "id": "s2-b",
+        "nodeId": "s2-b",
+        "role": "REPLICA",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 48
+      }
+    ]
+  }
+}
