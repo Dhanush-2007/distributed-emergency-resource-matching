@@ -1,6 +1,7 @@
 import argparse
 import sys
 
+
 def generate_node_yaml(node_name: str) -> str:
     # Extract shard id (digit after 's')
     # node_name format: s<shard>-<suffix>
@@ -8,8 +9,8 @@ def generate_node_yaml(node_name: str) -> str:
     try:
         shard_part, suffix = node_name.split('-')
         shard_id = int(shard_part[1:])  # skip leading 's'
-    except Exception:
-        raise ValueError(f"Invalid node name: {node_name}")
+    except (TypeError, ValueError):
+        raise ValueError(f"Invalid node name: {node_name}") from None
     role = "primary" if suffix == "a" else "replica"
     # Service name
     service_name = f"ems-{node_name}"
@@ -32,6 +33,7 @@ metadata:
     app: {service_name}
 spec:
   clusterIP: None
+  publishNotReadyAddresses: true
   ports:
     - name: http
       port: 9000
@@ -61,8 +63,11 @@ spec:
         app: {service_name}
         component: storage-node
     spec:
+      enableServiceLinks: false
       securityContext:
         runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
         fsGroup: 10001
       containers:
         - name: storage-node
@@ -117,6 +122,8 @@ spec:
             httpGet:
               path: /health/live
               port: 9000
+            failureThreshold: 30
+            periodSeconds: 2
           resources:
             requests:
               cpu: "50m"
@@ -137,7 +144,7 @@ spec:
     # Join with document separator
     return "---\n".join(yaml_docs) + "\n"
 
-def main(argv=None):
+def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="Generate storage node manifests")
     parser.add_argument(
         "--nodes",
@@ -157,7 +164,9 @@ def main(argv=None):
         # default three primary nodes
         node_list = [f"s{i}-a" for i in range(3)]
 
-    for node in node_list:
+    for index, node in enumerate(node_list):
+        if index:
+            sys.stdout.write("---\n")
         sys.stdout.write(generate_node_yaml(node))
 
 if __name__ == "__main__":

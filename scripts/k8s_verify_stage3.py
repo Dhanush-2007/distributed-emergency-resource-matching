@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
-"""Kubernetes Stage‑3 verification script.
+"""Kubernetes Stage 3 verification script.
+
+Valid for the 3-node skeleton only (Stage 9 has its own verification with replicas).
 
 Checks the full local Minikube deployment:
 1. All Pods in namespace `ems` are Running & Ready; PVCs are Bound.
-2. `/diagnostics/nodes` reports three UP nodes and DNS‑style endpoints.
+2. `/diagnostics/nodes` reports three UP nodes and DNS-style endpoints (*.svc.cluster.local).
 3. Runs the existing `scripts/distribution.py` client script.
-4. Persistence test – write a key (shard 1), delete its storage pod, wait for
+4. Persistence test – write a key (shard 1), delete its storage pod, wait for
    recovery, then GET the key and verify value/version.
-5. Coordinator self‑healing – delete the coordinator pod, wait for it to be Ready,
-   verify diagnostics again and that the key from step 4 is still readable.
+5. Coordinator self-healing – delete the coordinator pod, wait for it to be Ready,
+   verify 3 nodes UP again, unchanged shard epochs, and the key from step 4 readable.
 6. Prints a summary table.
 
 The script uses only the Python standard library and `httpx`.
-It invokes `kubectl` via `subprocess` and retries connections (up to 60 s) if a
-port‑forward is disrupted.
+It invokes `kubectl` via `subprocess` and retries connections (up to 60 s) if a
+port-forward is disrupted.
 """
 
 import argparse
@@ -22,8 +24,6 @@ import os
 import subprocess
 import sys
 import time
-from pathlib import Path
-from typing import Any, Dict, List, Tuple
 
 import httpx
 
@@ -31,17 +31,21 @@ import httpx
 # Helper utilities
 # ---------------------------------------------------------------------------
 
-def run_cmd(cmd: List[str], capture: bool = True) -> Tuple[int, str]:
+def run_cmd(
+    cmd: list[str], capture: bool = True, env: dict[str, str] | None = None
+) -> tuple[int, str]:
     """Run a shell command, return (returncode, output)."""
     result = subprocess.run(
         cmd,
+        check=False,
+        env=env,
         stdout=subprocess.PIPE if capture else None,
         stderr=subprocess.STDOUT,
         text=True,
     )
     return result.returncode, result.stdout.strip()
 
-def kubectl(*args: str) -> Tuple[int, str]:
+def kubectl(*args: str) -> tuple[int, str]:
     return run_cmd(["kubectl"] + list(args))
 
 def wait_for(condition_fn, timeout: int = 120, interval: int = 5) -> bool:
@@ -53,15 +57,23 @@ def wait_for(condition_fn, timeout: int = 120, interval: int = 5) -> bool:
         time.sleep(interval)
     return False
 
-def retry_http_get(url: str, headers: Dict[str, str] = None, retries: int = 12, delay: int = 5) -> httpx.Response:
-    """GET with exponential retries (max *retries* attempts)."""
+def retry_http_get(
+    url: str,
+    headers: dict[str, str] | None = None,
+    retries: int = 12,
+    delay: int = 5,
+) -> httpx.Response:
+    """GET with retries (max *retries* attempts, up to 60s total)."""
     for attempt in range(retries):
         try:
             resp = httpx.get(url, headers=headers, timeout=10.0)
             resp.raise_for_status()
             return resp
-        except Exception as e:
+        except (httpx.HTTPError, httpx.NetworkError, Exception) as exc:
             if attempt == retries - 1:
+                print(f"\n[!] Connection to {url} failed after 60s: {exc}")
+                print("[!] Reminder: if kubectl port-forward dropped after pod restart, please restart it:")
+                print("    kubectl -n ems port-forward svc/coordinator 8000:8000\n")
                 raise
             time.sleep(delay)
     raise RuntimeError("unreachable")
@@ -107,17 +119,20 @@ def check_diagnostics_nodes(base_url: str) -> bool:
     url = f"{base_url}/diagnostics/nodes"
     try:
         resp = retry_http_get(url)
-    except Exception as e:
-        print(f"FAIL: cannot GET {url}: {e}")
+    except (httpx.HTTPError, ValueError) as exc:
+        print(f"FAIL: cannot GET {url}: {exc}")
         return False
     data = resp.json()
-    nodes = data.get("nodes", [])
+    nodes = data if isinstance(data, list) else data.get("nodes", [])
     if len(nodes) != 3:
         print(f"FAIL: expected 3 nodes, got {len(nodes)}")
         return False
     for n in nodes:
-        if n.get("status") != "UP":
-            print(f"FAIL: node {n.get('nodeId')} status {n.get('status')}")
+        if n.get("health") != "UP" or n.get("status") != "READY":
+            print(
+                f"FAIL: node {n.get('nodeId')} health={n.get('health')} "
+                f"status={n.get('status')}"
+            )
             return False
         endpoint = n.get("endpoint", "")
         if not endpoint.endswith(".svc.cluster.local:9000"):
@@ -131,7 +146,11 @@ def run_distribution(base_url: str) -> bool:
     # reuse the existing script; it reads COORDINATOR_URL from env if set
     env = os.environ.copy()
     env["COORDINATOR_URL"] = base_url
-    rc, out = run_cmd(["python3", "scripts/distribution.py", "--keys", "10"], capture=True)
+    rc, out = run_cmd(
+        [sys.executable, "scripts/distribution.py", "--keys", "10"],
+        capture=True,
+        env=env,
+    )
     if rc != 0:
         print(f"FAIL: distribution script failed (rc={rc})\n{out}")
         return False
@@ -143,9 +162,10 @@ def run_distribution(base_url: str) -> bool:
         return False
 
 
-def persistence_test(base_url: str) -> Tuple[bool, str, int]:
+def persistence_test(base_url: str) -> tuple[bool, str, int]:
     # generate a key that maps to shard 1 using ems_common sharding logic
     import uuid
+
     from ems_common import sharding
     # Loop until shard_of returns 1 (unlikely to loop many times)
     while True:
@@ -160,8 +180,8 @@ def persistence_test(base_url: str) -> Tuple[bool, str, int]:
         resp = httpx.put(put_url, json=payload, timeout=10.0)
         resp.raise_for_status()
         version = resp.json().get("version")
-    except Exception as e:
-        print(f"FAIL: initial PUT failed: {e}")
+    except httpx.HTTPError as exc:
+        print(f"FAIL: initial PUT failed: {exc}")
         return False, "", -1
     # delete the storage pod for shard 1
     pod_name = "ems-s1-a-0"
@@ -190,61 +210,22 @@ def persistence_test(base_url: str) -> Tuple[bool, str, int]:
         if got.get("value") != {"test": "persistence"} or got.get("version") != version:
             print("FAIL: retrieved value/version mismatch after pod restart")
             return False, key, version
-    except Exception as e:
-        print(f"FAIL: GET after pod restart failed: {e}")
-        return False, key, version
-    print("PASS: persistence test succeeded (key survives storage pod restart)")
-    return True, key, version
-    # generate a shard‑1 key via find_key_for_shard.py
-    rc, key = run_cmd(["python3", "scripts/find_key_for_shard.py", "--shard", "1"], capture=True)
-    if rc != 0:
-        print(f"FAIL: find_key_for_shard failed: {key}")
-        return False, "", -1
-    # write the key via PUT (use httpx directly)
-    put_url = f"{base_url}/internal/data/{key}"
-    payload = {"value": {"test": "persistence"}, "ifVersion": None, "epoch": 1}
-    try:
-        resp = httpx.put(put_url, json=payload, timeout=10.0)
-        resp.raise_for_status()
-        version = resp.json().get("version")
-    except Exception as e:
-        print(f"FAIL: initial PUT failed: {e}")
-        return False, "", -1
-    # delete the storage pod for shard 1
-    pod_name = "ems-s1-a-0"
-    rc, out = kubectl("-n", "ems", "delete", "pod", pod_name, "--wait=false")
-    if rc != 0:
-        print(f"FAIL: could not delete pod {pod_name}: {out}")
-        return False, "", -1
-    # wait for new pod to be Ready
-    def pod_ready():
-        rc, out = kubectl("-n", "ems", "get", "pod", pod_name, "-o", "json")
-        if rc != 0:
-            return False
-        pod = json.loads(out)
-        phase = pod["status"].get("phase")
-        conds = pod["status"].get("conditions", [])
-        ready = any(c.get("type") == "Ready" and c.get("status") == "True" for c in conds)
-        return phase == "Running" and ready
-    if not wait_for(pod_ready, timeout=120, interval=5):
-        print(f"FAIL: pod {pod_name} did not become Ready after deletion")
-        return False, "", -1
-    # GET the key again
-    get_url = f"{base_url}/internal/data/{key}"
-    try:
-        resp = retry_http_get(get_url)
-        got = resp.json()
-        if got.get("value") != {"test": "persistence"} or got.get("version") != version:
-            print("FAIL: retrieved value/version mismatch after pod restart")
-            return False, key, version
-    except Exception as e:
-        print(f"FAIL: GET after pod restart failed: {e}")
+    except (httpx.HTTPError, ValueError) as exc:
+        print(f"FAIL: GET after pod restart failed: {exc}")
         return False, key, version
     print("PASS: persistence test succeeded (key survives storage pod restart)")
     return True, key, version
 
 
 def coordinator_healing_test(base_url: str, key: str, version: int) -> bool:
+    # record epochs before restart
+    try:
+        shards_resp = retry_http_get(f"{base_url}/diagnostics/shards")
+        pre_epochs = {s["shardId"]: s.get("epoch", 1) for s in shards_resp.json()}
+    except (httpx.HTTPError, ValueError, RuntimeError) as exc:
+        print(f"FAIL: could not get diagnostics/shards before coordinator restart: {exc}")
+        return False
+
     # delete coordinator pod
     rc, out = kubectl("-n", "ems", "delete", "pod", "-l", "app=coordinator", "--wait=false")
     if rc != 0:
@@ -269,6 +250,18 @@ def coordinator_healing_test(base_url: str, key: str, version: int) -> bool:
     # diagnostics nodes again
     if not check_diagnostics_nodes(base_url):
         return False
+
+    # verify unchanged shard epochs
+    try:
+        shards_resp2 = retry_http_get(f"{base_url}/diagnostics/shards")
+        post_epochs = {s["shardId"]: s.get("epoch", 1) for s in shards_resp2.json()}
+        if pre_epochs != post_epochs:
+            print(f"FAIL: shard epochs changed after coordinator restart: {pre_epochs} vs {post_epochs}")
+            return False
+    except (httpx.HTTPError, ValueError, RuntimeError) as exc:
+        print(f"FAIL: could not get diagnostics/shards after coordinator restart: {exc}")
+        return False
+
     # GET the key again to ensure it is still readable
     get_url = f"{base_url}/internal/data/{key}"
     try:
@@ -277,10 +270,10 @@ def coordinator_healing_test(base_url: str, key: str, version: int) -> bool:
         if got.get("value") != {"test": "persistence"} or got.get("version") != version:
             print("FAIL: key value/version changed after coordinator restart")
             return False
-    except Exception as e:
-        print(f"FAIL: GET after coordinator restart failed: {e}")
+    except (httpx.HTTPError, ValueError) as exc:
+        print(f"FAIL: GET after coordinator restart failed: {exc}")
         return False
-    print("PASS: coordinator self‑healing verified (key still readable)")
+    print("PASS: coordinator self-healing verified (3 nodes UP, epochs unchanged, key still readable)")
     return True
 
 
@@ -295,7 +288,7 @@ def main():
 
     base = args.coordinator_url.rstrip('/')
     all_pass = True
-    summaries: List[Tuple[str, str]] = []
+    summaries: list[tuple[str, str]] = []
 
     # 1 – pods & PVCs
     ok = check_pods_and_pvcs()
@@ -327,8 +320,7 @@ def main():
 
     # 6 – summary table
     print("\n=== Summary ===")
-    print("| Check | Result |
-|---|---|")
+    print("| Check | Result |\n|---|---|")
     for name, result in summaries:
         print(f"| {name} | {result} |")
 

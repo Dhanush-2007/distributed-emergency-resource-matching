@@ -159,17 +159,6 @@ class Gap(EmsError):
             message=message,
             details=details,
         )
-    def __init__(
-        self,
-        message: str = "Node is not primary",
-        details: list[dict[str, Any]] | None = None,
-    ) -> None:
-        super().__init__(
-            http_status=409,
-            code="NOT_PRIMARY",
-            message=message,
-            details=details,
-        )
 
 
 def _extract_cid(request: Request) -> str | None:
