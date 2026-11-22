@@ -1,0 +1,1 @@
+SKIPPED: Scenario 8 requires Kubernetes mode.

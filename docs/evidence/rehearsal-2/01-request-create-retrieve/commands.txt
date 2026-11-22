@@ -2,5 +2,5 @@ Command: curl -s -w '\n%{http_code}' -X POST http://localhost:8001/requests -H '
 POST Response (201):
 
 Command: curl -s -w '
-%{http_code}' http://localhost:8001/requests/48bbde99-e8f8-426f-8fe0-bd2ecd219873
+%{http_code}' http://localhost:8001/requests/d1007f8e-f3c1-459c-a30a-cae2853eb181
 GET Response (200):

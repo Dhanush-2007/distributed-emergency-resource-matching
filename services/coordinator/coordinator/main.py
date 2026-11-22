@@ -95,7 +95,7 @@ class Settings:
         self.http_timeout_sec: float = (
             http_timeout_sec
             if http_timeout_sec is not None
-            else float(os.getenv("HTTP_TIMEOUT_SEC", "3"))
+            else float(os.getenv("HTTP_TIMEOUT_SEC", "5.0"))
         )
 
 

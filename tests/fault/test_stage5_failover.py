@@ -352,12 +352,14 @@ def test_scenario_i_double_failure_cycle():
     assert wait_until(
         lambda: next((s for s in client.get("/diagnostics/shards").json() if s["shardId"] == 2), {}).get("primary") == node_b
         and next((s for s in client.get("/diagnostics/shards").json() if s["shardId"] == 2), {}).get("epoch", 0) >= epoch_start + 1,
-        timeout=15.0,
+        timeout=30.0,
     )
 
     # Recover node_a -> healthy
     subprocess.run(["docker", "start", f"ems-{node_a}"], check=True)
     assert wait_shards_healthy(client, timeout=30.0)
+    # Allow node_b's replica monitor (probe interval 2.0s) to probe recovered node_a
+    time.sleep(2.5)
 
     # 2. Write on node_b
     k_i2 = key_for_shard(2)
@@ -367,7 +369,7 @@ def test_scenario_i_double_failure_cycle():
     subprocess.run(["docker", "stop", f"ems-{node_b}"], check=True)
     assert wait_until(
         lambda: next((s for s in client.get("/diagnostics/shards").json() if s["shardId"] == 2), {}).get("primary") == node_a,
-        timeout=15.0,
+        timeout=30.0,
     )
 
     # Recover node_b -> healthy

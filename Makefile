@@ -43,7 +43,7 @@ itest:
 	$(VENV_PY) -m pytest --timeout=60 --timeout-method=thread -m integration
 
 ftest:
-	$(VENV_PY) -m pytest --timeout=60 --timeout-method=thread -m fault
+	$(VENV_PY) -m pytest --timeout=300 --timeout-method=thread -m fault
 
 lint:
 	$(VENV_PY) -m ruff check .

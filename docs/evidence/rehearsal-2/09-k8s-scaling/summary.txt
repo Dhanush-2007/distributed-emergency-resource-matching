@@ -1,0 +1,1 @@
+SKIPPED: Scenario 9 requires Kubernetes mode.

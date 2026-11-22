@@ -140,11 +140,17 @@ def replicate_or_degrade(
             "value": value,
             "version": version,
         }
+        repl_timeout: Any = replication_timeout
+        if isinstance(replication_timeout, (int, float)):
+            repl_timeout = httpx.Timeout(
+                float(replication_timeout),
+                connect=min(1.0, float(replication_timeout)),
+            )
         try:
             resp = http_client.post(
                 f"{peer_url.rstrip('/')}/internal/replicate",
                 json=replicate_payload,
-                timeout=replication_timeout,
+                timeout=repl_timeout,
             )
             if resp.status_code == 200:
                 data = resp.json()

@@ -1,5 +1,5 @@
 === EMS CLUSTER STATUS ===
-Timestamp: 2026-11-20 03:57:49
+Timestamp: 2026-11-22 17:52:46
 
 SHARDS:
 Shard    State        Primary      Epoch    Degraded   DegradedSeq 
@@ -11,9 +11,9 @@ Shard    State        Primary      Epoch    Degraded   DegradedSeq
 NODES:
 NodeId     Shard    Role       Health   Status       LastSeq    AckSeq   Counts              
 ------------------------------------------------------------------------------------------
-s0-a       0        PRIMARY    UP       READY        72         -        {'request': 16, 'resource': 12, 'other': 0}
-s0-b       0        REPLICA    UP       READY        72         -        {'request': 16, 'resource': 12, 'other': 0}
-s1-a       1        REPLICA    DOWN     READY        98         -        {'request': 23, 'resource': 15, 'other': 0}
-s1-b       1        PRIMARY    UP       READY        100        -        {'request': 24, 'resource': 15, 'other': 0}
-s2-a       2        PRIMARY    UP       READY        97         -        {'request': 25, 'resource': 11, 'other': 0}
-s2-b       2        REPLICA    UP       READY        97         -        {'request': 25, 'resource': 11, 'other': 0}
+s0-a       0        PRIMARY    UP       READY        115        -        {'request': 26, 'resource': 19, 'other': 0}
+s0-b       0        REPLICA    UP       READY        115        -        {'request': 26, 'resource': 19, 'other': 0}
+s1-a       1        REPLICA    DOWN     READY        59         -        {'request': 13, 'resource': 10, 'other': 0}
+s1-b       1        PRIMARY    UP       READY        62         -        {'request': 14, 'resource': 10, 'other': 0}
+s2-a       2        PRIMARY    UP       READY        81         -        {'request': 21, 'resource': 9, 'other': 0}
+s2-b       2        REPLICA    UP       READY        81         -        {'request': 21, 'resource': 9, 'other': 0}

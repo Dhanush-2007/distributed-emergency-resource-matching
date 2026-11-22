@@ -1,5 +1,6 @@
 """Component tests for follower recovery (Build item 4.4)."""
 
+import threading
 import time
 
 import pytest
@@ -71,18 +72,55 @@ def test_gap_triggers_immediate_sync(tmp_path):
         h.p_client = pc
         h.r_client = rc
 
-        # Write seq 1 and seq 2 on primary directly without replication
-        h.primary_db.put("k:1", {"x": 1}, if_version=None, epoch=1)
-        h.primary_db.put("k:2", {"x": 2}, if_version=None, epoch=1)
+        # Make replica unable to sync during the first part of the test
+        rm = h.replica_app.state.get_recovery_manager()
+        sync_gate = threading.Event()
+        orig_get = rm._http.get
 
-        # Send seq 3 directly to replica /internal/replicate -> triggers 409 GAP
-        gap_res = h.r_client.post(
-            "/internal/replicate",
-            json={"epoch": 1, "seq": 3, "op": "PUT", "key": "k:3", "value": {"x": 3}, "version": 1},
-        )
-        assert gap_res.status_code == 409
-        assert gap_res.json()["error"]["code"] == "GAP"
+        def gated_get(*args, **kwargs):
+            while not sync_gate.is_set() and not rm._stop_event.is_set():
+                sync_gate.wait(timeout=0.05)
+            return orig_get(*args, **kwargs)
 
-        # The 409 GAP triggers immediate recovery sync pull
-        time.sleep(0.5)
-        assert h.replica_db.stats()["last_seq"] == 2
+        rm._http.get = gated_get
+
+        try:
+            # Write seq 1 and seq 2 on primary only
+            h.primary_db.put("k:1", {"x": 1}, if_version=None, epoch=1)
+            h.primary_db.put("k:2", {"x": 2}, if_version=None, epoch=1)
+            assert h.primary_db.stats()["last_seq"] == 2
+            replica_last_seq = h.replica_db.stats()["last_seq"]
+            assert replica_last_seq == 0
+
+            # Send seq 4 (a true gap) to /internal/replicate and assert 409 GAP
+            gap_res = h.r_client.post(
+                "/internal/replicate",
+                json={"epoch": 1, "seq": 4, "op": "PUT", "key": "k:4", "value": {"x": 4}, "version": 1},
+            )
+            assert gap_res.status_code == 409
+            assert gap_res.json()["error"]["code"] == "GAP"
+            assert gap_res.json()["error"]["details"] == [{"lastSeq": replica_last_seq}]
+
+            # Assert nothing changed on replica
+            assert h.replica_db.stats()["last_seq"] == replica_last_seq
+            assert h.replica_db.get("k:4") is None
+
+            # Let sync run and assert replica converges to primary
+            sync_gate.set()
+            rm.trigger_sync()
+
+            for _ in range(50):
+                if h.replica_db.stats()["last_seq"] == h.primary_db.stats()["last_seq"]:
+                    break
+                time.sleep(0.05)
+
+            assert h.replica_db.stats()["last_seq"] == h.primary_db.stats()["last_seq"]
+            assert h.replica_db.stats()["last_seq"] == 2
+            rec1 = h.replica_db.get("k:1")
+            rec2 = h.replica_db.get("k:2")
+            assert rec1 is not None and rec1.value == {"x": 1}
+            assert rec2 is not None and rec2.value == {"x": 2}
+            assert h.replica_db.get("k:4") is None
+        finally:
+            sync_gate.set()
+            rm._http.get = orig_get

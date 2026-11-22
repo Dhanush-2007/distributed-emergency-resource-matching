@@ -1,60 +1,60 @@
-INFO:     10.244.0.131:52248 - "POST /internal/nodes/heartbeat HTTP/1.1" 200 OK
-{"ts": "2026-11-19T22:25:12.607716+00:00", "level": "INFO", "service": "coordinator", "event": "Shard recovered from degraded state", "correlationId": "6f1b5d71-2905-4bf2-9ae8-6ce6379ec44b", "shardId": 1, "primary": "s1-b", "replica": "s1-a", "seq": 75}
-{"ts": "2026-11-19T22:25:12.607775+00:00", "level": "INFO", "service": "coordinator", "event": "Shard recovered from degraded state", "correlationId": "6f1b5d71-2905-4bf2-9ae8-6ce6379ec44b", "shardId": 1, "primary": "s1-b", "replica": "s1-a", "seq": 75}
-INFO:     10.244.0.139:55742 - "POST /internal/nodes/heartbeat HTTP/1.1" 200 OK
-INFO:     10.244.0.1:36728 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     10.244.0.1:36738 - "GET /health/ready HTTP/1.1" 200 OK
-{"ts": "2026-11-19T22:25:12.818975+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "25861fe3-0f25-43d5-8432-404afd594b02", "key": "request:8816e4c4-ff3f-4a06-8180-5cfd2de70774", "shardId": 0, "nodeId": "s0-a", "role": "PRIMARY", "epoch": 1, "op": "GET"}
-{"ts": "2026-11-19T22:25:12.819091+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "25861fe3-0f25-43d5-8432-404afd594b02", "key": "request:8816e4c4-ff3f-4a06-8180-5cfd2de70774", "shardId": 0, "nodeId": "s0-a", "role": "PRIMARY", "epoch": 1, "op": "GET"}
-{"ts": "2026-11-19T22:25:12.820992+00:00", "level": "INFO", "service": "coordinator", "event": "HTTP Request: GET http://ems-s0-a-0.ems-s0-a.ems.svc.cluster.local:9000/internal/data/request:8816e4c4-ff3f-4a06-8180-5cfd2de70774 \"HTTP/1.1 404 Not Found\"", "correlationId": "25861fe3-0f25-43d5-8432-404afd594b02"}
-INFO:     10.244.0.135:57686 - "GET /internal/data/request%3A8816e4c4-ff3f-4a06-8180-5cfd2de70774 HTTP/1.1" 404 Not Found
-INFO:     10.244.0.134:55428 - "POST /internal/nodes/heartbeat HTTP/1.1" 200 OK
-INFO:     10.244.0.133:48300 - "POST /internal/nodes/heartbeat HTTP/1.1" 200 OK
-{"ts": "2026-11-19T22:25:13.172333+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "58a91078-032b-4aba-83af-a58e70cd4339", "key": "request:8816e4c4-ff3f-4a06-8180-5cfd2de70774", "shardId": 0, "nodeId": "s0-a", "role": "PRIMARY", "epoch": 1, "op": "GET"}
-{"ts": "2026-11-19T22:25:13.172428+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "58a91078-032b-4aba-83af-a58e70cd4339", "key": "request:8816e4c4-ff3f-4a06-8180-5cfd2de70774", "shardId": 0, "nodeId": "s0-a", "role": "PRIMARY", "epoch": 1, "op": "GET"}
-{"ts": "2026-11-19T22:25:13.173206+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 0}
-{"ts": "2026-11-19T22:25:13.173286+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 0}
-{"ts": "2026-11-19T22:25:13.173385+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 1}
-{"ts": "2026-11-19T22:25:13.173445+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 1}
-{"ts": "2026-11-19T22:25:13.173505+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 2}
-{"ts": "2026-11-19T22:25:13.173556+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 2}
-{"ts": "2026-11-19T22:25:13.175780+00:00", "level": "INFO", "service": "coordinator", "event": "HTTP Request: GET http://ems-s0-a-0.ems-s0-a.ems.svc.cluster.local:9000/internal/data/request:8816e4c4-ff3f-4a06-8180-5cfd2de70774 \"HTTP/1.1 404 Not Found\"", "correlationId": "58a91078-032b-4aba-83af-a58e70cd4339"}
-INFO:     10.244.0.135:57686 - "GET /internal/data/request%3A8816e4c4-ff3f-4a06-8180-5cfd2de70774 HTTP/1.1" 404 Not Found
-{"ts": "2026-11-19T22:25:13.454380+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "aaacf14c-bc09-4abf-a5b7-f8ae23d1ff91", "key": "request:", "shardId": 0, "nodeId": "s0-a", "role": "PRIMARY", "epoch": 1, "op": "SCAN"}
-{"ts": "2026-11-19T22:25:13.454454+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "aaacf14c-bc09-4abf-a5b7-f8ae23d1ff91", "key": "request:", "shardId": 0, "nodeId": "s0-a", "role": "PRIMARY", "epoch": 1, "op": "SCAN"}
-{"ts": "2026-11-19T22:25:13.458244+00:00", "level": "INFO", "service": "coordinator", "event": "HTTP Request: GET http://ems-s0-a-0.ems-s0-a.ems.svc.cluster.local:9000/internal/scan?prefix=request%3A \"HTTP/1.1 200 OK\"", "correlationId": "aaacf14c-bc09-4abf-a5b7-f8ae23d1ff91"}
-{"ts": "2026-11-19T22:25:13.458771+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "aaacf14c-bc09-4abf-a5b7-f8ae23d1ff91", "key": "request:", "shardId": 1, "nodeId": "s1-b", "role": "PRIMARY", "epoch": 2, "op": "SCAN"}
-{"ts": "2026-11-19T22:25:13.458809+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "aaacf14c-bc09-4abf-a5b7-f8ae23d1ff91", "key": "request:", "shardId": 1, "nodeId": "s1-b", "role": "PRIMARY", "epoch": 2, "op": "SCAN"}
-{"ts": "2026-11-19T22:25:13.463173+00:00", "level": "INFO", "service": "coordinator", "event": "HTTP Request: GET http://ems-s1-b-0.ems-s1-b.ems.svc.cluster.local:9000/internal/scan?prefix=request%3A \"HTTP/1.1 200 OK\"", "correlationId": "aaacf14c-bc09-4abf-a5b7-f8ae23d1ff91"}
-{"ts": "2026-11-19T22:25:13.643676+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "aaacf14c-bc09-4abf-a5b7-f8ae23d1ff91", "key": "request:", "shardId": 2, "nodeId": "s2-a", "role": "PRIMARY", "epoch": 1, "op": "SCAN"}
-{"ts": "2026-11-19T22:25:13.643723+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "aaacf14c-bc09-4abf-a5b7-f8ae23d1ff91", "key": "request:", "shardId": 2, "nodeId": "s2-a", "role": "PRIMARY", "epoch": 1, "op": "SCAN"}
-{"ts": "2026-11-19T22:25:13.644717+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "eabf6954-ff57-4cff-9498-f7e5aaedb24d", "key": "request:8816e4c4-ff3f-4a06-8180-5cfd2de70774", "shardId": 0, "nodeId": "s0-a", "role": "PRIMARY", "epoch": 1, "op": "GET"}
-{"ts": "2026-11-19T22:25:13.644758+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "eabf6954-ff57-4cff-9498-f7e5aaedb24d", "key": "request:8816e4c4-ff3f-4a06-8180-5cfd2de70774", "shardId": 0, "nodeId": "s0-a", "role": "PRIMARY", "epoch": 1, "op": "GET"}
-{"ts": "2026-11-19T22:25:13.647595+00:00", "level": "INFO", "service": "coordinator", "event": "HTTP Request: GET http://ems-s0-a-0.ems-s0-a.ems.svc.cluster.local:9000/internal/data/request:8816e4c4-ff3f-4a06-8180-5cfd2de70774 \"HTTP/1.1 404 Not Found\"", "correlationId": "eabf6954-ff57-4cff-9498-f7e5aaedb24d"}
-INFO:     10.244.0.135:44196 - "GET /internal/data/request%3A8816e4c4-ff3f-4a06-8180-5cfd2de70774 HTTP/1.1" 404 Not Found
-{"ts": "2026-11-19T22:25:13.652118+00:00", "level": "INFO", "service": "coordinator", "event": "HTTP Request: GET http://ems-s2-a-0.ems-s2-a.ems.svc.cluster.local:9000/internal/scan?prefix=request%3A \"HTTP/1.1 200 OK\"", "correlationId": "aaacf14c-bc09-4abf-a5b7-f8ae23d1ff91"}
-INFO:     10.244.0.135:57686 - "GET /internal/scan?prefix=request%3A&allowPartial=true HTTP/1.1" 200 OK
-{"ts": "2026-11-19T22:25:13.944218+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "806fde8b-dfdf-42c5-ae08-bb50ca5fe26e", "key": "resource:", "shardId": 0, "nodeId": "s0-a", "role": "PRIMARY", "epoch": 1, "op": "SCAN"}
-{"ts": "2026-11-19T22:25:13.944345+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "806fde8b-dfdf-42c5-ae08-bb50ca5fe26e", "key": "resource:", "shardId": 0, "nodeId": "s0-a", "role": "PRIMARY", "epoch": 1, "op": "SCAN"}
-{"ts": "2026-11-19T22:25:13.949640+00:00", "level": "INFO", "service": "coordinator", "event": "HTTP Request: GET http://ems-s0-a-0.ems-s0-a.ems.svc.cluster.local:9000/internal/scan?prefix=resource%3A \"HTTP/1.1 200 OK\"", "correlationId": "806fde8b-dfdf-42c5-ae08-bb50ca5fe26e"}
-{"ts": "2026-11-19T22:25:13.950740+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "806fde8b-dfdf-42c5-ae08-bb50ca5fe26e", "key": "resource:", "shardId": 1, "nodeId": "s1-b", "role": "PRIMARY", "epoch": 2, "op": "SCAN"}
-{"ts": "2026-11-19T22:25:13.950842+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "806fde8b-dfdf-42c5-ae08-bb50ca5fe26e", "key": "resource:", "shardId": 1, "nodeId": "s1-b", "role": "PRIMARY", "epoch": 2, "op": "SCAN"}
-{"ts": "2026-11-19T22:25:13.958512+00:00", "level": "INFO", "service": "coordinator", "event": "HTTP Request: GET http://ems-s1-b-0.ems-s1-b.ems.svc.cluster.local:9000/internal/scan?prefix=resource%3A \"HTTP/1.1 200 OK\"", "correlationId": "806fde8b-dfdf-42c5-ae08-bb50ca5fe26e"}
-{"ts": "2026-11-19T22:25:13.958908+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "806fde8b-dfdf-42c5-ae08-bb50ca5fe26e", "key": "resource:", "shardId": 2, "nodeId": "s2-a", "role": "PRIMARY", "epoch": 1, "op": "SCAN"}
-{"ts": "2026-11-19T22:25:13.958952+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "806fde8b-dfdf-42c5-ae08-bb50ca5fe26e", "key": "resource:", "shardId": 2, "nodeId": "s2-a", "role": "PRIMARY", "epoch": 1, "op": "SCAN"}
-INFO:     127.0.0.1:52348 - "GET /diagnostics/shards HTTP/1.1" 200 OK
-{"ts": "2026-11-19T22:25:13.961752+00:00", "level": "INFO", "service": "coordinator", "event": "HTTP Request: GET http://ems-s2-a-0.ems-s2-a.ems.svc.cluster.local:9000/internal/scan?prefix=resource%3A \"HTTP/1.1 200 OK\"", "correlationId": "806fde8b-dfdf-42c5-ae08-bb50ca5fe26e"}
-INFO:     10.244.0.136:41158 - "GET /internal/scan?prefix=resource%3A&allowPartial=false HTTP/1.1" 200 OK
-{"ts": "2026-11-19T22:25:13.995648+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "93168ced-f5e5-4780-aff4-22810434b157", "key": "request:8816e4c4-ff3f-4a06-8180-5cfd2de70774", "shardId": 0, "nodeId": "s0-a", "role": "PRIMARY", "epoch": 1, "op": "GET"}
-{"ts": "2026-11-19T22:25:13.995740+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "93168ced-f5e5-4780-aff4-22810434b157", "key": "request:8816e4c4-ff3f-4a06-8180-5cfd2de70774", "shardId": 0, "nodeId": "s0-a", "role": "PRIMARY", "epoch": 1, "op": "GET"}
-{"ts": "2026-11-19T22:25:13.999126+00:00", "level": "INFO", "service": "coordinator", "event": "HTTP Request: GET http://ems-s0-a-0.ems-s0-a.ems.svc.cluster.local:9000/internal/data/request:8816e4c4-ff3f-4a06-8180-5cfd2de70774 \"HTTP/1.1 404 Not Found\"", "correlationId": "93168ced-f5e5-4780-aff4-22810434b157"}
-INFO:     10.244.0.135:57686 - "GET /internal/data/request%3A8816e4c4-ff3f-4a06-8180-5cfd2de70774 HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:52360 - "GET /diagnostics/shards HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52360 - "GET /diagnostics/nodes HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52374 - "GET /diagnostics/shards HTTP/1.1" 200 OK
-{"ts": "2026-11-19T22:25:14.173807+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 0}
-{"ts": "2026-11-19T22:25:14.173907+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 0}
-{"ts": "2026-11-19T22:25:14.173941+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 1}
-{"ts": "2026-11-19T22:25:14.173958+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 1}
-{"ts": "2026-11-19T22:25:14.173986+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 2}
-{"ts": "2026-11-19T22:25:14.174003+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 2}
+ems-coordinator  | {"ts": "2026-11-22T12:21:13.172988+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 2}
+ems-coordinator  | INFO:     172.18.0.1:58648 - "GET /diagnostics/shards HTTP/1.1" 200 OK
+ems-coordinator  | INFO:     172.18.0.4:50426 - "POST /internal/nodes/heartbeat HTTP/1.1" 200 OK
+ems-coordinator  | INFO:     172.18.0.5:40198 - "POST /internal/nodes/heartbeat HTTP/1.1" 200 OK
+ems-coordinator  | INFO:     172.18.0.6:34780 - "POST /internal/nodes/heartbeat HTTP/1.1" 200 OK
+ems-coordinator  | {"ts": "2026-11-22T12:21:14.173393+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 0}
+ems-coordinator  | {"ts": "2026-11-22T12:21:14.173534+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 0}
+ems-coordinator  | {"ts": "2026-11-22T12:21:14.173625+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 1}
+ems-coordinator  | {"ts": "2026-11-22T12:21:14.173654+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 1}
+ems-coordinator  | {"ts": "2026-11-22T12:21:14.173745+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 2}
+ems-coordinator  | {"ts": "2026-11-22T12:21:14.173804+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 2}
+ems-coordinator  | INFO:     172.18.0.10:33396 - "POST /internal/nodes/heartbeat HTTP/1.1" 200 OK
+ems-coordinator  | INFO:     172.18.0.8:60440 - "POST /internal/nodes/heartbeat HTTP/1.1" 200 OK
+ems-coordinator  | INFO:     172.18.0.9:45160 - "POST /internal/nodes/heartbeat HTTP/1.1" 200 OK
+ems-coordinator  | {"ts": "2026-11-22T12:21:15.174069+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 0}
+ems-coordinator  | {"ts": "2026-11-22T12:21:15.174164+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 0}
+ems-coordinator  | {"ts": "2026-11-22T12:21:15.174219+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 1}
+ems-coordinator  | {"ts": "2026-11-22T12:21:15.174236+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 1}
+ems-coordinator  | {"ts": "2026-11-22T12:21:15.174265+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 2}
+ems-coordinator  | {"ts": "2026-11-22T12:21:15.174295+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 2}
+ems-coordinator  | INFO:     172.18.0.4:50426 - "POST /internal/nodes/heartbeat HTTP/1.1" 200 OK
+ems-coordinator  | INFO:     172.18.0.5:40198 - "POST /internal/nodes/heartbeat HTTP/1.1" 200 OK
+ems-coordinator  | INFO:     172.18.0.6:34780 - "POST /internal/nodes/heartbeat HTTP/1.1" 200 OK
+ems-coordinator  | {"ts": "2026-11-22T12:21:16.174716+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 0}
+ems-coordinator  | {"ts": "2026-11-22T12:21:16.174913+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 0}
+ems-coordinator  | {"ts": "2026-11-22T12:21:16.175027+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 1}
+ems-coordinator  | {"ts": "2026-11-22T12:21:16.175101+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 1}
+ems-coordinator  | {"ts": "2026-11-22T12:21:16.175197+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 2}
+ems-coordinator  | {"ts": "2026-11-22T12:21:16.175230+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 2}
+ems-coordinator  | INFO:     172.18.0.10:33396 - "POST /internal/nodes/heartbeat HTTP/1.1" 200 OK
+ems-coordinator  | INFO:     172.18.0.8:60440 - "POST /internal/nodes/heartbeat HTTP/1.1" 200 OK
+ems-coordinator  | INFO:     172.18.0.9:45160 - "POST /internal/nodes/heartbeat HTTP/1.1" 200 OK
+ems-coordinator  | {"ts": "2026-11-22T12:21:17.175607+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 0}
+ems-coordinator  | {"ts": "2026-11-22T12:21:17.175749+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 0}
+ems-coordinator  | {"ts": "2026-11-22T12:21:17.175841+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 1}
+ems-coordinator  | {"ts": "2026-11-22T12:21:17.175894+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 1}
+ems-coordinator  | {"ts": "2026-11-22T12:21:17.175967+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 2}
+ems-coordinator  | {"ts": "2026-11-22T12:21:17.176023+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 2}
+ems-coordinator  | {"ts": "2026-11-22T12:21:17.512519+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "ee0596bf-1095-48c8-aaca-baff13d99420", "key": "resource:", "shardId": 0, "nodeId": "s0-a", "role": "PRIMARY", "epoch": 1, "op": "SCAN"}
+ems-coordinator  | {"ts": "2026-11-22T12:21:17.512595+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "ee0596bf-1095-48c8-aaca-baff13d99420", "key": "resource:", "shardId": 0, "nodeId": "s0-a", "role": "PRIMARY", "epoch": 1, "op": "SCAN"}
+ems-coordinator  | {"ts": "2026-11-22T12:21:17.516128+00:00", "level": "INFO", "service": "coordinator", "event": "HTTP Request: GET http://s0-a:9000/internal/scan?prefix=resource%3A \"HTTP/1.1 200 OK\"", "correlationId": "ee0596bf-1095-48c8-aaca-baff13d99420"}
+ems-coordinator  | {"ts": "2026-11-22T12:21:17.516519+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "ee0596bf-1095-48c8-aaca-baff13d99420", "key": "resource:", "shardId": 1, "nodeId": "s1-b", "role": "PRIMARY", "epoch": 2, "op": "SCAN"}
+ems-coordinator  | {"ts": "2026-11-22T12:21:17.516573+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "ee0596bf-1095-48c8-aaca-baff13d99420", "key": "resource:", "shardId": 1, "nodeId": "s1-b", "role": "PRIMARY", "epoch": 2, "op": "SCAN"}
+ems-coordinator  | {"ts": "2026-11-22T12:21:17.519635+00:00", "level": "INFO", "service": "coordinator", "event": "HTTP Request: GET http://s1-b:9000/internal/scan?prefix=resource%3A \"HTTP/1.1 200 OK\"", "correlationId": "ee0596bf-1095-48c8-aaca-baff13d99420"}
+ems-coordinator  | {"ts": "2026-11-22T12:21:17.519946+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "ee0596bf-1095-48c8-aaca-baff13d99420", "key": "resource:", "shardId": 2, "nodeId": "s2-a", "role": "PRIMARY", "epoch": 1, "op": "SCAN"}
+ems-coordinator  | {"ts": "2026-11-22T12:21:17.519996+00:00", "level": "INFO", "service": "coordinator", "event": "Routed data operation", "correlationId": "ee0596bf-1095-48c8-aaca-baff13d99420", "key": "resource:", "shardId": 2, "nodeId": "s2-a", "role": "PRIMARY", "epoch": 1, "op": "SCAN"}
+ems-coordinator  | {"ts": "2026-11-22T12:21:17.522834+00:00", "level": "INFO", "service": "coordinator", "event": "HTTP Request: GET http://s2-a:9000/internal/scan?prefix=resource%3A \"HTTP/1.1 200 OK\"", "correlationId": "ee0596bf-1095-48c8-aaca-baff13d99420"}
+ems-coordinator  | INFO:     172.18.0.7:54794 - "GET /internal/scan?prefix=resource%3A&allowPartial=false HTTP/1.1" 200 OK
+ems-coordinator  | INFO:     172.18.0.4:50426 - "POST /internal/nodes/heartbeat HTTP/1.1" 200 OK
+ems-coordinator  | INFO:     172.18.0.1:59134 - "GET /diagnostics/shards HTTP/1.1" 200 OK
+ems-coordinator  | INFO:     172.18.0.1:59134 - "GET /diagnostics/nodes HTTP/1.1" 200 OK
+ems-coordinator  | INFO:     172.18.0.1:59144 - "GET /diagnostics/shards HTTP/1.1" 200 OK
+ems-coordinator  | INFO:     172.18.0.5:40198 - "POST /internal/nodes/heartbeat HTTP/1.1" 200 OK
+ems-coordinator  | INFO:     172.18.0.6:34780 - "POST /internal/nodes/heartbeat HTTP/1.1" 200 OK
+ems-coordinator  | {"ts": "2026-11-22T12:21:18.176431+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 0}
+ems-coordinator  | {"ts": "2026-11-22T12:21:18.176611+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 0}
+ems-coordinator  | {"ts": "2026-11-22T12:21:18.176862+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 1}
+ems-coordinator  | {"ts": "2026-11-22T12:21:18.176945+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 1}
+ems-coordinator  | {"ts": "2026-11-22T12:21:18.177005+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 2}
+ems-coordinator  | {"ts": "2026-11-22T12:21:18.177041+00:00", "level": "INFO", "service": "coordinator", "event": "Evaluating failover for shard", "correlationId": null, "shardId": 2}

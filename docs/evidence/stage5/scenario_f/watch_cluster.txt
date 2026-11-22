@@ -1,14 +1,18 @@
 === EMS CLUSTER STATUS ===
-Timestamp: 2026-11-20 04:29:01
+Timestamp: 2026-11-22 17:33:08
 
 SHARDS:
 Shard    State        Primary      Epoch    Degraded   DegradedSeq 
 -----------------------------------------------------------------
-0        UNAVAILABLE  -            1        False      0           
-1        UNAVAILABLE  -            3        True       0           
-2        UNAVAILABLE  -            1        False      0           
+0        DEGRADED     -            1        False      0           
+1        DEGRADED     -            3        True       0           
+2        HEALTHY      -            1        False      0           
 
 NODES:
 NodeId     Shard    Role       Health   Status       LastSeq    AckSeq   Counts              
 ------------------------------------------------------------------------------------------
-s1-a       1        PRIMARY    UP       STARTING     188        -        {'request': 0, 'resource': 0, 'other': 0}
+s0-a       0        PRIMARY    UP       READY        2          -        {'request': 2, 'resource': 0, 'other': 0}
+s0-b       0        REPLICA    UP       STARTING     2          -        {'request': 0, 'resource': 0, 'other': 0}
+s1-a       1        PRIMARY    UP       READY        13         -        {'request': 13, 'resource': 0, 'other': 0}
+s2-a       2        PRIMARY    UP       READY        0          -        {'request': 0, 'resource': 0, 'other': 0}
+s2-b       2        REPLICA    UP       READY        0          -        {'request': 0, 'resource': 0, 'other': 0}

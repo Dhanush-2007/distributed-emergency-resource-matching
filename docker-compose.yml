@@ -58,6 +58,7 @@ services:
       N_SHARDS: ${N_SHARDS:-3}
       MISSED_HEARTBEATS_LIMIT: ${MISSED_HEARTBEATS_LIMIT:-3}
       HEALTH_CHECK_INTERVAL_SEC: ${HEALTH_CHECK_INTERVAL_SEC:-1.0}
+      HTTP_TIMEOUT_SEC: ${HTTP_TIMEOUT_SEC:-5.0}
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/live')"]
       interval: 5s

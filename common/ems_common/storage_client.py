@@ -24,6 +24,7 @@ class CoordinatorClient:
         http_client: httpx.Client | None = None,
         retries: int = 3,
         timeout: float | None = None,
+        deadline: float | None = None,
     ) -> None:
         self.base_url = (
             base_url or os.getenv("COORDINATOR_URL", "http://localhost:8000")
@@ -34,10 +35,16 @@ class CoordinatorClient:
             if timeout is not None
             else float(os.getenv("HTTP_TIMEOUT_SEC", "3"))
         )
+        self.deadline_sec = (
+            deadline
+            if deadline is not None
+            else float(os.getenv("COORD_RETRY_DEADLINE_SEC", "6.0"))
+        )
+        self.timeout_config = httpx.Timeout(self.timeout, connect=1.0)
 
         self._owns_http = False
         if http_client is None:
-            http_client = httpx.Client(timeout=self.timeout)
+            http_client = httpx.Client(timeout=self.timeout_config)
             self._owns_http = True
         self._http = http_client
 
@@ -63,10 +70,15 @@ class CoordinatorClient:
         """Fetch record value and version, retrying on 503 or connection errors."""
         url = f"{self.base_url}/internal/data/{key}"
         last_exc: Exception | None = None
+        start_time = time.monotonic()
 
         for attempt in range(self.retries + 1):
+            if time.monotonic() - start_time >= self.deadline_sec:
+                break
             try:
-                resp = self._http.get(url, headers=self._headers(), timeout=self.timeout)
+                resp = self._http.get(
+                    url, headers=self._headers(), timeout=self.timeout_config
+                )
                 if resp.status_code == 200:
                     data = resp.json()
                     return data["value"], data["version"]
@@ -77,8 +89,10 @@ class CoordinatorClient:
                         details=err_json.get("details", []),
                     )
                 if resp.status_code == 503:
-                    if attempt < self.retries:
-                        time.sleep(self._calc_backoff(attempt, resp))
+                    rem = self.deadline_sec - (time.monotonic() - start_time)
+                    if attempt < self.retries and rem > 0:
+                        backoff = self._calc_backoff(attempt, resp)
+                        time.sleep(min(backoff, rem))
                         continue
                     err_json = resp.json().get("error", {})
                     raise StorageUnavailable(
@@ -89,15 +103,25 @@ class CoordinatorClient:
                 resp.raise_for_status()
             except (httpx.ConnectError, httpx.TimeoutException, httpx.NetworkError) as exc:
                 last_exc = exc
-                if attempt < self.retries:
-                    time.sleep(self._calc_backoff(attempt))
+                rem = self.deadline_sec - (time.monotonic() - start_time)
+                if attempt < self.retries and rem > 0:
+                    backoff = self._calc_backoff(attempt)
+                    time.sleep(min(backoff, rem))
                     continue
                 raise StorageUnavailable(
                     f"Coordinator connection failed: {exc}",
                     headers={"Retry-After": "3"},
                 ) from exc
 
-        raise StorageUnavailable(f"Get failed after retries: {last_exc}")
+        if last_exc is not None:
+            raise StorageUnavailable(
+                f"Coordinator connection failed: {last_exc}",
+                headers={"Retry-After": "3"},
+            ) from last_exc
+        raise StorageUnavailable(
+            f"Coordinator unavailable after retries (deadline {self.deadline_sec}s exceeded)",
+            headers={"Retry-After": "3"},
+        )
 
     def put(
         self,
@@ -113,7 +137,7 @@ class CoordinatorClient:
 
         try:
             resp = self._http.put(
-                url, json=body, headers=self._headers(), timeout=self.timeout
+                url, json=body, headers=self._headers(), timeout=self.timeout_config
             )
             if resp.status_code in (200, 201):
                 return resp.status_code, resp.json()
@@ -143,7 +167,7 @@ class CoordinatorClient:
         url = f"{self.base_url}/internal/data/{key}"
         try:
             resp = self._http.delete(
-                url, headers=self._headers(), timeout=self.timeout
+                url, headers=self._headers(), timeout=self.timeout_config
             )
             if resp.status_code == 200:
                 return resp.status_code, resp.json()
@@ -175,19 +199,24 @@ class CoordinatorClient:
         url = f"{self.base_url}/internal/scan"
         params = {"prefix": prefix, "allowPartial": str(allow_partial).lower()}
         last_exc: Exception | None = None
+        start_time = time.monotonic()
 
         for attempt in range(self.retries + 1):
+            if time.monotonic() - start_time >= self.deadline_sec:
+                break
             try:
                 resp = self._http.get(
-                    url, params=params, headers=self._headers(), timeout=self.timeout
+                    url, params=params, headers=self._headers(), timeout=self.timeout_config
                 )
                 if resp.status_code == 200:
                     data = resp.json()
                     is_partial = bool(data.get("unavailableShards"))
                     return data.get("items", []), is_partial
                 if resp.status_code == 503:
-                    if attempt < self.retries:
-                        time.sleep(self._calc_backoff(attempt, resp))
+                    rem = self.deadline_sec - (time.monotonic() - start_time)
+                    if attempt < self.retries and rem > 0:
+                        backoff = self._calc_backoff(attempt, resp)
+                        time.sleep(min(backoff, rem))
                         continue
                     err_json = resp.json().get("error", {})
                     raise StorageUnavailable(
@@ -198,29 +227,44 @@ class CoordinatorClient:
                 resp.raise_for_status()
             except (httpx.ConnectError, httpx.TimeoutException, httpx.NetworkError) as exc:
                 last_exc = exc
-                if attempt < self.retries:
-                    time.sleep(self._calc_backoff(attempt))
+                rem = self.deadline_sec - (time.monotonic() - start_time)
+                if attempt < self.retries and rem > 0:
+                    backoff = self._calc_backoff(attempt)
+                    time.sleep(min(backoff, rem))
                     continue
                 raise StorageUnavailable(
                     f"Coordinator scan failed: {exc}",
                     headers={"Retry-After": "3"},
                 ) from exc
 
-        raise StorageUnavailable(f"Scan failed after retries: {last_exc}")
+        if last_exc is not None:
+            raise StorageUnavailable(
+                f"Coordinator scan failed: {last_exc}",
+                headers={"Retry-After": "3"},
+            ) from last_exc
+        raise StorageUnavailable(
+            f"Coordinator scan failed after retries (deadline {self.deadline_sec}s exceeded)",
+            headers={"Retry-After": "3"},
+        )
 
     def create_if_absent(
         self, key: str, value: dict[str, Any]
     ) -> tuple[dict[str, Any], int]:
         """Create a new record (ifVersion=0); handle 409 idempotently if retrying."""
         retried = False
+        start_time = time.monotonic()
         for attempt in range(self.retries + 1):
+            if time.monotonic() - start_time >= self.deadline_sec:
+                break
             try:
                 _, res = self.put(key, value, if_version=0)
                 return value, res.get("version", 1)
             except StorageUnavailable:
                 retried = True
-                if attempt < self.retries:
-                    time.sleep(self._calc_backoff(attempt))
+                rem = self.deadline_sec - (time.monotonic() - start_time)
+                if attempt < self.retries and rem > 0:
+                    backoff = self._calc_backoff(attempt)
+                    time.sleep(min(backoff, rem))
                     continue
                 raise
             except VersionConflict:
@@ -233,7 +277,10 @@ class CoordinatorClient:
                         pass
                 raise
 
-        raise StorageUnavailable(f"Create failed after retries for key '{key}'")
+        raise StorageUnavailable(
+            f"Create failed after retries for key '{key}'",
+            headers={"Retry-After": "3"},
+        )
 
     def update(
         self,

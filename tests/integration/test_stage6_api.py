@@ -211,22 +211,39 @@ def test_coordinator_fault_propagation(wait_for_services):
         assert r_req.status_code == 503
         assert r_req.headers.get("Retry-After") == "3"
         assert r_req.json()["error"]["code"] == "STORAGE_UNAVAILABLE"
+        assert "message" in r_req.json()["error"]
+        assert "details" in r_req.json()["error"]
 
         r_res = client.get(f"{RES_BASE}/resources")
         assert r_res.status_code == 503
         assert r_res.headers.get("Retry-After") == "3"
         assert r_res.json()["error"]["code"] == "STORAGE_UNAVAILABLE"
+        assert "message" in r_res.json()["error"]
+        assert "details" in r_res.json()["error"]
+
+        # /health/live 200 with /health/ready 503 on both services
+        assert client.get(f"{REQ_BASE}/health/live").status_code == 200
+        assert client.get(f"{REQ_BASE}/health/ready").status_code == 503
+        assert client.get(f"{RES_BASE}/health/live").status_code == 200
+        assert client.get(f"{RES_BASE}/health/ready").status_code == 503
     finally:
-        # Restart coordinator and wait for recovery
+        # Restart coordinator and wait for recovery until shards are HEALTHY
         subprocess.run(["docker", "start", "ems-coordinator"], check=True)
         recovered = False
-        for _ in range(30):
+        for _ in range(60):
             time.sleep(0.5)
             try:
                 r1 = client.get(f"{COORD_BASE}/health/live", timeout=2.0)
                 r2 = client.get(f"{REQ_BASE}/health/ready", timeout=2.0)
                 r3 = client.get(f"{RES_BASE}/health/ready", timeout=2.0)
-                if r1.status_code == 200 and r2.status_code == 200 and r3.status_code == 200:
+                r_shards = client.get(f"{COORD_BASE}/diagnostics/shards", timeout=2.0)
+                if (
+                    r1.status_code == 200
+                    and r2.status_code == 200
+                    and r3.status_code == 200
+                    and r_shards.status_code == 200
+                    and all(s.get("state") == "HEALTHY" for s in r_shards.json())
+                ):
                     recovered = True
                     break
             except Exception:  # noqa: BLE001, S110

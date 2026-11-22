@@ -1,19 +1,19 @@
 === EMS CLUSTER STATUS ===
-Timestamp: 2026-11-20 03:54:59
+Timestamp: 2026-11-22 17:50:52
 
 SHARDS:
 Shard    State        Primary      Epoch    Degraded   DegradedSeq 
 -----------------------------------------------------------------
 0        HEALTHY      -            1        False      0           
 1        HEALTHY      -            1        False      0           
-2        DEGRADED     -            1        False      0           
+2        HEALTHY      -            1        False      0           
 
 NODES:
 NodeId     Shard    Role       Health   Status       LastSeq    AckSeq   Counts              
 ------------------------------------------------------------------------------------------
-s0-a       0        PRIMARY    UP       READY        87         -        {'request': 22, 'resource': 11, 'other': 0}
-s0-b       0        REPLICA    UP       READY        87         -        {'request': 22, 'resource': 11, 'other': 0}
-s1-a       1        PRIMARY    UP       READY        72         -        {'request': 18, 'resource': 9, 'other': 0}
-s1-b       1        REPLICA    UP       READY        72         -        {'request': 18, 'resource': 9, 'other': 0}
-s2-a       2        PRIMARY    UP       READY        84         -        {'request': 16, 'resource': 18, 'other': 0}
-s2-b       2        REPLICA    UP       READY        90         -        {'request': 18, 'resource': 18, 'other': 0}
+s0-a       0        PRIMARY    UP       READY        104        -        {'request': 24, 'resource': 16, 'other': 0}
+s0-b       0        REPLICA    UP       READY        104        -        {'request': 24, 'resource': 16, 'other': 0}
+s1-a       1        PRIMARY    UP       READY        73         -        {'request': 16, 'resource': 13, 'other': 0}
+s1-b       1        REPLICA    UP       READY        73         -        {'request': 16, 'resource': 13, 'other': 0}
+s2-a       2        PRIMARY    UP       READY        81         -        {'request': 21, 'resource': 9, 'other': 0}
+s2-b       2        REPLICA    UP       READY        81         -        {'request': 21, 'resource': 9, 'other': 0}
