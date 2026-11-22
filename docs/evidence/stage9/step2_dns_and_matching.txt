@@ -2,63 +2,63 @@ DNS check output:
 DNS_OK
 
 Matching logs:
-INFO:     10.244.0.1:33696 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     10.244.0.1:33704 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     10.244.0.1:50218 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     10.244.0.1:50222 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     10.244.0.1:45304 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     10.244.0.1:45320 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     10.244.0.1:53264 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     10.244.0.1:53270 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     10.244.0.1:38040 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     10.244.0.1:38050 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     10.244.0.1:50066 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     10.244.0.1:50074 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     10.244.0.1:54192 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     10.244.0.1:54206 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     10.244.0.1:49376 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     10.244.0.1:49388 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     10.244.0.1:46722 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     10.244.0.1:46728 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     10.244.0.1:45006 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     10.244.0.1:45022 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     10.244.0.1:53194 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     10.244.0.1:53196 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     10.244.0.1:40296 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     10.244.0.1:40304 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     10.244.0.1:43496 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     10.244.0.1:43502 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     10.244.0.1:57930 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     10.244.0.1:57944 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     10.244.0.1:52198 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     10.244.0.1:52212 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     10.244.0.1:59740 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     10.244.0.1:59748 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     10.244.0.1:58354 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     10.244.0.1:58366 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     10.244.0.1:33044 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     10.244.0.1:33058 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     10.244.0.1:59242 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     10.244.0.1:59248 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     10.244.0.1:36538 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     10.244.0.1:36546 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     10.244.0.1:39054 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     10.244.0.1:39058 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     10.244.0.1:52488 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     10.244.0.1:52496 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     10.244.0.1:43372 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     10.244.0.1:43386 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     10.244.0.1:58602 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     10.244.0.1:58616 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     10.244.0.1:59974 - "GET /health/ready HTTP/1.1" 200 OK
-{"ts": "2026-11-19T23:03:13.205684+00:00", "level": "INFO", "service": "matching-service", "event": "HTTP Request: GET http://request-service:8001/internal/requests/42e7b813-22bf-4f35-80d2-213652367d9c \"HTTP/1.1 200 OK\"", "correlationId": "0022848c-e54c-402c-8b89-4ad95aca30d7"}
-{"ts": "2026-11-19T23:03:13.281376+00:00", "level": "INFO", "service": "matching-service", "event": "HTTP Request: GET http://resource-service:8002/internal/resources/by-request/42e7b813-22bf-4f35-80d2-213652367d9c \"HTTP/1.1 404 Not Found\"", "correlationId": "0022848c-e54c-402c-8b89-4ad95aca30d7"}
-{"ts": "2026-11-19T23:03:13.360706+00:00", "level": "INFO", "service": "matching-service", "event": "HTTP Request: GET http://resource-service:8002/internal/resources/candidates?type=water \"HTTP/1.1 200 OK\"", "correlationId": "0022848c-e54c-402c-8b89-4ad95aca30d7"}
-{"ts": "2026-11-19T23:03:13.380710+00:00", "level": "INFO", "service": "matching-service", "event": "HTTP Request: POST http://resource-service:8002/internal/resources/b1f5a2d6-769b-48f4-a420-f5f8e5be78cd/reserve \"HTTP/1.1 200 OK\"", "correlationId": "0022848c-e54c-402c-8b89-4ad95aca30d7"}
-{"ts": "2026-11-19T23:03:13.381000+00:00", "level": "INFO", "service": "matching-service", "event": "Candidate table for request 42e7b813-22bf-4f35-80d2-213652367d9c: b1f5a2d6 (0.378km -> RESERVED) | Selected: b1f5a2d6-769b-48f4-a420-f5f8e5be78cd", "correlationId": "0022848c-e54c-402c-8b89-4ad95aca30d7"}
-{"ts": "2026-11-19T23:03:13.381041+00:00", "level": "INFO", "service": "matching-service", "event": "Candidate table for request 42e7b813-22bf-4f35-80d2-213652367d9c: b1f5a2d6 (0.378km -> RESERVED) | Selected: b1f5a2d6-769b-48f4-a420-f5f8e5be78cd", "correlationId": "0022848c-e54c-402c-8b89-4ad95aca30d7"}
-{"ts": "2026-11-19T23:03:13.381095+00:00", "level": "INFO", "service": "matching-service", "event": "Match candidate evaluation", "correlationId": "0022848c-e54c-402c-8b89-4ad95aca30d7", "requestId": "42e7b813-22bf-4f35-80d2-213652367d9c", "chosenId": "b1f5a2d6-769b-48f4-a420-f5f8e5be78cd", "candidates": [{"resourceId": "b1f5a2d6-769b-48f4-a420-f5f8e5be78cd", "distanceKm": 0.378, "decision": "RESERVED"}]}
-{"ts": "2026-11-19T23:03:13.381128+00:00", "level": "INFO", "service": "matching-service", "event": "Match candidate evaluation", "correlationId": "0022848c-e54c-402c-8b89-4ad95aca30d7", "requestId": "42e7b813-22bf-4f35-80d2-213652367d9c", "chosenId": "b1f5a2d6-769b-48f4-a420-f5f8e5be78cd", "candidates": [{"resourceId": "b1f5a2d6-769b-48f4-a420-f5f8e5be78cd", "distanceKm": 0.378, "decision": "RESERVED"}]}
-{"ts": "2026-11-19T23:03:13.397786+00:00", "level": "INFO", "service": "matching-service", "event": "HTTP Request: POST http://request-service:8001/internal/requests/42e7b813-22bf-4f35-80d2-213652367d9c/matchresult \"HTTP/1.1 200 OK\"", "correlationId": "0022848c-e54c-402c-8b89-4ad95aca30d7"}
-{"ts": "2026-11-19T23:03:13.397937+00:00", "level": "INFO", "service": "matching-service", "event": "Match request completed: MATCHED", "correlationId": "0022848c-e54c-402c-8b89-4ad95aca30d7", "requestId": "42e7b813-22bf-4f35-80d2-213652367d9c", "outcome": "MATCHED"}
-{"ts": "2026-11-19T23:03:13.397956+00:00", "level": "INFO", "service": "matching-service", "event": "Match request completed: MATCHED", "correlationId": "0022848c-e54c-402c-8b89-4ad95aca30d7", "requestId": "42e7b813-22bf-4f35-80d2-213652367d9c", "outcome": "MATCHED"}
+INFO:     10.244.0.1:54060 - "GET /health/live HTTP/1.1" 200 OK
+INFO:     10.244.0.1:54070 - "GET /health/ready HTTP/1.1" 503 Service Unavailable
+{"ts": "2026-11-22T21:14:03.496690+00:00", "level": "INFO", "service": "matching-service", "event": "Pika version 1.4.4 connecting to ('10.99.24.136', 5672)", "correlationId": null}
+{"ts": "2026-11-22T21:14:03.497234+00:00", "level": "ERROR", "service": "matching-service", "event": "Socket failed to connect: <socket.socket fd=15, family=2, type=1, proto=6, laddr=('10.244.0.13', 35022)>; error=111 (Connection refused)", "correlationId": null}
+{"ts": "2026-11-22T21:14:03.497469+00:00", "level": "ERROR", "service": "matching-service", "event": "TCP Connection attempt failed: ConnectionRefusedError(111, 'Connection refused'); dest=(<AddressFamily.AF_INET: 2>, <SocketKind.SOCK_STREAM: 1>, 6, '', ('10.99.24.136', 5672))", "correlationId": null}
+{"ts": "2026-11-22T21:14:03.497598+00:00", "level": "ERROR", "service": "matching-service", "event": "AMQPConnector - reporting failure: AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused')", "correlationId": null}
+{"ts": "2026-11-22T21:14:03.497740+00:00", "level": "ERROR", "service": "matching-service", "event": "AMQP connection workflow failed: AMQPConnectionWorkflowFailed: 1 exceptions in all; last exception - AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused'); first exception - None.", "correlationId": null}
+{"ts": "2026-11-22T21:14:03.497848+00:00", "level": "ERROR", "service": "matching-service", "event": "AMQPConnectionWorkflow - reporting failure: AMQPConnectionWorkflowFailed: 1 exceptions in all; last exception - AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused'); first exception - None", "correlationId": null}
+{"ts": "2026-11-22T21:14:03.497982+00:00", "level": "ERROR", "service": "matching-service", "event": "Connection workflow failed: AMQPConnectionWorkflowFailed: 1 exceptions in all; last exception - AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused'); first exception - None", "correlationId": null}
+{"ts": "2026-11-22T21:14:03.498100+00:00", "level": "ERROR", "service": "matching-service", "event": "Error in _create_connection().", "correlationId": null}
+{"ts": "2026-11-22T21:14:03.498308+00:00", "level": "WARNING", "service": "matching-service", "event": "Consumer disconnected (). Retrying in 10.0s...", "correlationId": null}
+{"ts": "2026-11-22T21:14:03.498384+00:00", "level": "WARNING", "service": "matching-service", "event": "Consumer disconnected (). Retrying in 10.0s...", "correlationId": null}
+INFO:     10.244.0.1:59494 - "GET /health/live HTTP/1.1" 200 OK
+INFO:     10.244.0.1:59496 - "GET /health/ready HTTP/1.1" 503 Service Unavailable
+INFO:     10.244.0.1:59498 - "GET /health/ready HTTP/1.1" 503 Service Unavailable
+{"ts": "2026-11-22T21:14:13.503604+00:00", "level": "INFO", "service": "matching-service", "event": "Pika version 1.4.4 connecting to ('10.99.24.136', 5672)", "correlationId": null}
+{"ts": "2026-11-22T21:14:13.504534+00:00", "level": "ERROR", "service": "matching-service", "event": "Socket failed to connect: <socket.socket fd=15, family=2, type=1, proto=6, laddr=('10.244.0.13', 54842)>; error=111 (Connection refused)", "correlationId": null}
+{"ts": "2026-11-22T21:14:13.504785+00:00", "level": "ERROR", "service": "matching-service", "event": "TCP Connection attempt failed: ConnectionRefusedError(111, 'Connection refused'); dest=(<AddressFamily.AF_INET: 2>, <SocketKind.SOCK_STREAM: 1>, 6, '', ('10.99.24.136', 5672))", "correlationId": null}
+{"ts": "2026-11-22T21:14:13.504930+00:00", "level": "ERROR", "service": "matching-service", "event": "AMQPConnector - reporting failure: AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused')", "correlationId": null}
+{"ts": "2026-11-22T21:14:13.505406+00:00", "level": "ERROR", "service": "matching-service", "event": "AMQP connection workflow failed: AMQPConnectionWorkflowFailed: 1 exceptions in all; last exception - AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused'); first exception - None.", "correlationId": null}
+{"ts": "2026-11-22T21:14:13.505542+00:00", "level": "ERROR", "service": "matching-service", "event": "AMQPConnectionWorkflow - reporting failure: AMQPConnectionWorkflowFailed: 1 exceptions in all; last exception - AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused'); first exception - None", "correlationId": null}
+{"ts": "2026-11-22T21:14:13.505874+00:00", "level": "ERROR", "service": "matching-service", "event": "Connection workflow failed: AMQPConnectionWorkflowFailed: 1 exceptions in all; last exception - AMQPConnectorSocketConnectError: ConnectionRefusedError(111, 'Connection refused'); first exception - None", "correlationId": null}
+{"ts": "2026-11-22T21:14:13.506079+00:00", "level": "ERROR", "service": "matching-service", "event": "Error in _create_connection().", "correlationId": null}
+{"ts": "2026-11-22T21:14:13.506305+00:00", "level": "WARNING", "service": "matching-service", "event": "Consumer disconnected (). Retrying in 10.0s...", "correlationId": null}
+{"ts": "2026-11-22T21:14:13.506390+00:00", "level": "WARNING", "service": "matching-service", "event": "Consumer disconnected (). Retrying in 10.0s...", "correlationId": null}
+INFO:     10.244.0.1:56146 - "GET /health/live HTTP/1.1" 200 OK
+INFO:     10.244.0.1:56152 - "GET /health/ready HTTP/1.1" 503 Service Unavailable
+{"ts": "2026-11-22T21:14:23.511430+00:00", "level": "INFO", "service": "matching-service", "event": "Pika version 1.4.4 connecting to ('10.99.24.136', 5672)", "correlationId": null}
+{"ts": "2026-11-22T21:14:23.512633+00:00", "level": "INFO", "service": "matching-service", "event": "Socket connected: <socket.socket fd=15, family=2, type=1, proto=6, laddr=('10.244.0.13', 58480), raddr=('10.99.24.136', 5672)>", "correlationId": null}
+{"ts": "2026-11-22T21:14:23.513906+00:00", "level": "INFO", "service": "matching-service", "event": "Streaming transport linked up: (<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7fe8684ac1d0>, _StreamingProtocolShim: <SelectConnection PROTOCOL transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7fe8684ac1d0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>).", "correlationId": null}
+{"ts": "2026-11-22T21:14:23.519805+00:00", "level": "INFO", "service": "matching-service", "event": "AMQPConnector - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7fe8684ac1d0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>", "correlationId": null}
+{"ts": "2026-11-22T21:14:23.520021+00:00", "level": "INFO", "service": "matching-service", "event": "AMQPConnectionWorkflow - reporting success: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7fe8684ac1d0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>", "correlationId": null}
+{"ts": "2026-11-22T21:14:23.520331+00:00", "level": "INFO", "service": "matching-service", "event": "Connection workflow succeeded: <SelectConnection OPEN transport=<pika.adapters.utils.io_services_utils._AsyncPlaintextTransport object at 0x7fe8684ac1d0> params=<ConnectionParameters host=rabbitmq port=5672 virtual_host=/ ssl=False>>", "correlationId": null}
+{"ts": "2026-11-22T21:14:23.520999+00:00", "level": "INFO", "service": "matching-service", "event": "Created channel=1", "correlationId": null}
+{"ts": "2026-11-22T21:14:23.532911+00:00", "level": "INFO", "service": "matching-service", "event": "Matching consumer connected to RabbitMQ and ready", "correlationId": null}
+{"ts": "2026-11-22T21:14:23.533046+00:00", "level": "INFO", "service": "matching-service", "event": "Matching consumer connected to RabbitMQ and ready", "correlationId": null}
+{"ts": "2026-11-22T21:14:23.534202+00:00", "level": "INFO", "service": "matching-service", "event": "Created new queue consumer generator <_QueueConsumerGeneratorInfo params=('request.match', False, False) consumer_tag='ctag1.5ed3e5a5f90f42d0aff74a278e980435'>", "correlationId": null}
+INFO:     10.244.0.1:45180 - "GET /health/live HTTP/1.1" 200 OK
+INFO:     10.244.0.1:45184 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     10.244.0.1:35610 - "GET /health/live HTTP/1.1" 200 OK
+INFO:     10.244.0.1:35622 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     10.244.0.1:49444 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     10.244.0.1:49438 - "GET /health/live HTTP/1.1" 200 OK
+INFO:     10.244.0.1:45384 - "GET /health/live HTTP/1.1" 200 OK
+INFO:     10.244.0.1:45378 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     10.244.0.1:39904 - "GET /health/live HTTP/1.1" 200 OK
+INFO:     10.244.0.1:39920 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     10.244.0.1:51280 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     10.244.0.1:51290 - "GET /health/live HTTP/1.1" 200 OK
+{"ts": "2026-11-22T21:15:23.816552+00:00", "level": "INFO", "service": "matching-service", "event": "HTTP Request: GET http://request-service:8001/internal/requests/9b13b678-15e5-4500-b619-ee966834ab49 \"HTTP/1.1 200 OK\"", "correlationId": "bfc2812b-5235-4844-b9e5-f508d63acfe4"}
+{"ts": "2026-11-22T21:15:23.864875+00:00", "level": "INFO", "service": "matching-service", "event": "HTTP Request: GET http://resource-service:8002/internal/resources/by-request/9b13b678-15e5-4500-b619-ee966834ab49 \"HTTP/1.1 404 Not Found\"", "correlationId": "bfc2812b-5235-4844-b9e5-f508d63acfe4"}
+{"ts": "2026-11-22T21:15:23.954759+00:00", "level": "INFO", "service": "matching-service", "event": "HTTP Request: GET http://resource-service:8002/internal/resources/candidates?type=water \"HTTP/1.1 200 OK\"", "correlationId": "bfc2812b-5235-4844-b9e5-f508d63acfe4"}
+{"ts": "2026-11-22T21:15:24.058794+00:00", "level": "INFO", "service": "matching-service", "event": "HTTP Request: POST http://resource-service:8002/internal/resources/25b513b3-aa8e-43bb-a85c-fe7efc57da9e/reserve \"HTTP/1.1 200 OK\"", "correlationId": "bfc2812b-5235-4844-b9e5-f508d63acfe4"}
+{"ts": "2026-11-22T21:15:24.059613+00:00", "level": "INFO", "service": "matching-service", "event": "Candidate table for request 9b13b678-15e5-4500-b619-ee966834ab49: 25b513b3 (0.378km -> RESERVED) | Selected: 25b513b3-aa8e-43bb-a85c-fe7efc57da9e", "correlationId": "bfc2812b-5235-4844-b9e5-f508d63acfe4"}
+{"ts": "2026-11-22T21:15:24.059736+00:00", "level": "INFO", "service": "matching-service", "event": "Candidate table for request 9b13b678-15e5-4500-b619-ee966834ab49: 25b513b3 (0.378km -> RESERVED) | Selected: 25b513b3-aa8e-43bb-a85c-fe7efc57da9e", "correlationId": "bfc2812b-5235-4844-b9e5-f508d63acfe4"}
+{"ts": "2026-11-22T21:15:24.059828+00:00", "level": "INFO", "service": "matching-service", "event": "Match candidate evaluation", "correlationId": "bfc2812b-5235-4844-b9e5-f508d63acfe4", "requestId": "9b13b678-15e5-4500-b619-ee966834ab49", "chosenId": "25b513b3-aa8e-43bb-a85c-fe7efc57da9e", "candidates": [{"resourceId": "25b513b3-aa8e-43bb-a85c-fe7efc57da9e", "distanceKm": 0.378, "decision": "RESERVED"}]}
+{"ts": "2026-11-22T21:15:24.059908+00:00", "level": "INFO", "service": "matching-service", "event": "Match candidate evaluation", "correlationId": "bfc2812b-5235-4844-b9e5-f508d63acfe4", "requestId": "9b13b678-15e5-4500-b619-ee966834ab49", "chosenId": "25b513b3-aa8e-43bb-a85c-fe7efc57da9e", "candidates": [{"resourceId": "25b513b3-aa8e-43bb-a85c-fe7efc57da9e", "distanceKm": 0.378, "decision": "RESERVED"}]}
+{"ts": "2026-11-22T21:15:24.146685+00:00", "level": "INFO", "service": "matching-service", "event": "HTTP Request: POST http://request-service:8001/internal/requests/9b13b678-15e5-4500-b619-ee966834ab49/matchresult \"HTTP/1.1 200 OK\"", "correlationId": "bfc2812b-5235-4844-b9e5-f508d63acfe4"}
+{"ts": "2026-11-22T21:15:24.147178+00:00", "level": "INFO", "service": "matching-service", "event": "Match request completed: MATCHED", "correlationId": "bfc2812b-5235-4844-b9e5-f508d63acfe4", "requestId": "9b13b678-15e5-4500-b619-ee966834ab49", "outcome": "MATCHED"}
+{"ts": "2026-11-22T21:15:24.147267+00:00", "level": "INFO", "service": "matching-service", "event": "Match request completed: MATCHED", "correlationId": "bfc2812b-5235-4844-b9e5-f508d63acfe4", "requestId": "9b13b678-15e5-4500-b619-ee966834ab49", "outcome": "MATCHED"}

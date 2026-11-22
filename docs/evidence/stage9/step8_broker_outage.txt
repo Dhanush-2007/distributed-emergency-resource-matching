@@ -1,9 +1,9 @@
 Scaling RabbitMQ statefulset to 0...
 
-Created request 45b50789-6bbf-4383-8ca0-d049085a69f7 during broker outage (matchQueued=False)
+Created request b2e15012-9268-47a7-8772-ad5108a0b44a during broker outage (matchQueued=False)
 
 Scaling RabbitMQ statefulset back to 1...
 
 Waiting for outbox sweeper to pick up pending request...
 
-Request 45b50789-6bbf-4383-8ca0-d049085a69f7 settled to MATCHED with resource e0aadf60-f1a3-4456-925c-77aff1fa73fb
+Request b2e15012-9268-47a7-8772-ad5108a0b44a settled to MATCHED with resource a4ec63f3-e47d-48a1-97de-5b7522d81d60

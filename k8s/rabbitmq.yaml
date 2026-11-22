@@ -95,6 +95,8 @@ spec:
                 secretKeyRef:
                   name: ems-secret
                   key: RABBITMQ_PASS
+            - name: RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS
+              value: "-rabbit vm_memory_high_watermark 0.6"
           ports:
             - name: amqp
               containerPort: 5672
@@ -104,30 +106,30 @@ spec:
             - name: rabbitmq-data
               mountPath: /var/lib/rabbitmq
           livenessProbe:
-            exec:
-              command: ["rabbitmq-diagnostics", "-q", "ping"]
+            tcpSocket:
+              port: 5672
             initialDelaySeconds: 15
             periodSeconds: 10
             timeoutSeconds: 5
           readinessProbe:
-            exec:
-              command: ["rabbitmq-diagnostics", "-q", "ping"]
+            tcpSocket:
+              port: 5672
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 5
           startupProbe:
-            exec:
-              command: ["rabbitmq-diagnostics", "-q", "ping"]
+            tcpSocket:
+              port: 5672
             failureThreshold: 30
             periodSeconds: 5
             timeoutSeconds: 5
           resources:
             requests:
               cpu: "100m"
-              memory: "256Mi"
+              memory: "384Mi"
             limits:
               cpu: "500m"
-              memory: "512Mi"
+              memory: "1Gi"
   volumeClaimTemplates:
     - metadata:
         name: rabbitmq-data

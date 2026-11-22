@@ -1,0 +1,329 @@
+=== 1. Building and loading images ===
+docker build -f services/storage-node/Dockerfile -t ems/storage-node:1.0 .
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.05kB 0.1s done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for docker.io/library/python:3.11-slim
+#2 DONE 0.2s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 159B 0.1s
+#3 transferring context: 161B 0.1s done
+#3 DONE 0.2s
+
+#4 [1/9] FROM docker.io/library/python:3.11-slim@sha256:9534e5a8e315485d4061ed659af0fd78a284c015f9b73661b41d6bab25604534
+#4 resolve docker.io/library/python:3.11-slim@sha256:9534e5a8e315485d4061ed659af0fd78a284c015f9b73661b41d6bab25604534 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 3.32kB 0.7s done
+#5 DONE 0.7s
+
+#6 [4/9] COPY services/storage-node/requirements.txt requirements.txt
+#6 CACHED
+
+#7 [5/9] RUN pip install --no-cache-dir -r requirements.txt
+#7 CACHED
+
+#8 [7/9] RUN pip install --no-cache-dir -e /app/common
+#8 CACHED
+
+#9 [2/9] RUN groupadd -g 10001 appuser &&     useradd -u 10001 -g appuser -s /bin/sh -m appuser &&     mkdir -p /data &&     chown -R appuser:appuser /data
+#9 CACHED
+
+#10 [6/9] COPY common/ /app/common/
+#10 CACHED
+
+#11 [8/9] COPY services/storage-node/storage_node/ /app/storage_node/
+#11 CACHED
+
+#12 [3/9] WORKDIR /app
+#12 CACHED
+
+#13 [9/9] RUN chown -R appuser:appuser /app
+#13 CACHED
+
+#14 exporting to image
+#14 exporting layers 0.0s done
+#14 exporting manifest sha256:78c0cbfd1ba6227925f84238e402f8979ef55afa0a0882d25e3707649eaf9d47 done
+#14 exporting config sha256:7ea55864fa3e373dce77ed3734a513343a13b63d9a5994359045aeefdef0413c done
+#14 exporting attestation manifest sha256:94ea64965fbd47842edffe5b323998127b3cced8d3710d39ff2ceca764e43cf3 0.0s done
+#14 exporting manifest list sha256:961224cfbb55d587ecd855c53ba0a45edee02bff65a2aec07377f1b9ca11cb76
+#14 exporting manifest list sha256:961224cfbb55d587ecd855c53ba0a45edee02bff65a2aec07377f1b9ca11cb76 0.0s done
+#14 naming to docker.io/ems/storage-node:1.0 done
+#14 unpacking to docker.io/ems/storage-node:1.0 0.0s done
+#14 DONE 0.3s
+docker build -f services/coordinator/Dockerfile -t ems/coordinator:1.0 .
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.05kB 0.0s done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for docker.io/library/python:3.11-slim
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 32B 0.0s
+#3 transferring context: 161B 0.1s done
+#3 DONE 0.1s
+
+#4 [internal] load build context
+#4 DONE 0.0s
+
+#5 [1/9] FROM docker.io/library/python:3.11-slim@sha256:9534e5a8e315485d4061ed659af0fd78a284c015f9b73661b41d6bab25604534
+#5 resolve docker.io/library/python:3.11-slim@sha256:9534e5a8e315485d4061ed659af0fd78a284c015f9b73661b41d6bab25604534 0.0s done
+#5 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 167.22kB 0.6s done
+#4 DONE 0.6s
+
+#6 [2/9] RUN groupadd -g 10001 appuser &&     useradd -u 10001 -g appuser -s /bin/sh -m appuser &&     mkdir -p /state &&     chown -R appuser:appuser /state
+#6 CACHED
+
+#7 [3/9] WORKDIR /app
+#7 CACHED
+
+#8 [4/9] COPY services/coordinator/requirements.txt requirements.txt
+#8 CACHED
+
+#9 [5/9] RUN pip install --no-cache-dir -r requirements.txt
+#9 CACHED
+
+#10 [6/9] COPY common/ /app/common/
+#10 CACHED
+
+#11 [7/9] RUN pip install --no-cache-dir -e /app/common
+#11 CACHED
+
+#12 [8/9] COPY services/coordinator/coordinator/ /app/coordinator/
+#12 DONE 0.1s
+
+#13 [9/9] RUN chown -R appuser:appuser /app
+#13 DONE 1.0s
+
+#14 exporting to image
+#14 exporting layers
+#14 exporting layers 0.2s done
+#14 exporting manifest sha256:a3a0a56b8ef5544c959ab44c1a1f35f20138e80fc462b8c63d8c18182315e581 0.0s done
+#14 exporting config sha256:98db723fbe1699b42227ccdb80ae2a10779c57e28ba526dd4de2327f51e8f87c 0.0s done
+#14 exporting attestation manifest sha256:46e7026671e8705e5d228a28478d8ba6985dca0f3cef4e2db2ee8b80917f7948 0.0s done
+#14 exporting manifest list sha256:aa2e9d5fb5f5bb44fdc08be05037d2fbbc9be03827b014865a52cbb501bbfc14
+#14 exporting manifest list sha256:aa2e9d5fb5f5bb44fdc08be05037d2fbbc9be03827b014865a52cbb501bbfc14 0.0s done
+#14 naming to docker.io/ems/coordinator:1.0 done
+#14 unpacking to docker.io/ems/coordinator:1.0 0.1s done
+#14 DONE 0.6s
+docker build -f services/request-service/Dockerfile -t ems/request-service:1.0 .
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 951B 0.1s done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for docker.io/library/python:3.11-slim
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 161B 0.1s done
+#3 DONE 0.1s
+
+#4 [1/9] FROM docker.io/library/python:3.11-slim@sha256:9534e5a8e315485d4061ed659af0fd78a284c015f9b73661b41d6bab25604534
+#4 resolve docker.io/library/python:3.11-slim@sha256:9534e5a8e315485d4061ed659af0fd78a284c015f9b73661b41d6bab25604534 0.0s done
+#4 DONE 0.1s
+
+#5 [internal] load build context
+#5 transferring context: 61.52kB 0.6s done
+#5 DONE 0.6s
+
+#6 [5/9] RUN pip install --no-cache-dir -r requirements.txt
+#6 CACHED
+
+#7 [6/9] COPY common/ /app/common/
+#7 CACHED
+
+#8 [8/9] COPY services/request-service/request_service/ /app/request_service/
+#8 CACHED
+
+#9 [3/9] WORKDIR /app
+#9 CACHED
+
+#10 [7/9] RUN pip install --no-cache-dir -e /app/common
+#10 CACHED
+
+#11 [2/9] RUN groupadd -g 10001 appuser &&     useradd -u 10001 -g appuser -s /bin/sh -m appuser
+#11 CACHED
+
+#12 [4/9] COPY services/request-service/requirements.txt requirements.txt
+#12 CACHED
+
+#13 [9/9] RUN chown -R appuser:appuser /app
+#13 CACHED
+
+#14 exporting to image
+#14 exporting layers 0.0s done
+#14 exporting manifest sha256:824cdedd4be9c8640437db4a9e976094edbf5026575de4e2f88c915f098a62d6 0.0s done
+#14 exporting config sha256:a22127a0c7eaf732c133eaa699b8e41440586c051ad69e7e82ead7355deb4ef4
+#14 exporting config sha256:a22127a0c7eaf732c133eaa699b8e41440586c051ad69e7e82ead7355deb4ef4 0.0s done
+#14 exporting attestation manifest sha256:d58eb6d565678fdb9fb6a822f5d5c9b0afd6c1374dbb25f1bc3daae730b983a6 0.0s done
+#14 exporting manifest list sha256:bf010532f2cf57ced0b216954cf0e7edb9f559b9dc02c7fddfd12eb61ea62ddd 0.0s done
+#14 naming to docker.io/ems/request-service:1.0
+#14 naming to docker.io/ems/request-service:1.0 done
+#14 unpacking to docker.io/ems/request-service:1.0 0.0s done
+#14 DONE 0.2s
+docker build -f services/resource-service/Dockerfile -t ems/resource-service:1.0 .
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 956B 0.1s done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for docker.io/library/python:3.11-slim
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 161B 0.1s done
+#3 DONE 0.1s
+
+#4 [1/9] FROM docker.io/library/python:3.11-slim@sha256:9534e5a8e315485d4061ed659af0fd78a284c015f9b73661b41d6bab25604534
+#4 resolve docker.io/library/python:3.11-slim@sha256:9534e5a8e315485d4061ed659af0fd78a284c015f9b73661b41d6bab25604534 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 48.97kB 0.6s done
+#5 DONE 0.6s
+
+#6 [4/9] COPY services/resource-service/requirements.txt requirements.txt
+#6 CACHED
+
+#7 [5/9] RUN pip install --no-cache-dir -r requirements.txt
+#7 CACHED
+
+#8 [8/9] COPY services/resource-service/resource_service/ /app/resource_service/
+#8 CACHED
+
+#9 [2/9] RUN groupadd -g 10001 appuser &&     useradd -u 10001 -g appuser -s /bin/sh -m appuser
+#9 CACHED
+
+#10 [3/9] WORKDIR /app
+#10 CACHED
+
+#11 [6/9] COPY common/ /app/common/
+#11 CACHED
+
+#12 [7/9] RUN pip install --no-cache-dir -e /app/common
+#12 CACHED
+
+#13 [9/9] RUN chown -R appuser:appuser /app
+#13 CACHED
+
+#14 exporting to image
+#14 exporting layers 0.0s done
+#14 exporting manifest sha256:52bd6f39147688ba7763053e4f7170bb582c11fa6074ccff9023bc8c9f17e7b7 0.0s done
+#14 exporting config sha256:6a0b7fc1a8939cd4f4c0c2193b79ef2ccf62f38d6148f03ffd22f5f365251e58 0.0s done
+#14 exporting attestation manifest sha256:be1208c67a79781c4079e16f4cce242be73ca924093d6571cfaf80238bfaa0df 0.0s done
+#14 exporting manifest list sha256:a56c361c2a89e2595250d455477f5fdadb2f5985d61f2c2009b3f9b4b09708fc 0.0s done
+#14 naming to docker.io/ems/resource-service:1.0 done
+#14 unpacking to docker.io/ems/resource-service:1.0 0.0s done
+#14 DONE 0.2s
+docker build -f services/matching-service/Dockerfile -t ems/matching-service:1.0 .
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 956B 0.1s done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for docker.io/library/python:3.11-slim
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 161B 0.1s done
+#3 DONE 0.1s
+
+#4 [1/9] FROM docker.io/library/python:3.11-slim@sha256:9534e5a8e315485d4061ed659af0fd78a284c015f9b73661b41d6bab25604534
+#4 resolve docker.io/library/python:3.11-slim@sha256:9534e5a8e315485d4061ed659af0fd78a284c015f9b73661b41d6bab25604534 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 59.85kB 0.7s done
+#5 DONE 0.7s
+
+#6 [3/9] WORKDIR /app
+#6 CACHED
+
+#7 [4/9] COPY services/matching-service/requirements.txt requirements.txt
+#7 CACHED
+
+#8 [6/9] COPY common/ /app/common/
+#8 CACHED
+
+#9 [2/9] RUN groupadd -g 10001 appuser &&     useradd -u 10001 -g appuser -s /bin/sh -m appuser
+#9 CACHED
+
+#10 [5/9] RUN pip install --no-cache-dir -r requirements.txt
+#10 CACHED
+
+#11 [7/9] RUN pip install --no-cache-dir -e /app/common
+#11 CACHED
+
+#12 [8/9] COPY services/matching-service/matching_service/ /app/matching_service/
+#12 DONE 0.1s
+
+#13 [9/9] RUN chown -R appuser:appuser /app
+#13 DONE 0.5s
+
+#14 exporting to image
+#14 exporting layers
+#14 exporting layers 0.2s done
+#14 exporting manifest sha256:9000d1248b64fc3540ba82f91aa037b10b9f7bf94b199b039c0874c44cfba7f6 0.0s done
+#14 exporting config sha256:f9d8dd79aa6e3b93ab78b40f82dda6dffbc9cda4b6ed26d11c681c33797025d4 0.0s done
+#14 exporting attestation manifest sha256:1f257c151e7b8df405d62cc5abefdd4bc001ad1f396e4356026026fd2fd4d110 0.0s done
+#14 exporting manifest list sha256:6cac968a6174aead82fe3f181d4b5d2e9fd398134a2b1213ad0abcd34f67c1f8
+#14 exporting manifest list sha256:6cac968a6174aead82fe3f181d4b5d2e9fd398134a2b1213ad0abcd34f67c1f8 0.0s done
+#14 naming to docker.io/ems/matching-service:1.0 done
+#14 unpacking to docker.io/ems/matching-service:1.0 0.1s done
+#14 DONE 0.5s
+Loading ems/storage-node:1.0 into Minikube...
+Loading ems/coordinator:1.0 into Minikube...
+Loading ems/request-service:1.0 into Minikube...
+Loading ems/resource-service:1.0 into Minikube...
+Loading ems/matching-service:1.0 into Minikube...
+=== 2. Generating storage manifests ===
+=== 3. Applying manifests in order ===
+namespace/ems created
+configmap/ems-config created
+secret/ems-secret created
+service/rabbitmq-headless created
+service/rabbitmq created
+service/rabbitmq-ui created
+statefulset.apps/rabbitmq created
+service/ems-s0-a created
+statefulset.apps/ems-s0-a created
+service/ems-s0-b created
+statefulset.apps/ems-s0-b created
+service/ems-s1-a created
+statefulset.apps/ems-s1-a created
+service/ems-s1-b created
+statefulset.apps/ems-s1-b created
+service/ems-s2-a created
+statefulset.apps/ems-s2-a created
+service/ems-s2-b created
+statefulset.apps/ems-s2-b created
+persistentvolumeclaim/coordinator-state created
+deployment.apps/coordinator created
+service/coordinator created
+service/coordinator-nodeport created
+deployment.apps/request-service created
+service/request-service created
+service/request-service-nodeport created
+deployment.apps/resource-service created
+service/resource-service created
+service/resource-service-nodeport created
+deployment.apps/matching-service created
+service/matching-service created
+=== 4. Waiting for rollouts (timeout 180s) ===
+Waiting for 1 pods to be ready...
+error: timed out waiting for the condition

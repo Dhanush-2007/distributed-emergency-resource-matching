@@ -21,11 +21,11 @@ Shards distribution post-seed:
     "epoch": 1,
     "primary": "s0-a",
     "degraded": false,
-    "records": 291,
+    "records": 96,
     "recordCount": {
-      "request": 205,
-      "resource": 79,
-      "other": 7
+      "request": 58,
+      "resource": 38,
+      "other": 0
     },
     "nodes": [
       {
@@ -34,7 +34,7 @@ Shards distribution post-seed:
         "role": "REPLICA",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 746
+        "lastSeq": 237
       },
       {
         "id": "s0-a",
@@ -42,69 +42,69 @@ Shards distribution post-seed:
         "role": "PRIMARY",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 750
+        "lastSeq": 238
       }
     ]
   },
   "1": {
     "shardId": 1,
     "state": "HEALTHY",
-    "epoch": 4,
-    "primary": "s1-b",
+    "epoch": 3,
+    "primary": "s1-a",
     "degraded": false,
-    "records": 292,
+    "records": 79,
     "recordCount": {
-      "request": 217,
-      "resource": 73,
-      "other": 2
+      "request": 43,
+      "resource": 36,
+      "other": 0
     },
     "nodes": [
       {
         "id": "s1-b",
         "nodeId": "s1-b",
-        "role": "PRIMARY",
+        "role": "REPLICA",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 764
+        "lastSeq": 187
       },
       {
         "id": "s1-a",
         "nodeId": "s1-a",
-        "role": "REPLICA",
+        "role": "PRIMARY",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 764
+        "lastSeq": 187
       }
     ]
   },
   "2": {
     "shardId": 2,
-    "state": "HEALTHY",
+    "state": "DEGRADED",
     "epoch": 1,
     "primary": "s2-a",
     "degraded": false,
-    "records": 282,
+    "records": 98,
     "recordCount": {
-      "request": 194,
-      "resource": 82,
-      "other": 6
+      "request": 69,
+      "resource": 29,
+      "other": 0
     },
     "nodes": [
-      {
-        "id": "s2-a",
-        "nodeId": "s2-a",
-        "role": "PRIMARY",
-        "health": "UP",
-        "status": "READY",
-        "lastSeq": 739
-      },
       {
         "id": "s2-b",
         "nodeId": "s2-b",
         "role": "REPLICA",
         "health": "UP",
         "status": "READY",
-        "lastSeq": 739
+        "lastSeq": 242
+      },
+      {
+        "id": "s2-a",
+        "nodeId": "s2-a",
+        "role": "PRIMARY",
+        "health": "UP",
+        "status": "READY",
+        "lastSeq": 241
       }
     ]
   }
