@@ -1,0 +1,587 @@
+{
+	"id": "cb44f9d3-8615-46bb-8f3c-b38a9c6fb0db",
+	"name": "EMS Distributed Resource Matching API",
+	"timestamp": "2026-11-22T19:22:03.468Z",
+	"collection_id": "50064966-ab9387f2-2ffc-4571-a669-16fc680d44be",
+	"folder_id": 0,
+	"environment_id": "50064966-246e1e1b-1be1-4cd4-ae18-0ad403290f74",
+	"totalPass": 40,
+	"delay": "1500",
+	"persist": true,
+	"status": "finished",
+	"startedAt": "2026-11-22T19:21:41.645Z",
+	"totalFail": 0,
+	"results": [
+		{
+			"id": "29ee9d2d-439c-42a1-be97-20645fd53543",
+			"name": "6. Register Resource (POST /resources)",
+			"url": "http://localhost:8002/resources",
+			"time": 98,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"Status code is 201": true,
+				"Content-Type is application/json": true,
+				"Status is AVAILABLE and availability is true": true
+			},
+			"testPassFailCounts": {
+				"Status code is 201": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Content-Type is application/json": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Status is AVAILABLE and availability is true": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				98
+			],
+			"allTests": [
+				{
+					"Status code is 201": true,
+					"Content-Type is application/json": true,
+					"Status is AVAILABLE and availability is true": true
+				}
+			]
+		},
+		{
+			"id": "fd5cb1c1-026a-4c26-aeb4-31ab9c9adf46",
+			"name": "7. List Resources (GET /resources)",
+			"url": "http://localhost:8002/resources?type=water&status=AVAILABLE",
+			"time": 46,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200": true,
+				"Content-Type is application/json": true,
+				"Body has items array and count": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Content-Type is application/json": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Body has items array and count": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				46
+			],
+			"allTests": [
+				{
+					"Status code is 200": true,
+					"Content-Type is application/json": true,
+					"Body has items array and count": true
+				}
+			]
+		},
+		{
+			"id": "5f6978db-2cd0-4442-b15a-42c9a7ab19fb",
+			"name": "1. Create Request (POST /requests)",
+			"url": "http://localhost:8001/requests",
+			"time": 154,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"Status code is 201": true,
+				"Content-Type is application/json": true,
+				"Has Location header": true,
+				"Status is PENDING": true
+			},
+			"testPassFailCounts": {
+				"Status code is 201": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Content-Type is application/json": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Has Location header": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Status is PENDING": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				154
+			],
+			"allTests": [
+				{
+					"Status code is 201": true,
+					"Content-Type is application/json": true,
+					"Has Location header": true,
+					"Status is PENDING": true
+				}
+			]
+		},
+		{
+			"id": "53ed8589-b8e7-43b2-8d70-4838c67b47d0",
+			"name": "2. Get Request (GET /requests/{{requestId}})",
+			"url": "http://localhost:8001/requests/2e6d41f0-c4da-48c0-b716-abff2810f4cb",
+			"time": 13,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200": true,
+				"Content-Type is application/json": true,
+				"Status is PENDING or MATCHED": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Content-Type is application/json": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Status is PENDING or MATCHED": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				13
+			],
+			"allTests": [
+				{
+					"Status code is 200": true,
+					"Content-Type is application/json": true,
+					"Status is PENDING or MATCHED": true
+				}
+			]
+		},
+		{
+			"id": "8d9d541b-2d0d-42d4-9175-f28bc5dc3564",
+			"name": "3. List Requests (GET /requests)",
+			"url": "http://localhost:8001/requests?type=water",
+			"time": 39,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200": true,
+				"Content-Type is application/json": true,
+				"Body has items": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Content-Type is application/json": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Body has items": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				39
+			],
+			"allTests": [
+				{
+					"Status code is 200": true,
+					"Content-Type is application/json": true,
+					"Body has items": true
+				}
+			]
+		},
+		{
+			"id": "e4c6fd9f-83d6-46d9-90c0-ec107a56de2c",
+			"name": "4. Update Request Status (PUT /requests/{{requestId}}/status)",
+			"url": "http://localhost:8001/requests/2e6d41f0-c4da-48c0-b716-abff2810f4cb/status",
+			"time": 106,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200 or 409": true,
+				"Content-Type is application/json": true,
+				"Response status matches sent status": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200 or 409": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Content-Type is application/json": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response status matches sent status": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				106
+			],
+			"allTests": [
+				{
+					"Status code is 200 or 409": true,
+					"Content-Type is application/json": true,
+					"Response status matches sent status": true
+				}
+			]
+		},
+		{
+			"id": "382cce7b-e083-4c7d-af0c-61841649c003",
+			"name": "8. Update Resource Status (PUT /resources/{{resourceId}}/status)",
+			"url": "http://localhost:8002/resources/157dd3a0-7008-40b7-93cc-83e72b0e0ab6/status",
+			"time": 62,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status code is 200 or 409": true,
+				"Content-Type is application/json": true,
+				"Response status matches sent status": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200 or 409": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Content-Type is application/json": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response status matches sent status": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				62
+			],
+			"allTests": [
+				{
+					"Status code is 200 or 409": true,
+					"Content-Type is application/json": true,
+					"Response status matches sent status": true
+				}
+			]
+		},
+		{
+			"id": "501bd4f2-cec2-437c-ae43-bb4f1f9c00b2",
+			"name": "5. Manual Match Trigger (POST /match/{{requestId}})",
+			"url": "http://localhost:8001/match/2e6d41f0-c4da-48c0-b716-abff2810f4cb",
+			"time": 9,
+			"responseCode": {
+				"code": 409,
+				"name": "Conflict"
+			},
+			"tests": {
+				"Status code is 200 or 409": true,
+				"Content-Type is application/json": true,
+				"Error code is INVALID_TRANSITION": true
+			},
+			"testPassFailCounts": {
+				"Status code is 200 or 409": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Content-Type is application/json": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Error code is INVALID_TRANSITION": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				9
+			],
+			"allTests": [
+				{
+					"Status code is 200 or 409": true,
+					"Content-Type is application/json": true,
+					"Error code is INVALID_TRANSITION": true
+				}
+			]
+		},
+		{
+			"id": "093bb235-f5ae-4178-9ea9-a694679dc0b9",
+			"name": "9. Error 400 - Invalid Request Type",
+			"url": "http://localhost:8001/requests",
+			"time": 6,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Status code is 400": true,
+				"Content-Type is application/json": true,
+				"Error structure is valid": true
+			},
+			"testPassFailCounts": {
+				"Status code is 400": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Content-Type is application/json": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Error structure is valid": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				6
+			],
+			"allTests": [
+				{
+					"Status code is 400": true,
+					"Content-Type is application/json": true,
+					"Error structure is valid": true
+				}
+			]
+		},
+		{
+			"id": "632b1cdd-f318-4ac6-a55f-ed9da6bd7ee4",
+			"name": "10. Error 400 - Malformed UUID",
+			"url": "http://localhost:8001/requests/not-a-valid-uuid",
+			"time": 7,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Status code is 400": true,
+				"Content-Type is application/json": true,
+				"Error structure is valid": true
+			},
+			"testPassFailCounts": {
+				"Status code is 400": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Content-Type is application/json": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Error structure is valid": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				7
+			],
+			"allTests": [
+				{
+					"Status code is 400": true,
+					"Content-Type is application/json": true,
+					"Error structure is valid": true
+				}
+			]
+		},
+		{
+			"id": "4efe3043-f274-4b70-b232-b05f2a9f729a",
+			"name": "11. Error 404 - Unknown Request ID",
+			"url": "http://localhost:8001/requests/00000000-0000-0000-0000-000000000000",
+			"time": 14,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status code is 404": true,
+				"Content-Type is application/json": true,
+				"Error code is NOT_FOUND": true
+			},
+			"testPassFailCounts": {
+				"Status code is 404": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Content-Type is application/json": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Error code is NOT_FOUND": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				14
+			],
+			"allTests": [
+				{
+					"Status code is 404": true,
+					"Content-Type is application/json": true,
+					"Error code is NOT_FOUND": true
+				}
+			]
+		},
+		{
+			"id": "4e29fefa-bd8a-4d49-8f58-e0336bf7511e",
+			"name": "12. Error 409 - Illegal Request Status Transition",
+			"url": "http://localhost:8001/requests/2e6d41f0-c4da-48c0-b716-abff2810f4cb/status",
+			"time": 25,
+			"responseCode": {
+				"code": 409,
+				"name": "Conflict"
+			},
+			"tests": {
+				"Status code is 409": true,
+				"Content-Type is application/json": true,
+				"Error code is INVALID_TRANSITION": true
+			},
+			"testPassFailCounts": {
+				"Status code is 409": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Content-Type is application/json": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Error code is INVALID_TRANSITION": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				25
+			],
+			"allTests": [
+				{
+					"Status code is 409": true,
+					"Content-Type is application/json": true,
+					"Error code is INVALID_TRANSITION": true
+				}
+			]
+		},
+		{
+			"id": "56beb783-4804-4640-b436-37b15860e02e",
+			"name": "13. Error 409 - Client-set ASSIGNED Resource Status",
+			"url": "http://localhost:8002/resources/157dd3a0-7008-40b7-93cc-83e72b0e0ab6/status",
+			"time": 27,
+			"responseCode": {
+				"code": 409,
+				"name": "Conflict"
+			},
+			"tests": {
+				"Status code is 409": true,
+				"Content-Type is application/json": true,
+				"Error code is INVALID_TRANSITION": true
+			},
+			"testPassFailCounts": {
+				"Status code is 409": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Content-Type is application/json": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Error code is INVALID_TRANSITION": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				27
+			],
+			"allTests": [
+				{
+					"Status code is 409": true,
+					"Content-Type is application/json": true,
+					"Error code is INVALID_TRANSITION": true
+				}
+			]
+		}
+	],
+	"count": 1,
+	"totalTime": 606,
+	"collection": {
+		"requests": [
+			{
+				"id": "29ee9d2d-439c-42a1-be97-20645fd53543",
+				"method": "POST"
+			},
+			{
+				"id": "fd5cb1c1-026a-4c26-aeb4-31ab9c9adf46",
+				"method": "GET"
+			},
+			{
+				"id": "5f6978db-2cd0-4442-b15a-42c9a7ab19fb",
+				"method": "POST"
+			},
+			{
+				"id": "53ed8589-b8e7-43b2-8d70-4838c67b47d0",
+				"method": "GET"
+			},
+			{
+				"id": "8d9d541b-2d0d-42d4-9175-f28bc5dc3564",
+				"method": "GET"
+			},
+			{
+				"id": "e4c6fd9f-83d6-46d9-90c0-ec107a56de2c",
+				"method": "PUT"
+			},
+			{
+				"id": "382cce7b-e083-4c7d-af0c-61841649c003",
+				"method": "PUT"
+			},
+			{
+				"id": "501bd4f2-cec2-437c-ae43-bb4f1f9c00b2",
+				"method": "POST"
+			},
+			{
+				"id": "093bb235-f5ae-4178-9ea9-a694679dc0b9",
+				"method": "POST"
+			},
+			{
+				"id": "632b1cdd-f318-4ac6-a55f-ed9da6bd7ee4",
+				"method": "GET"
+			},
+			{
+				"id": "4efe3043-f274-4b70-b232-b05f2a9f729a",
+				"method": "GET"
+			},
+			{
+				"id": "4e29fefa-bd8a-4d49-8f58-e0336bf7511e",
+				"method": "PUT"
+			},
+			{
+				"id": "56beb783-4804-4640-b436-37b15860e02e",
+				"method": "PUT"
+			}
+		]
+	}
+}
