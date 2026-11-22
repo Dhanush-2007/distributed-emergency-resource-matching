@@ -49,7 +49,7 @@ fi
 
 # 3. Submit a burst load of 30 requests
 echo "Submitting 30-request burst to exercise concurrent workers..."
-REQ_URL="$REQ" "$PYTHON_BIN" scripts/app_load.py --rate 15 --duration 2 | tee "$EVIDENCE_DIR/load_output.txt"
+REQ_URL="$REQ" "$PYTHON_BIN" scripts/ops/app_load.py --rate 15 --duration 2 | tee "$EVIDENCE_DIR/load_output.txt"
 
 # 4. Wait for processing / queue to drain
 echo "Waiting for queue to drain..."

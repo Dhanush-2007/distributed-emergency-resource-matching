@@ -29,7 +29,7 @@ echo "Pre-burst: $(sample_queue)" | tee -a "$QUEUE_SAMPLES"
 
 # 2. Run app_load.py (e.g., rate 10 req/s for 3s = 30 requests)
 echo "Submitting burst load (30 requests)..."
-REQ_URL="$REQ" "$PYTHON_BIN" scripts/app_load.py --rate 10 --duration 3 | tee "$EVIDENCE_DIR/load_output.txt"
+REQ_URL="$REQ" "$PYTHON_BIN" scripts/ops/app_load.py --rate 10 --duration 3 | tee "$EVIDENCE_DIR/load_output.txt"
 
 # 3. Sample queue depth while draining
 echo "Sampling queue draining..."

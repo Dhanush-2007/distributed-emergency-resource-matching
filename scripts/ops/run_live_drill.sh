@@ -2,7 +2,7 @@
 set -euo pipefail
 
 echo "=== Starting load loop (60s, rate 10, shard 1) ==="
-.venv/bin/python scripts/load_loop.py --rate 10 --duration 60 --shard 1 > load_loop_output.txt 2>&1 &
+.venv/bin/python scripts/ops/load_loop.py --rate 10 --duration 60 --shard 1 > load_loop_output.txt 2>&1 &
 LOAD_PID=$!
 
 echo "Load loop running with PID ${LOAD_PID}. Sleeping 15s..."
@@ -13,7 +13,7 @@ docker stop ems-s1-a
 sleep 3
 
 echo "--- Status after stopping s1-a ---"
-.venv/bin/python scripts/watch_cluster.py --once
+.venv/bin/python scripts/ops/watch_cluster.py --once
 curl -s http://localhost:8000/diagnostics/shards
 echo ""
 
@@ -25,7 +25,7 @@ docker start ems-s1-a
 sleep 5
 
 echo "--- Status after restarting s1-a ---"
-.venv/bin/python scripts/watch_cluster.py --once
+.venv/bin/python scripts/ops/watch_cluster.py --once
 curl -s http://localhost:8000/diagnostics/shards
 echo ""
 

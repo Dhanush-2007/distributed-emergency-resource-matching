@@ -155,83 +155,76 @@ REQUEST SERVICE
 
 ## Repository Structure
 
-```text
-distributed-emergency-resource-matching/
+`	ext
+emergency-matching/
+├── LICENSE                 # MIT License
+├── Makefile                # Unified build, test, and lifecycle targets
+├── README.md               # System overview and quick start guide
+├── docker-compose.yml      # 11-container Compose specification
+├── pyproject.toml          # Ruff linter and tool configurations
+├── pytest.ini              # Pytest configuration and timeout settings
+├── requirements-dev.txt    # Developer test and lint tooling dependencies
+├── .env.example            # Canonical environment variable template
+├── .gitignore              # Ignored local artifacts and cache
+├── .gitattributes          # Line ending normalizations
+├── .dockerignore           # Build context exclusion rules
 │
-├── common/
-│   └── ems_common/
-│       ├── sharding.py
-│       ├── models.py
-│       ├── errors.py
-│       ├── logging.py
-│       ├── haversine.py
-│       ├── storage_client.py
-│       └── rabbit.py
+├── common/                 # Shared Python library
+│   ├── ems_common/         # Data models, transitions, sharding, rabbitmq client
+│   └── pyproject.toml      # Common package build spec
 │
-├── services/
-│   ├── storage-node/
-│   │   ├── app/
-│   │   ├── Dockerfile
-│   │   └── requirements.txt
-│   │
-│   ├── coordinator/
-│   │   ├── app/
-│   │   └── Dockerfile
-│   │
-│   ├── request-service/
-│   │   ├── app/
-│   │   ├── Dockerfile
-│   │   └── requirements.txt
-│   │
-│   ├── resource-service/
-│   │   ├── app/
-│   │   ├── Dockerfile
-│   │   └── requirements.txt
-│   │
-│   └── matching-service/
-│       ├── app/
-│       ├── Dockerfile
-│       └── requirements.txt
+├── services/               # Five containerized microservices
+│   ├── storage-node/       # Replicated SQLite storage node service
+│   ├── coordinator/        # Topology router and failover coordinator
+│   ├── request-service/    # Request intake and lifecycle API
+│   ├── resource-service/   # Emergency resource inventory API
+│   └── matching-service/   # Nearest-resource asynchronous matching engine
 │
-├── k8s/
-│   ├── 00-namespace.yaml
-│   ├── 01-config.yaml
-│   ├── 02-secret.yaml
-│   ├── rabbitmq.yaml
-│   ├── storage-node.tpl.yaml
-│   ├── generate-storage.sh
-│   ├── coordinator.yaml
-│   └── services.yaml
+├── k8s/                    # Production Kubernetes manifests
+│   ├── 00-namespace.yaml   # ems namespace
+│   ├── 01-config.yaml      # Cluster ConfigMap
+│   ├── 02-secret.yaml      # Base64 secret credentials
+│   ├── rabbitmq.yaml       # RabbitMQ StatefulSet & headless service
+│   ├── coordinator.yaml    # Coordinator Deployment & Service
+│   ├── storage-nodes.yaml  # 6 storage StatefulSets & headless services
+│   ├── generate_storage.py # Storage manifest generator
+│   └── services.yaml       # Application deployments and NodePort services
 │
-├── scripts/
-│   ├── seed.py
-│   ├── load_loop.py
-│   ├── watch_cluster.py
-│   ├── find_key_for_shard.py
-│   └── reset.sh
+├── scripts/                # Operational, testing, and demonstration scripts
+│   ├── ops/                # Cluster administration & load generation
+│   │   ├── seed.py, reset.sh, load_loop.py, watch_cluster.py
+│   │   ├── find_key_for_shard.py, check_replication.py, app_load.py, k8s_ports.sh
+│   │   ├── distribution.py, run_live_drill.sh
+│   ├── demo/               # 9 sequential demonstration scenarios
+│   │   ├── demo_01_request.sh .. demo_09_k8s_scaling.sh
+│   │   ├── demo_storage_node.py, run_demo.sh, rehearse.sh
+│   ├── k8s/                # Kubernetes lifecycle & verification
+│   │   ├── k8s_up.sh, k8s_down.sh, k8s_verify_stage3.py, k8s_verify_stage9.py
+│   └── verify/             # Automated validation & test runners
+│       ├── test_storage_persistence.sh, test_fresh_clone.sh, run_all_tests.sh
 │
-├── tests/
-│   ├── unit/
-│   ├── component/
-│   ├── integration/
-│   └── fault/
+├── tests/                  # 4-tier comprehensive automated test suite
+│   ├── unit/               # In-memory pure unit tests
+│   ├── component/          # In-process mock-cluster component tests
+│   ├── integration/        # Full end-to-end integration tests
+│   └── fault/              # Failure-injection, network partition & drill tests
 │
-├── postman/
+├── postman/                # End-to-end API collection and environment
+│   ├── ems.postman_collection.json
+│   └── ems.postman_environment.json
 │
-├── docs/
-│   ├── architecture.md
-│   ├── api.md
-│   ├── diagrams/
-│   ├── evidence/
-│   └── report/
-│
-├── docker-compose.yml
-├── Makefile
-├── .env.example
-├── .gitignore
-├── .dockerignore
-└── README.md
-```
+└── docs/                   # System documentation and proof artifacts
+    ├── README.md           # Documentation index
+    ├── architecture.md     # Component architecture and storage topology
+    ├── api.md              # REST API contract and status transitions
+    ├── runbook.md          # Live demonstration runbook (Scenarios 1-9)
+    ├── k8s-local.md        # Local Kubernetes execution guide
+    ├── checklist.md        # Verification checklist
+    ├── design/             # Authoritative technical specifications (SPEC.md)
+    ├── dev/                # Assistant development guidelines
+    ├── report/             # Design report and requirements coverage matrix
+    └── evidence/           # Preserved demonstration and test transcripts
+`
 
 ## API Endpoints
 
@@ -262,98 +255,56 @@ The Request Service handles request operations, while the Resource Service handl
 9. The Request Service records the matching outcome.
 10. The request becomes `MATCHED`, and the resource becomes `ASSIGNED`.
 
-## Getting Started
+## Quick Start
 
 ### Prerequisites
 
-Ensure the following tools are installed:
+- Python 3.11+
+- Docker & Docker Compose V2
+- kubectl & Minikube (for Kubernetes execution)
+- GNU Make
 
-- Python 3.11
-- pip
-- Docker Desktop
-- Docker Compose V2
-- kubectl
-- Minikube or kind
-- Git
+### Quick Start (Make & Compose)
 
-### 1. Clone the Repository
+`ash
+# 1. Setup virtual environment and install dependencies
+make install
 
-```bash
-git clone https://github.com/YOUR_USERNAME/distributed-emergency-resource-matching.git
+# 2. Build images and start all 11 Docker Compose containers
+make up
 
-cd distributed-emergency-resource-matching
-```
+# 3. Run unit and component test suites
+make test
 
-### 2. Configure Environment Variables
+# 4. Run full end-to-end integration test suite against running stack
+make itest
+`
 
-Create a local environment file using the example configuration:
+### Kubernetes Start
 
-```bash
-cp .env.example .env
-```
-
-Configure the required service URLs, database settings, RabbitMQ credentials, and other environment variables.
-
-Never commit actual credentials or secrets to the repository.
-
-### 3. Install Dependencies
-
-Each service maintains its own `requirements.txt` file. Install the dependencies for the component you intend to run.
-
-For example:
-
-```bash
-pip install -r services/request-service/requirements.txt
-```
-
-### 4. Run Using Docker Compose
-
-Once the Docker Compose configuration is implemented:
-
-```bash
-docker compose build
-docker compose up -d
-```
-
-Check the running containers:
-
-```bash
-docker compose ps
-```
-
-View coordinator logs:
-
-```bash
-docker compose logs -f coordinator
-```
-
-### 5. Kubernetes Deployment
-
-Start a local Kubernetes cluster:
-
-```bash
+`ash
+# 1. Start local Minikube cluster
 minikube start --memory=4096 --cpus=2
-```
 
-Deploy the Kubernetes resources after building and loading the application images:
+# 2. Build images, deploy all workloads, and wait for healthy shards
+./scripts/k8s/k8s_up.sh
 
-```bash
-kubectl apply -f k8s/00-namespace.yaml
-kubectl apply -f k8s/01-config.yaml
-kubectl apply -f k8s/02-secret.yaml
-```
+# 3. Start localhost port-forwarding in background
+./scripts/ops/k8s_ports.sh
+`
 
-Deploy the remaining RabbitMQ, storage, coordinator, and application resources according to the deployment order documented in the project plan.
+### Running the Demo & Test Commands
 
-Check the cluster:
+`ash
+# Run all 9 demonstration scenarios sequentially (k8s or compose mode)
+./scripts/demo/run_demo.sh compose
 
-```bash
-kubectl -n ems get pods
-kubectl -n ems get services
-kubectl -n ems get deployments
-```
+# Run two consecutive rehearsals to verify repeatability
+./scripts/demo/rehearse.sh compose
 
-*Note: The commands above describe the planned setup workflow. They require the corresponding implementation files and configurations to be completed.*
+# Run full comprehensive test suite across all 4 tiers
+./scripts/verify/run_all_tests.sh
+`
 
 ## Testing
 
@@ -444,13 +395,13 @@ Each stage builds upon the previous one and must satisfy its testing and complet
 
 ```bash
 # Run all 9 demonstration scenarios sequentially (k8s or compose mode)
-./scripts/run_demo.sh k8s
+./scripts/demo/run_demo.sh k8s
 
 # Run two consecutive rehearsals to verify repeatability (SPEC 16.1)
-./scripts/rehearse.sh k8s
+./scripts/demo/rehearse.sh k8s
 
 # Run full comprehensive test suite across all 4 tiers (SPEC 13.1)
-./scripts/run_all_tests.sh
+./scripts/verify/run_all_tests.sh
 ```
 
 ## Documentation

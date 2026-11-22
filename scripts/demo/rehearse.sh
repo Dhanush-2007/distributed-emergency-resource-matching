@@ -16,7 +16,7 @@ echo ""
 echo "##########################################################"
 echo " REHEARSAL 1 / 2"
 echo "##########################################################"
-if ! bash scripts/run_demo.sh "$MODE"; then
+if ! bash scripts/demo/run_demo.sh "$MODE"; then
     echo "FAIL: Rehearsal 1 failed."
     exit 1
 fi
@@ -35,7 +35,7 @@ echo ""
 echo "##########################################################"
 echo " REHEARSAL 2 / 2"
 echo "##########################################################"
-if ! bash scripts/run_demo.sh "$MODE"; then
+if ! bash scripts/demo/run_demo.sh "$MODE"; then
     echo "FAIL: Rehearsal 2 failed."
     exit 1
 fi

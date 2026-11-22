@@ -18,7 +18,7 @@ echo "=== Scenario 6: Storage Node Failure ($MODE mode) ==="
 
 # 1. State before failure
 echo "Capturing cluster status before failure..."
-"$PYTHON_BIN" scripts/watch_cluster.py --once | tee "$EVIDENCE_DIR/watch_cluster_before.txt"
+"$PYTHON_BIN" scripts/ops/watch_cluster.py --once | tee "$EVIDENCE_DIR/watch_cluster_before.txt"
 
 SHARDS_DATA=$(curl -s "$COORD/diagnostics/shards")
 echo "$SHARDS_DATA" | tee "$EVIDENCE_DIR/diagnostics_before.json"
@@ -124,7 +124,7 @@ fi
 
 # 5. Capture cluster status during failure (degraded state)
 echo -e "\nCapturing cluster status during failure (DEGRADED)..."
-"$PYTHON_BIN" scripts/watch_cluster.py --once | tee "$EVIDENCE_DIR/watch_cluster_during.txt"
+"$PYTHON_BIN" scripts/ops/watch_cluster.py --once | tee "$EVIDENCE_DIR/watch_cluster_during.txt"
 curl -s "$COORD/diagnostics/shards" | tee "$EVIDENCE_DIR/diagnostics_during.json"
 
 # 6. Verify probe key is still readable on the newly promoted replica

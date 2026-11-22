@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Project rules (always applied)
 
-The authoritative design is `docs/SPEC.md`. Read the sections relevant to the task before writing code. If a prompt and the spec disagree, stop and ask; do not guess.
+The authoritative design is `docs/design/SPEC.md`. Read the sections relevant to the task before writing code. If a prompt and the spec disagree, stop and ask; do not guess.
 
 ## Scope discipline
 - Implement ONLY what the current prompt asks. Do not add features, endpoints, services, files or dependencies that were not requested.

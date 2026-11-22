@@ -46,32 +46,32 @@ Manifests must be applied in the following strict dependency sequence:
 
 ### Start Cluster and Stack
 ```bash
-./scripts/k8s_up.sh
+./scripts/k8s/k8s_up.sh
 ```
 Builds all five service images, loads them into Minikube, generates storage manifests, applies all resources in order, waits for rollouts, and verifies that all three shards report `HEALTHY`.
 
 ### Manage Port-Forwards
 ```bash
 # Start background port-forwards (8000, 8001, 8002, 15672)
-./scripts/k8s_ports.sh
+./scripts/ops/k8s_ports.sh
 
 # Terminate port-forwards
-./scripts/k8s_ports.sh --stop
+./scripts/ops/k8s_ports.sh --stop
 ```
 
 ### Reset State
 ```bash
-./scripts/reset.sh k8s
+./scripts/ops/reset.sh k8s
 ```
 Tears down the namespace and PVCs, redeploys the stack, purges RabbitMQ queues, and seeds deterministic demo resources (`seed.py --fixed`).
 
 ### Teardown
 ```bash
 # Complete teardown including PVCs:
-./scripts/k8s_down.sh
+./scripts/k8s/k8s_down.sh
 
 # Teardown workloads while retaining persistent volumes:
-./scripts/k8s_down.sh --keep-data
+./scripts/k8s/k8s_down.sh --keep-data
 ```
 
 ---
@@ -79,7 +79,7 @@ Tears down the namespace and PVCs, redeploys the stack, purges RabbitMQ queues, 
 ## 4. Service Access: NodePort vs Port-Forwarding
 
 ### Option A: Port-Forwarding (Recommended for Local Dev)
-Run `./scripts/k8s_ports.sh` to forward localhost ports:
+Run `./scripts/ops/k8s_ports.sh` to forward localhost ports:
 - Coordinator Diagnostics: `http://localhost:8000`
 - Request Service API: `http://localhost:8001`
 - Resource Service API: `http://localhost:8002`
@@ -103,7 +103,7 @@ minikube service -n ems request-service-nodeport --url
 
 Run the automated Stage 9 Kubernetes verification suite:
 ```bash
-.venv/bin/python scripts/k8s_verify_stage9.py
+.venv/bin/python scripts/k8s/k8s_verify_stage9.py
 ```
 This runs 8 comprehensive verification drills:
 1. Workload readiness and shard health check.

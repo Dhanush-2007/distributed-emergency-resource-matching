@@ -614,27 +614,26 @@ The system provides standardized `make` targets and utility scripts to manage th
 ### 9.1 Makefile Commands
 - `make up`: Starts all 11 Compose containers in the proper dependency order (`docker compose up -d --wait`).
 - `make down`: Gracefully stops all stack containers (`docker compose down`).
-- `make reset`: Runs `scripts/reset.sh compose` to tear down volumes, recreate the stack, purge RabbitMQ queues, and seed deterministic resources.
+- `make reset`: Runs `scripts/ops/reset.sh compose` to tear down volumes, recreate the stack, purge RabbitMQ queues, and seed deterministic resources.
 - `make itest`: Runs the end-to-end integration test suite against the live stack.
 - `make ftest`: Runs the cluster fault, failover, and partition drill suites.
 - `make all-tests`: Sequentially executes `make lint`, `make test`, `make itest`, and `make ftest`.
 - `make images`: Builds all five application container images (`ems/storage-node:1.0`, `ems/coordinator:1.0`, `ems/request-service:1.0`, `ems/resource-service:1.0`, `ems/matching-service:1.0`).
 
 ### 9.2 Utility Scripts
-- `scripts/seed.py`: Seeds resources and requests. `--fixed` creates the deterministic demo dataset (3 water resources at ~0.6km, 2km, 6km and 1 food resource); `--requests N --resources N` seeds random test distributions.
-- `scripts/reset.sh [compose]`: Idempotent stack teardown, volume reset, queue purge, and deterministic seed.
-- `scripts/app_load.py`: Submits sustained request load with 503 backoff retries and verifies all requests settle.
-- `scripts/test_fresh_clone.sh`: Verifies that a clean repository clone without a `.env` file starts and matches resources out of the box.
-- `scripts/test_storage_persistence.sh`: Proves that storage node data survives container restarts on a Docker named volume.
-
+- `scripts/ops/seed.py`: Seeds resources and requests. `--fixed` creates the deterministic demo dataset (3 water resources at ~0.6km, 2km, 6km and 1 food resource); `--requests N --resources N` seeds random test distributions.
+- `scripts/ops/reset.sh [compose]`: Idempotent stack teardown, volume reset, queue purge, and deterministic seed.
+- `scripts/ops/app_load.py`: Submits sustained request load with 503 backoff retries and verifies all requests settle.
+- `scripts/verify/test_fresh_clone.sh`: Verifies that a clean repository clone without a `.env` file starts and matches resources out of the box.
+- `scripts/verify/test_storage_persistence.sh`: Proves that storage node data survives container restarts on a Docker named volume.
 
 ---
 
 ## 10. Postman Collection and Live Testing
 
 A complete Postman test suite is provided in the `postman/` directory:
-- Collection: [`postman/ems.postman_collection.json`](file:///Users/dhanush/Desktop/distributed-emergency-resource-matching/postman/ems.postman_collection.json)
-- Environment: [`postman/ems.postman_environment.json`](file:///Users/dhanush/Desktop/distributed-emergency-resource-matching/postman/ems.postman_environment.json)
+- Collection: [`postman/ems.postman_collection.json`](../postman/ems.postman_collection.json)
+- Environment: [`postman/ems.postman_environment.json`](../postman/ems.postman_environment.json)
 
 ### Configured Environment Variables:
 - `REQ_BASE`: `http://localhost:8001` (Request Service)

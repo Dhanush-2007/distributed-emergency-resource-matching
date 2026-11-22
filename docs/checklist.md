@@ -34,19 +34,19 @@ Every checklist item defined in **SPEC 17** is verified below, with references t
 
 - [x] **8. Containerization & Clean-Clone Verification**
   - **Verification**: Production Dockerfiles exist for all services with non-root UID 10001. A fresh clone brings up the full 11-container stack with `docker compose up -d --wait` without requiring `.env`.
-  - **Evidence**: `docker-compose.yml`, `scripts/test_fresh_clone.sh`, `docs/evidence/tests/test_fresh_clone.txt`.
+  - **Evidence**: `docker-compose.yml`, `scripts/verify/test_fresh_clone.sh`, `docs/evidence/tests/test_fresh_clone.txt`.
 
 - [x] **9. Full Kubernetes Orchestration**
   - **Verification**: 13 workloads (6 StatefulSets, 4 Deployments, headless and ClusterIP Services, PVCs) deployed on Minikube. Automatic pod self-healing and horizontal scaling to 3 workers demonstrated.
-  - **Evidence**: `k8s/*.yaml`, `scripts/k8s_verify_stage9.py`, `docs/evidence/08-k8s-pod-recovery/`, `docs/evidence/09-k8s-scaling/`.
+  - **Evidence**: `k8s/*.yaml`, `scripts/k8s/k8s_verify_stage9.py`, `docs/evidence/08-k8s-pod-recovery/`, `docs/evidence/09-k8s-scaling/`.
 
 - [x] **10. Nine Scripted Demonstrations with Saved Evidence**
   - **Verification**: Scripts `demo_01_request.sh` through `demo_09_k8s_scaling.sh` run deterministically in both k8s and compose modes, saving before, during, and after artifacts into `docs/evidence/`.
-  - **Evidence**: `scripts/run_demo.sh`, `scripts/rehearse.sh`, `docs/evidence/rehearsal-1/`, `docs/evidence/rehearsal-2/`.
+  - **Evidence**: `scripts/demo/run_demo.sh`, `scripts/demo/rehearse.sh`, `docs/evidence/rehearsal-1/`, `docs/evidence/rehearsal-2/`.
 
 - [x] **11. Comprehensive Testing Matrix**
   - **Verification**: 4-tier test suite executed and documented in the test summary matrix covering unit, component, integration, and fault testing.
-  - **Evidence**: `scripts/run_all_tests.sh`, `docs/evidence/tests/SUMMARY.md`.
+  - **Evidence**: `scripts/verify/run_all_tests.sh`, `docs/evidence/tests/SUMMARY.md`.
 
 - [x] **12. Complete Documentation & Submission Package**
   - **Verification**: All documentation is finalized, including README, API reference, Mermaid architecture diagrams, demonstration runbook, design report, requirements coverage, and Postman fixtures.

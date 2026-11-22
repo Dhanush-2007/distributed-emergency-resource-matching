@@ -10,8 +10,8 @@ elif [[ -n "${1:-}" ]]; then
 fi
 
 # Stop any active port-forwards
-if [[ -f "scripts/k8s_ports.sh" ]]; then
-    ./scripts/k8s_ports.sh --stop >/dev/null 2>&1 || true
+if [[ -f "scripts/ops/k8s_ports.sh" ]]; then
+    ./scripts/ops/k8s_ports.sh --stop >/dev/null 2>&1 || true
 fi
 
 if [[ "$keep_data" == true ]]; then

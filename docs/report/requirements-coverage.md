@@ -24,7 +24,7 @@ This document maps all architectural, functional, storage, messaging, fault tole
 | ID | Requirement Description | Implementation Files | Automated Tests | Demo Scenario & Evidence | Status |
 |---|---|---|---|---|---|
 | **SR-1** | Single coordinator determines shard and routes storage operations | `services/coordinator/coordinator/router.py`, `services/coordinator/coordinator/registry.py` | `tests/component/test_coordinator_routing.py`, `tests/component/test_coordinator_shards.py` | Scenario 4 (`docs/evidence/04-distribution/`) | COMPLIANT |
-| **SR-2** | 3 storage shards with at least one replica each; data spread across all shards | `services/storage-node/storage_node/db.py`, `services/storage-node/storage_node/replication.py` | `tests/fault/test_stage4_replication.py`, `scripts/check_replication.py` | Scenario 4 (`docs/evidence/04-distribution/`) | COMPLIANT |
+| **SR-2** | 3 storage shards with at least one replica each; data spread across all shards | `services/storage-node/storage_node/db.py`, `services/storage-node/storage_node/replication.py` | `tests/fault/test_stage4_replication.py`, `scripts/ops/check_replication.py` | Scenario 4 (`docs/evidence/04-distribution/`) | COMPLIANT |
 | **SR-3** | Hash-based deterministic partitioning (`uint32(sha256(key)[:4]) % 3`) | `common/ems_common/sharding.py`, `services/coordinator/coordinator/router.py` | `tests/unit/test_hash.py`, `tests/unit/test_sharding.py` | Scenario 4 (`docs/evidence/04-distribution/`) | COMPLIANT |
 | **SR-4** | Client never sees or uses physical storage node addresses | `common/ems_common/storage_client.py` | `tests/integration/test_stage6_api.py`, `tests/integration/test_stage8_stack.py` | Scenarios 1, 4 (`docs/evidence/04-distribution/`) | COMPLIANT |
 | **SR-5** | Internal APIs: register, heartbeat, store/update, retrieve, delete data | `services/coordinator/coordinator/main.py`, `services/storage-node/storage_node/main.py` | `tests/component/test_storage_node.py`, `tests/component/test_cluster_harness.py` | Scenarios 4, 6, 7 (`docs/evidence/06-storage-failure/`) | COMPLIANT |
@@ -50,7 +50,7 @@ This document maps all architectural, functional, storage, messaging, fault tole
 | **FT-2** | Detect unavailable nodes; avoid routing traffic to failed nodes | `services/coordinator/coordinator/failover.py`, `services/coordinator/coordinator/router.py` | `tests/fault/test_stage5_failover.py` | Scenario 6 (`docs/evidence/06-storage-failure/`) | COMPLIANT |
 | **FT-3** | Use available in-sync replica; continue processing writes degraded | `services/storage-node/storage_node/replication.py`, `services/coordinator/coordinator/shard_state.py` | `tests/fault/test_stage5_failover.py`, `tests/fault/test_stage8_storage_drill.py` | Scenario 6 (`docs/evidence/06-storage-failure/`) | COMPLIANT |
 | **FT-4** | Rejoin and delta/snapshot synchronization upon node recovery | `services/storage-node/storage_node/recovery.py`, `services/storage-node/storage_node/db.py` | `tests/component/test_replica_sync.py`, `tests/fault/test_stage5_failover.py` | Scenario 7 (`docs/evidence/07-node-recovery/`) | COMPLIANT |
-| **FT-5** | Failure demonstrated by stopping container/pod showing before, during, and after | `scripts/demo_06_storage_failure.sh`, `scripts/demo_07_node_recovery.sh` | `tests/fault/test_stage5_failover.py`, `tests/fault/test_stage8_storage_drill.py` | Scenarios 6, 7 (`docs/evidence/06-storage-failure/`, `07-node-recovery/`) | COMPLIANT |
+| **FT-5** | Failure demonstrated by stopping container/pod showing before, during, and after | `scripts/demo/demo_06_storage_failure.sh`, `scripts/demo/demo_07_node_recovery.sh` | `tests/fault/test_stage5_failover.py`, `tests/fault/test_stage8_storage_drill.py` | Scenarios 6, 7 (`docs/evidence/06-storage-failure/`, `07-node-recovery/`) | COMPLIANT |
 
 ---
 
@@ -58,10 +58,10 @@ This document maps all architectural, functional, storage, messaging, fault tole
 
 | ID | Requirement Description | Implementation Files | Automated Tests | Demo Scenario & Evidence | Status |
 |---|---|---|---|---|---|
-| **DK-1** | Dockerfiles for all services, Compose file, container-to-container networking, clean clone up | `docker-compose.yml`, `services/*/Dockerfile` | `scripts/test_fresh_clone.sh`, `tests/integration/test_stage8_stack.py` | `scripts/test_fresh_clone.sh` (`docs/evidence/tests/test_fresh_clone.txt`) | COMPLIANT |
-| **K8-1** | Kubernetes Deployments, StatefulSets, Services, pod replicas, inter-service DNS communication | `k8s/*.yaml`, `scripts/k8s_up.sh` | `tests/unit/test_k8s_manifests.py`, `scripts/k8s_verify_stage9.py` (Steps 1 & 2) | All K8s Scenarios (`docs/evidence/stage9/`) | COMPLIANT |
-| **K8-2** | Microservice scaling, and pod failure with automatic recovery | `k8s/services.yaml`, `scripts/demo_08_k8s_recovery.sh`, `scripts/demo_09_k8s_scaling.sh` | `scripts/k8s_verify_stage9.py` (Steps 4 & 5) | Scenarios 8, 9 (`docs/evidence/08-k8s-pod-recovery/`, `09-k8s-scaling/`) | COMPLIANT |
-| **K8-3** | Local Kubernetes execution (Minikube / kind / Docker Desktop) | `k8s/*.yaml`, `docs/k8s-local.md` | `scripts/k8s_verify_stage9.py` | Minikube deployment (`docs/k8s-local.md`) | COMPLIANT |
+| **DK-1** | Dockerfiles for all services, Compose file, container-to-container networking, clean clone up | `docker-compose.yml`, `services/*/Dockerfile` | `scripts/verify/test_fresh_clone.sh`, `tests/integration/test_stage8_stack.py` | `scripts/verify/test_fresh_clone.sh` (`docs/evidence/tests/test_fresh_clone.txt`) | COMPLIANT |
+| **K8-1** | Kubernetes Deployments, StatefulSets, Services, pod replicas, inter-service DNS communication | `k8s/*.yaml`, `scripts/k8s/k8s_up.sh` | `tests/unit/test_k8s_manifests.py`, `scripts/k8s/k8s_verify_stage9.py` (Steps 1 & 2) | All K8s Scenarios (`docs/evidence/stage9/`) | COMPLIANT |
+| **K8-2** | Microservice scaling, and pod failure with automatic recovery | `k8s/services.yaml`, `scripts/demo/demo_08_k8s_recovery.sh`, `scripts/demo/demo_09_k8s_scaling.sh` | `scripts/k8s/k8s_verify_stage9.py` (Steps 4 & 5) | Scenarios 8, 9 (`docs/evidence/08-k8s-pod-recovery/`, `09-k8s-scaling/`) | COMPLIANT |
+| **K8-3** | Local Kubernetes execution (Minikube / kind / Docker Desktop) | `k8s/*.yaml`, `docs/k8s-local.md` | `scripts/k8s/k8s_verify_stage9.py` | Minikube deployment (`docs/k8s-local.md`) | COMPLIANT |
 
 ---
 
@@ -69,6 +69,6 @@ This document maps all architectural, functional, storage, messaging, fault tole
 
 | ID | Requirement Description | Implementation Files | Automated Tests | Demo Scenario & Evidence | Status |
 |---|---|---|---|---|---|
-| **DM-1** | 9 Required demonstration scenarios executed with saved evidence | `scripts/demo_01_request.sh` ... `demo_09_k8s_scaling.sh`, `scripts/run_demo.sh` | `scripts/rehearse.sh` | `docs/evidence/01-*` to `docs/evidence/09-*` | COMPLIANT |
-| **TS-1** | 4-layer testing suite: unit, component, integration, fault test matrix | `tests/unit/`, `tests/component/`, `tests/integration/`, `tests/fault/` | `scripts/run_all_tests.sh` | `docs/evidence/tests/SUMMARY.md` | COMPLIANT |
+| **DM-1** | 9 Required demonstration scenarios executed with saved evidence | `scripts/demo/demo_01_request.sh` ... `demo_09_k8s_scaling.sh`, `scripts/demo/run_demo.sh` | `scripts/demo/rehearse.sh` | `docs/evidence/01-*` to `docs/evidence/09-*` | COMPLIANT |
+| **TS-1** | 4-layer testing suite: unit, component, integration, fault test matrix | `tests/unit/`, `tests/component/`, `tests/integration/`, `tests/fault/` | `scripts/verify/run_all_tests.sh` | `docs/evidence/tests/SUMMARY.md` | COMPLIANT |
 | **JU-1** | Full technical justification of all 10 architectural choices | `docs/report/design-report.md` (Section 3) | N/A (Documentation) | `docs/report/design-report.md` | COMPLIANT |

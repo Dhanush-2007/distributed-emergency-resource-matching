@@ -76,7 +76,7 @@ def save_evidence(scenario_name: str, client: httpx.Client) -> None:
     # Save watch_cluster output
     try:
         res = subprocess.run(
-            [".venv/bin/python", "scripts/watch_cluster.py", "--once"],
+            [".venv/bin/python", "scripts/ops/watch_cluster.py", "--once"],
             capture_output=True,
             text=True,
             check=False,

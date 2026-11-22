@@ -72,7 +72,7 @@ fi
 echo "=== 6. Stack is Ready! ==="
 echo "Access instructions:"
 echo "Start port-forwards:"
-echo "  ./scripts/k8s_ports.sh"
+echo "  ./scripts/ops/k8s_ports.sh"
 echo "  - Coordinator:      http://localhost:8000"
 echo "  - Request Service:  http://localhost:8001"
 echo "  - Resource Service: http://localhost:8002"

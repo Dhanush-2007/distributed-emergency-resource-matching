@@ -9,18 +9,18 @@ echo " Starting Full Demonstration Run (Mode: $MODE)"
 echo "=========================================================="
 
 echo "Resetting environment..."
-bash scripts/reset.sh "$MODE"
+bash scripts/ops/reset.sh "$MODE"
 
 SCRIPTS=(
-    "scripts/demo_01_request.sh"
-    "scripts/demo_02_resource.sh"
-    "scripts/demo_03_matching.sh"
-    "scripts/demo_04_distribution.sh"
-    "scripts/demo_05_async.sh"
-    "scripts/demo_06_storage_failure.sh"
-    "scripts/demo_07_node_recovery.sh"
-    "scripts/demo_08_k8s_recovery.sh"
-    "scripts/demo_09_k8s_scaling.sh"
+    "scripts/demo/demo_01_request.sh"
+    "scripts/demo/demo_02_resource.sh"
+    "scripts/demo/demo_03_matching.sh"
+    "scripts/demo/demo_04_distribution.sh"
+    "scripts/demo/demo_05_async.sh"
+    "scripts/demo/demo_06_storage_failure.sh"
+    "scripts/demo/demo_07_node_recovery.sh"
+    "scripts/demo/demo_08_k8s_recovery.sh"
+    "scripts/demo/demo_09_k8s_scaling.sh"
 )
 
 NAMES=(

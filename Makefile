@@ -6,7 +6,7 @@ PY := python3.11
 VENV_PY := .venv/bin/python
 endif
 
-.PHONY: install test itest ftest lint up down reset all-tests image-storage image-coordinator image-request image-resource image-matching images
+.PHONY: install test itest ftest atest lint up down reset all-tests image-storage image-coordinator image-request image-resource image-matching images
 
 image-storage:
 	docker build -f services/storage-node/Dockerfile -t ems/storage-node:1.0 .
@@ -55,6 +55,9 @@ down:
 	docker compose down
 
 reset:
-	./scripts/reset.sh compose
+	./scripts/ops/reset.sh compose
+
+atest:
+	$(VENV_PY) scripts/ops/check_replication.py
 
 all-tests: lint test itest ftest

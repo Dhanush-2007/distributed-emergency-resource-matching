@@ -87,7 +87,7 @@ The brief explicitly delegated ten architectural decisions to the engineering te
 - **Justification**: Headless Services grant deterministic DNS hostnames (`ems-s1-a-0...`) essential for cluster membership. Single-replica StatefulSets allow precise fault injection by scaling individual pods to 0.
 
 ### 3.9 Monitoring and Observability
-- **Choice**: Structured JSON logging with propagated `correlationId`, Coordinator `/diagnostics` endpoints, and a terminal watcher script (`scripts/watch_cluster.py`).
+- **Choice**: Structured JSON logging with propagated `correlationId`, Coordinator `/diagnostics` endpoints, and a terminal watcher script (`scripts/ops/watch_cluster.py`).
 - **Justification**: JSON logs allow easy parsing and automated assertions during fault drills. The live console watcher offers real-time visualization of shard health, node roles, and failover state.
 
 ### 3.10 Cloud Choice

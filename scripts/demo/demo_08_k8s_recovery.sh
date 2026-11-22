@@ -93,7 +93,7 @@ kill "$QUERY_PID" 2>/dev/null || true
 wait "$QUERY_PID" 2>/dev/null || true
 
 # Refresh port-forwards in case connection was severed by pod termination
-bash scripts/k8s_ports.sh >/dev/null 2>&1 || true
+bash scripts/ops/k8s_ports.sh >/dev/null 2>&1 || true
 sleep 1
 
 # 6. Capture pod state after recovery

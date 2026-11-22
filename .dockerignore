@@ -1,5 +1,7 @@
 .git
 .venv
+.cursor
+.agent
 tests
 docs
 __pycache__

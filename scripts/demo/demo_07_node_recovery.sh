@@ -88,7 +88,7 @@ fi
 
 # 4. State after recovery
 echo -e "\nCapturing cluster status after recovery (HEALTHY)..."
-"$PYTHON_BIN" scripts/watch_cluster.py --once | tee "$EVIDENCE_DIR/watch_cluster_after.txt"
+"$PYTHON_BIN" scripts/ops/watch_cluster.py --once | tee "$EVIDENCE_DIR/watch_cluster_after.txt"
 curl -s "$COORD/diagnostics/shards" | tee "$EVIDENCE_DIR/diagnostics_after.json"
 
 # 5. Capture storage node catch-up logs

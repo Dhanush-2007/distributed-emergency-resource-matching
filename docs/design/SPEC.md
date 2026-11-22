@@ -1,6 +1,6 @@
 # Distributed Emergency Resource Matching System: Specification
 
-> **Purpose of this file.** This is the single source of truth for the project, written for use inside Cursor (`@docs/SPEC.md`). It contains the requirements, architecture, contracts, algorithms, implementation stages and acceptance tests. When a prompt and this file disagree, **stop and ask** instead of guessing.
+> **Purpose of this file.** This is the single source of truth for the project, written for use inside Cursor (`@docs/design/SPEC.md`). It contains the requirements, architecture, contracts, algorithms, implementation stages and acceptance tests. When a prompt and this file disagree, **stop and ask** instead of guessing.
 
 ## How to use this file
 
@@ -773,7 +773,7 @@ emergency-matching/
 - Implement routing for `PUT/GET/DELETE /internal/data/{key}` and the scatter-gather `scan`.
 - Implement diagnostics: `/diagnostics/nodes`, `/diagnostics/shards` (with record counts), `/diagnostics/route`.
 - Log every routing decision (`key -> shard -> node`). Write the coordinator Dockerfile.
-- Run coordinator plus three storage nodes in Compose. Write `scripts/seed.py` and a distribution script that writes about 60 keys and prints per-shard counts.
+- Run coordinator plus three storage nodes in Compose. Write `scripts/ops/seed.py` and a distribution script that writes about 60 keys and prints per-shard counts.
 
 > **Exit criteria**
 >
@@ -831,7 +831,7 @@ emergency-matching/
 - Implement promotion rules, shard epochs (persisted), the `POST /internal/role` call, and stale-epoch rejection on nodes.
 - Implement rejoin: demotion of a returning old primary, the log-matching check, delta and snapshot recovery, `READY` only after catch-up.
 - Handle both-nodes-down and stale-replica cases with `503`; implement the optional force-promote override; handle coordinator restart (re-register on `404`).
-- Build `scripts/watch_cluster.py` and `scripts/load_loop.py` to show before, during and after.
+- Build `scripts/ops/watch_cluster.py` and `scripts/ops/load_loop.py` to show before, during and after.
 
 > **Exit criteria**
 >
@@ -1053,8 +1053,8 @@ The demonstration is judged on visible behaviour, so observability is built in r
 | **Key log events** | Routing (`key -> shard -> node`); heartbeat received/missed; node `DOWN`/`UP`; promotion with new epoch; degraded write; replication gap; catch-up start/progress/end; snapshot swap; reservation attempt/conflict/release; match decision with candidate table; message published/confirmed/acked/retried/dead-lettered; sweeper republish. | Distribution, failure, recovery, matching, messaging |
 | **Coordinator diagnostics** | `/diagnostics/nodes`, `/diagnostics/shards` (state, epoch, primary, counts), `/diagnostics/route?key=` | Distribution, before/during/after failure |
 | **RabbitMQ management UI** | Queue depth, consumers, message rates, contents of `request.match.dlq` | Asynchronous processing, retry, DLQ |
-| `scripts/watch_cluster.py` | Polls diagnostics every second and prints a one-screen table: shard, state, primary, epoch, node health, record counts | Failure timeline |
-| `scripts/load_loop.py` | Continuously creates and reads records; prints success/failure counters and latency | Continued operation during failure |
+| `scripts/ops/watch_cluster.py` | Polls diagnostics every second and prints a one-screen table: shard, state, primary, epoch, node health, record counts | Failure timeline |
+| `scripts/ops/load_loop.py` | Continuously creates and reads records; prints success/failure counters and latency | Continued operation during failure |
 | **Health endpoints** | `/health/live`, `/health/ready` on every service; storage `/health` with role and status | Kubernetes probes and recovery |
 
 ## 13. Testing strategy
@@ -1129,7 +1129,7 @@ The nine scenarios below follow the brief's required demonstration exactly. They
 
 #### 4. Data distribution across the three shards
 
-- `python scripts/seed.py --requests 30 --resources 30`
+- `python scripts/ops/seed.py --requests 30 --resources 30`
 - `curl $COORD/diagnostics/shards`
 - `curl "$COORD/diagnostics/route?key=request:<id>"`
 
@@ -1137,7 +1137,7 @@ The nine scenarios below follow the brief's required demonstration exactly. They
 
 #### 5. Asynchronous processing
 
-- `python scripts/load_loop.py --create 30 --burst` while watching `request.match` in the RabbitMQ UI and the worker log.
+- `python scripts/ops/load_loop.py --create 30 --burst` while watching `request.match` in the RabbitMQ UI and the worker log.
 
 **Evidence:** Queue depth rises then drains; consumer log lines with correlation IDs; every request ends `MATCHED` or `NO_MATCH`; no resource assigned twice.
 
@@ -1168,7 +1168,7 @@ The nine scenarios below follow the brief's required demonstration exactly. They
 
 ### 14.3 Reset between runs
 
-`scripts/reset.sh` deletes and recreates the data (Compose: `down -v`; Kubernetes: delete the namespace PVCs and restart the pods), purges the RabbitMQ queues, and re-runs `seed.py`. The demonstration must be repeatable from a clean state with no improvised commands.
+`scripts/ops/reset.sh` deletes and recreates the data (Compose: `down -v`; Kubernetes: delete the namespace PVCs and restart the pods), purges the RabbitMQ queues, and re-runs `seed.py`. The demonstration must be repeatable from a clean state with no improvised commands.
 
 ## 15. Submission package and design report
 

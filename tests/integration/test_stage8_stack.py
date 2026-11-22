@@ -128,7 +128,7 @@ def test_full_lifecycle_flow_and_resource_reassignment():
 def test_shard_distribution_after_seed():
     """Verify data distribution over three shards after seeding."""
     subprocess.run(
-        [".venv/bin/python", "scripts/seed.py", "--requests", "30", "--resources", "30"],
+        [".venv/bin/python", "scripts/ops/seed.py", "--requests", "30", "--resources", "30"],
         check=True,
     )
     with httpx.Client(timeout=5.0) as client:

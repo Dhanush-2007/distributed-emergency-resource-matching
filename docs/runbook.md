@@ -18,12 +18,12 @@ Before commencing a live demonstration or examination:
   ```
 - [ ] **Stack Deployment & Health**:
   ```bash
-  ./scripts/k8s_up.sh
-  ./scripts/k8s_ports.sh
+  ./scripts/k8s/k8s_up.sh
+  ./scripts/ops/k8s_ports.sh
   ```
 - [ ] **Clean Seed State**:
   ```bash
-  ./scripts/reset.sh k8s
+  ./scripts/ops/reset.sh k8s
   ```
 - [ ] **Environment Variables Exported**:
   ```bash
@@ -33,7 +33,7 @@ Before commencing a live demonstration or examination:
   export RABBIT=http://localhost:15672
   ```
 - [ ] **Monitoring Windows Open**:
-  - Terminal 1: `./.venv/bin/python scripts/watch_cluster.py` (live cluster status table)
+  - Terminal 1: `./.venv/bin/python scripts/ops/watch_cluster.py` (live cluster status table)
   - Terminal 2: `kubectl -n ems get pods -w`
   - Terminal 3: Demonstration command execution terminal
   - Browser: RabbitMQ UI at `http://localhost:15672` (guest/guest or ems/ems-dev-password)
@@ -117,7 +117,7 @@ curl -s "$REQ/requests/$REQ_ID" | jq .
 **Commands**:
 ```bash
 # Seed records across the cluster
-python3 scripts/seed.py --requests 30 --resources 30
+python3 scripts/ops/seed.py --requests 30 --resources 30
 
 # Inspect shard distribution
 curl -s "$COORD/diagnostics/shards" | jq .
@@ -137,7 +137,7 @@ curl -s "$COORD/diagnostics/route?key=request:$REQ_ID" | jq .
 **Commands**:
 ```bash
 # Submit burst load of 30 requests
-python3 scripts/app_load.py --rate 10 --duration 3
+python3 scripts/ops/app_load.py --rate 10 --duration 3
 
 # Monitor queue depth
 curl -s -u ems:ems-dev-password "$RABBIT/api/queues/%2F/request.match" | jq '{messages, messages_ready, messages_unacknowledged}'
@@ -154,11 +154,11 @@ curl -s -u ems:ems-dev-password "$RABBIT/api/queues/%2F/request.match" | jq '{me
 **Commands**:
 ```bash
 # Find a key that maps to shard 1
-KEY=$(python3 scripts/find_key_for_shard.py 1)
+KEY=$(python3 scripts/ops/find_key_for_shard.py 1)
 echo "Key on Shard 1: $KEY"
 
 # Before: Check cluster state
-python3 scripts/watch_cluster.py --once
+python3 scripts/ops/watch_cluster.py --once
 
 # Fail: Scale primary StatefulSet to 0
 kubectl -n ems scale sts/ems-s1-a --replicas=0
@@ -225,7 +225,7 @@ kubectl -n ems scale deployment/matching-service --replicas=3
 kubectl -n ems wait --for=condition=Ready pod -l app=matching-service --timeout=60s
 
 # Submit burst load
-python3 scripts/app_load.py --rate 15 --duration 2
+python3 scripts/ops/app_load.py --rate 15 --duration 2
 
 # Inspect logs across all three worker pods
 kubectl -n ems logs -l app=matching-service --tail=50 --prefix=true
@@ -245,22 +245,22 @@ To ensure repeatable demonstrations, run the reset script between demonstration 
 
 ### In Kubernetes Mode:
 ```bash
-./scripts/reset.sh k8s
+./scripts/ops/reset.sh k8s
 ```
 This tears down namespace PVCs, redeploys clean pods, purges RabbitMQ queues, restores port-forwards, and seeds fixed test fixtures.
 
 ### In Docker Compose Mode:
 ```bash
-./scripts/reset.sh compose
+./scripts/ops/reset.sh compose
 ```
 This runs `docker compose down -v`, brings up a fresh stack with `--wait`, purges queues, and seeds baseline data.
 
 ### Automated Run & Rehearsal
 To run all 9 scenarios sequentially with summary reporting:
 ```bash
-./scripts/run_demo.sh k8s
+./scripts/demo/run_demo.sh k8s
 ```
 To run the full two-pass rehearsal verification (SPEC 16.1):
 ```bash
-./scripts/rehearse.sh k8s
+./scripts/demo/rehearse.sh k8s
 ```

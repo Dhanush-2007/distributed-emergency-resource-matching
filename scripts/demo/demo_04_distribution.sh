@@ -18,7 +18,7 @@ echo "=== Scenario 4: Shard Distribution ($MODE mode) ==="
 
 # 1. Run seed with 30 requests and 30 resources
 echo "Running seed.py --requests 30 --resources 30..."
-"$PYTHON_BIN" scripts/seed.py --requests 30 --resources 30 | tee "$EVIDENCE_DIR/seed_output.txt"
+"$PYTHON_BIN" scripts/ops/seed.py --requests 30 --resources 30 | tee "$EVIDENCE_DIR/seed_output.txt"
 
 # 2. Check /diagnostics/shards
 echo -e "\nQuerying $COORD/diagnostics/shards..."

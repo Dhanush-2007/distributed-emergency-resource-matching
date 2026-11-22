@@ -289,7 +289,7 @@ def step_2_dns_and_matching() -> tuple[bool, str]:
 
 def step_3_shard_distribution() -> tuple[bool, str]:
     """Run seed.py --requests 30 --resources 30 and verify non-zero distribution on all shards."""
-    cmd = [sys.executable, "scripts/seed.py", "--requests", "30", "--resources", "30"]
+    cmd = [sys.executable, "scripts/ops/seed.py", "--requests", "30", "--resources", "30"]
     rc, out = run_cmd(cmd, timeout=60.0)
     if rc != 0:
         return False, f"seed.py failed: {out}"

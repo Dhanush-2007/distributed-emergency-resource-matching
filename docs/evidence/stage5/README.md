@@ -1,13 +1,13 @@
 # Stage 5 Failure Injection & Failover Evidence Catalog
 
-This directory contains real timestamped evidence artifacts collected from the 7-container Docker Compose cluster failure drills (`tests/fault/test_stage5_failover.py`) and the 60-second live load drill (`scripts/run_live_drill.sh`).
+This directory contains real timestamped evidence artifacts collected from the 7-container Docker Compose cluster failure drills (`tests/fault/test_stage5_failover.py`) and the 60-second live load drill (`scripts/ops/run_live_drill.sh`).
 
 ## Summary of Results
 
 - **Unit & Component Tests**: 162/162 passed (`make test`)
 - **Integration Tests**: 8/8 passed (`make itest`)
 - **Fault-Injection Drills**: 9/9 passed (`make ftest`)
-- **Storage Persistence Drill**: PASS (`scripts/test_storage_persistence.sh`)
+- **Storage Persistence Drill**: PASS (`scripts/verify/test_storage_persistence.sh`)
 - **Live Failover Drill**: 528 acknowledged keys under 10 req/s load with 0 lost keys (`LOST == 0`, `epoch 1 -> 2`).
 
 ---
@@ -32,7 +32,7 @@ This directory contains real timestamped evidence artifacts collected from the 7
 ## Live Failover Drill (`live_drill_output.txt`)
 
 Executed with continuous load:
-- Command: `.venv/bin/python scripts/load_loop.py --rate 10 --duration 60 --shard 1`
+- Command: `.venv/bin/python scripts/ops/load_loop.py --rate 10 --duration 60 --shard 1`
 - At 15s: `docker stop ems-s1-a` (injected primary failure)
 - At 35s: `docker start ems-s1-a` (restored node as follower)
 - Final Summary:

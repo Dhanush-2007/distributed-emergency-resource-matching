@@ -6,7 +6,7 @@ Valid for the 3-node skeleton only (Stage 9 has its own verification with replic
 Checks the full local Minikube deployment:
 1. All Pods in namespace `ems` are Running & Ready; PVCs are Bound.
 2. `/diagnostics/nodes` reports three UP nodes and DNS-style endpoints (*.svc.cluster.local).
-3. Runs the existing `scripts/distribution.py` client script.
+3. Runs the existing `scripts/ops/distribution.py` client script.
 4. Persistence test – write a key (shard 1), delete its storage pod, wait for
    recovery, then GET the key and verify value/version.
 5. Coordinator self-healing – delete the coordinator pod, wait for it to be Ready,
@@ -147,7 +147,7 @@ def run_distribution(base_url: str) -> bool:
     env = os.environ.copy()
     env["COORDINATOR_URL"] = base_url
     rc, out = run_cmd(
-        [sys.executable, "scripts/distribution.py", "--keys", "10"],
+        [sys.executable, "scripts/ops/distribution.py", "--keys", "10"],
         capture=True,
         env=env,
     )
