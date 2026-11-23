@@ -1,0 +1,169 @@
+/* ==========================================================================
+   EMS Operations Dashboard - Layout
+   Sidebar (220px), Status strip (40px), Main column (max-width 1180px)
+   ========================================================================== */
+
+.app-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  background-color: var(--bg-paper);
+  border-right: 1px solid var(--border-hairline);
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 1rem;
+  user-select: none;
+}
+
+.brand-box {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.brand-title {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  color: var(--text-ink);
+}
+
+.brand-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 0.15rem;
+}
+
+.nav-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.nav-item {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-ink);
+  border-radius: var(--radius-xs);
+  transition: background-color 0.1s ease;
+  border-left: 2px solid transparent;
+}
+
+.nav-item:hover {
+  background-color: var(--bg-subtle);
+  text-decoration: none;
+}
+
+.nav-item.active {
+  background-color: var(--bg-card);
+  border-left-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+}
+
+.sidebar-footer {
+  border-top: 1px solid var(--border-hairline);
+  padding-top: 1rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.kb-hint-title {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.05em;
+}
+
+.kb-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.3rem;
+  font-family: var(--font-mono);
+}
+
+kbd {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-xs);
+  padding: 0.1rem 0.3rem;
+  font-size: 0.7rem;
+  color: var(--text-ink);
+}
+
+/* Workspace & Status Strip */
+.workspace {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background-color: var(--bg-paper);
+}
+
+.status-strip {
+  height: 40px;
+  background-color: var(--bg-paper);
+  border-bottom: 1px solid var(--border-hairline);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  font-size: 0.75rem;
+}
+
+.strip-left, .strip-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.main-content {
+  flex: 1;
+  padding: 1.5rem;
+  max-width: 1180px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Responsive top bar on narrow viewports */
+@media (max-width: 900px) {
+  .app-layout {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    border-right: none;
+    border-bottom: 1px solid var(--border-hairline);
+    padding: 0.75rem 1rem;
+  }
+  .sidebar-footer {
+    display: none;
+  }
+  .nav-menu {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .nav-item {
+    border-left: none;
+    border-bottom: 2px solid transparent;
+    padding: 0.4rem 0.6rem;
+  }
+  .nav-item.active {
+    border-bottom-color: var(--accent);
+  }
+  .main-content {
+    padding: 1rem;
+  }
+}

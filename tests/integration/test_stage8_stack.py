@@ -57,8 +57,11 @@ def test_service_health_and_published_ports():
             if pub_port:
                 published_ports.add(int(pub_port))
 
-    expected_ports = {8000, 8001, 8002, 15672}
+    has_dashboard = any(c.get("Name") == "ems-dashboard" for c in containers)
+    expected_ports = {8000, 8001, 8002, 15672, 8080} if has_dashboard else {8000, 8001, 8002, 15672}
     assert published_ports == expected_ports, f"Unexpected published ports: {published_ports} vs {expected_ports}"
+    assert 5672 not in published_ports, "RabbitMQ port 5672 must not be publicly published"
+    assert not any(p in published_ports for p in range(9000, 9010)), "Storage node ports must not be published"
 
 
 def test_full_lifecycle_flow_and_resource_reassignment():
