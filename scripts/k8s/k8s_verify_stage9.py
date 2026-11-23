@@ -207,7 +207,7 @@ def step_1_workloads_and_health() -> tuple[bool, str]:
             return False, f"Shard {s_id} has no primary"
 
     (EVIDENCE_DIR / "step1_workloads.txt").write_text("\n\n".join(evidence))
-    return True, "13 workloads Ready, all PVCs Bound, 3 shards HEALTHY"
+    return True, "11 workloads Ready, all PVCs Bound, 3 shards HEALTHY"
 
 
 # ---------------------------------------------------------------------------

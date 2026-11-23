@@ -233,3 +233,55 @@ def test_fault_match_fail(monkeypatch):
     f.req_client.match_result.return_value = (200, {"status": "NO_MATCH"})
     outcome = match_request(req_id, f.req_client, f.res_client, retry_count=2)
     assert outcome == "NO_MATCH"
+
+
+def test_matcher_complete_first_scan_partial_second_scan_raises_transient():
+    """Bug 3 regression: First scan complete but conflict; second scan partial -> must raise Transient."""
+    f = FakeClients()
+    req_id = str(uuid.uuid4())
+    f.req_client.get_request.return_value = (200, {"requestId": req_id, "type": "water", "location": {"lat": 0, "lon": 0}, "status": "PENDING"})
+
+    cand1 = {"resourceId": "c1", "type": "water", "location": {"lat": 0, "lon": 0}, "version": 1}
+    cand2 = {"resourceId": "c2", "type": "water", "location": {"lat": 0, "lon": 0}, "version": 1}
+
+    # First scan returns cand1 (complete: partial=False)
+    # Second scan returns cand2 (incomplete: partial=True)
+    f.res_client.candidates.side_effect = [
+        ([cand1], False),
+        ([cand2], True),
+    ]
+
+    # Both candidates return 409 conflict during reservation
+    f.res_client.reserve.return_value = 409
+
+    # Must raise Transient because latest scan was partial
+    with pytest.raises(Transient):
+        match_request(req_id, f.req_client, f.res_client)
+
+    # match_result must NOT be called with NO_MATCH
+    assert f.req_client.match_result.call_count == 0
+
+
+def test_matcher_partial_first_scan_complete_second_scan_records_no_match():
+    """Bug 3 regression: First scan partial but conflict; second scan complete -> records NO_MATCH."""
+    f = FakeClients()
+    req_id = str(uuid.uuid4())
+    f.req_client.get_request.return_value = (200, {"requestId": req_id, "type": "water", "location": {"lat": 0, "lon": 0}, "status": "PENDING"})
+
+    cand1 = {"resourceId": "c1", "type": "water", "location": {"lat": 0, "lon": 0}, "version": 1}
+
+    # First scan returns cand1 (partial=True)
+    # Second scan returns empty list (complete: partial=False)
+    f.res_client.candidates.side_effect = [
+        ([cand1], True),
+        ([], False),
+    ]
+
+    # cand1 returns 409 conflict
+    f.res_client.reserve.return_value = 409
+    f.req_client.match_result.return_value = (200, {"status": "NO_MATCH"})
+
+    outcome = match_request(req_id, f.req_client, f.res_client)
+    assert outcome == "NO_MATCH"
+    f.req_client.match_result.assert_called_once_with(req_id, outcome="NO_MATCH")
+

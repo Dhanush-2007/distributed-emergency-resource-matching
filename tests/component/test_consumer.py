@@ -187,3 +187,21 @@ def test_consumer_nacks_with_requeue_if_republish_fails(fake_consumer):
     # Must NOT ack; must nack with requeue=True
     assert 77 not in ch.acked_tags
     assert (77, True) in ch.nacked_tags
+
+
+def test_consumer_nacks_with_requeue_if_malformed_dlx_publish_fails(fake_consumer):
+    consumer, _, _ = fake_consumer
+    ch = FakeChannel()
+    ch.publish_fails = True  # Broker rejects DLX publish
+
+    method = MagicMock()
+    method.delivery_tag = 99
+    props = pika.BasicProperties(headers={})
+    bad_body = b"not-a-valid-json"
+
+    consumer.handle_message(ch, method, props, bad_body)
+
+    # Must NOT ack malformed message if DLX republish failed; must nack with requeue=True
+    assert 99 not in ch.acked_tags
+    assert (99, True) in ch.nacked_tags
+

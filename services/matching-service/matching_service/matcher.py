@@ -68,8 +68,9 @@ def match_request(
         # 5. Candidate search
         req_type = req_data.get("type", "")
         cands, partial = res_client.candidates(req_type)
+        latest_partial = partial
         if not cands:
-            if partial:
+            if latest_partial:
                 raise Transient(f"Candidates list empty but scan partial for type {req_type}")
             req_client.match_result(request_id, outcome="NO_MATCH")
             return "NO_MATCH"
@@ -108,8 +109,9 @@ def match_request(
         # If none chosen, re-fetch candidates ONCE and retry once
         if chosen_cand is None:
             cands2, partial2 = res_client.candidates(req_type)
+            latest_partial = partial2
             if not cands2:
-                if partial2:
+                if latest_partial:
                     raise Transient(f"Re-fetch candidates empty and partial for type {req_type}")
                 req_client.match_result(request_id, outcome="NO_MATCH")
                 return "NO_MATCH"
@@ -130,7 +132,7 @@ def match_request(
                 raise Transient(f"Unexpected reserve status {r_code} on retry for resource {cid}")
 
         if chosen_cand is None:
-            if partial:
+            if latest_partial:
                 raise Transient(f"Could not reserve candidate and candidates were partial for type {req_type}")
             req_client.match_result(request_id, outcome="NO_MATCH")
             return "NO_MATCH"
