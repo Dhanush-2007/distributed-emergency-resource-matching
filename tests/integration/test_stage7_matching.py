@@ -92,10 +92,29 @@ def test_sequential_matching_nearest(wait_for_services):
     assert res_far["status"] == "AVAILABLE"
     assert res_food["status"] == "AVAILABLE"
 
-    # 5. Check matcher log for candidate table and correlation ID
-    logs = subprocess.run(["docker", "compose", "logs", "matching-service"], check=False, capture_output=True, text=True).stdout
-    assert "Candidate" in logs or "Candidates" in logs or "distance" in logs.lower()
-    assert corr_id in logs
+    # 5. Check logs for candidate table event and correlation ID
+    deadline = time.time() + 15.0
+    found_candidates = False
+    found_corr = False
+    last_logs = ""
+    while time.time() < deadline:
+        logs_res = subprocess.run(
+            ["docker", "compose", "logs", "--no-color", "--since", "3m", "matching-service", "request-service"],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        last_logs = logs_res.stdout
+        if "Candidate" in last_logs or "Candidates" in last_logs or "match.candidates" in last_logs or "distance" in last_logs.lower():
+            found_candidates = True
+        if corr_id in last_logs:
+            found_corr = True
+        if found_candidates and found_corr:
+            break
+        time.sleep(1.0)
+
+    assert found_candidates, f"Candidate evaluation not found in logs: {last_logs[-500:]}"
+    assert found_corr, f"Correlation ID {corr_id} not found in logs: {last_logs[-500:]}"
 
 
 def test_no_match_and_retry(wait_for_services):

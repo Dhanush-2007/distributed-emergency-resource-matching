@@ -213,6 +213,10 @@ emergency-matching/
 │   ├── ems.postman_collection.json
 │   └── ems.postman_environment.json
 │
+├── dashboard/              # Operations control room dashboard & reverse proxy
+│   ├── index.html, nginx.conf, Dockerfile, CONTRACTS.md
+│   ├── css/style.css, js/ (app.js, api.js, utils.js, views/)
+│
 └── docs/                   # System documentation and proof artifacts
     ├── README.md           # Documentation index
     ├── architecture.md     # Component architecture and storage topology
@@ -279,6 +283,22 @@ make test
 # 4. Run full end-to-end integration test suite against running stack
 make itest
 `
+
+### Operations Dashboard
+
+A hand-crafted operations control room dashboard is served at http://localhost:8080 via Nginx reverse proxy. It enables operators to:
+- Monitor live cluster KPIs, shard health matrix, and active requests.
+- Submit emergency requests and track matching outcomes in real time.
+- Manage resource inventory and operational availability toggles.
+- Inspect shard replica sync lag, sequence numbers (lastSeq), and automatic failover event history.
+
+Access the dashboard once the stack is running:
+`ash
+docker compose up -d --wait
+# Open http://localhost:8080 in your browser
+`
+For full details, architecture, and keyboard shortcuts, see [docs/dashboard.md](docs/dashboard.md).
+
 
 ### Kubernetes Start
 
