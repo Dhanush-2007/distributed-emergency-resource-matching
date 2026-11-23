@@ -156,7 +156,7 @@ class MatchingConsumer:
                     raise ValueError("Missing requestId in event payload")
             except Exception as exc:  # noqa: BLE001
                 logger.warning("Malformed message received (%s). Dead-lettering...", exc)
-                self._republish(
+                ok = self._republish(
                     ch,
                     exchange=EXCHANGE_DLX,
                     routing_key=ROUTING_KEY_MATCH,
@@ -165,7 +165,11 @@ class MatchingConsumer:
                     retry_count=0,
                     last_error=f"Malformed: {exc}",
                 )
-                ch.basic_ack(delivery_tag=method.delivery_tag)
+                if ok:
+                    ch.basic_ack(delivery_tag=method.delivery_tag)
+                else:
+                    logger.error("Failed to dead-letter malformed message; nacking with requeue")
+                    ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
                 return
 
             retry_count = int(headers.get("x-retry-count", 0))

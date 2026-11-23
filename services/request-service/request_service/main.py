@@ -255,8 +255,8 @@ def create_app(
         def mutate_match(rec: dict[str, Any]) -> dict[str, Any]:
             if rec.get("status") == RequestStatus.NO_MATCH.value:
                 rec["status"] = RequestStatus.PENDING.value
-                rec["eventPending"] = True
                 rec["updatedAt"] = now_iso()
+            rec["eventPending"] = True
             return rec
 
         updated_val, _ = coord_client.update(request_key(cid), mutate_match)

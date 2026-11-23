@@ -1,17 +1,17 @@
 {
-  "timestamp": 1795349147.8168845,
+  "timestamp": 1795447809.5991175,
   "shards": [
     {
       "shardId": 0,
-      "state": "HEALTHY",
+      "state": "DEGRADED",
       "epoch": 2,
       "primary": "s0-b",
       "degraded": false,
-      "records": 14,
+      "records": 412,
       "recordCount": {
-        "request": 11,
-        "resource": 3,
-        "other": 0
+        "request": 279,
+        "resource": 104,
+        "other": 29
       },
       "nodes": [
         {
@@ -20,7 +20,7 @@
           "role": "PRIMARY",
           "health": "UP",
           "status": "READY",
-          "lastSeq": 32
+          "lastSeq": 1072
         },
         {
           "id": "s0-a",
@@ -28,7 +28,7 @@
           "role": "REPLICA",
           "health": "UP",
           "status": "READY",
-          "lastSeq": 32
+          "lastSeq": 1071
         }
       ]
     },
@@ -38,11 +38,11 @@
       "epoch": 4,
       "primary": "s1-b",
       "degraded": false,
-      "records": 26,
+      "records": 349,
       "recordCount": {
-        "request": 19,
-        "resource": 7,
-        "other": 0
+        "request": 227,
+        "resource": 98,
+        "other": 24
       },
       "nodes": [
         {
@@ -51,7 +51,7 @@
           "role": "PRIMARY",
           "health": "UP",
           "status": "READY",
-          "lastSeq": 44
+          "lastSeq": 864
         },
         {
           "id": "s1-a",
@@ -59,7 +59,7 @@
           "role": "REPLICA",
           "health": "UP",
           "status": "READY",
-          "lastSeq": 44
+          "lastSeq": 864
         }
       ]
     },
@@ -69,65 +69,33 @@
       "epoch": 3,
       "primary": "s2-a",
       "degraded": false,
-      "records": 5,
+      "records": 395,
       "recordCount": {
-        "request": 3,
-        "resource": 2,
-        "other": 0
+        "request": 273,
+        "resource": 100,
+        "other": 22
       },
       "nodes": [
-        {
-          "id": "s2-a",
-          "nodeId": "s2-a",
-          "role": "PRIMARY",
-          "health": "UP",
-          "status": "READY",
-          "lastSeq": 9
-        },
         {
           "id": "s2-b",
           "nodeId": "s2-b",
           "role": "REPLICA",
           "health": "UP",
           "status": "READY",
-          "lastSeq": 9
+          "lastSeq": 1023
+        },
+        {
+          "id": "s2-a",
+          "nodeId": "s2-a",
+          "role": "PRIMARY",
+          "health": "UP",
+          "status": "READY",
+          "lastSeq": 1023
         }
       ]
     }
   ],
   "nodes": [
-    {
-      "nodeId": "s2-a",
-      "shardId": 2,
-      "endpoint": "http://s2-a:9000",
-      "role": "PRIMARY",
-      "epoch": 3,
-      "health": "UP",
-      "status": "READY",
-      "lastHeartbeatAgeSec": 0.095,
-      "lastSeq": 9,
-      "recordCount": {
-        "request": 3,
-        "resource": 2,
-        "other": 0
-      }
-    },
-    {
-      "nodeId": "s0-b",
-      "shardId": 0,
-      "endpoint": "http://s0-b:9000",
-      "role": "PRIMARY",
-      "epoch": 2,
-      "health": "UP",
-      "status": "READY",
-      "lastHeartbeatAgeSec": 1.615,
-      "lastSeq": 32,
-      "recordCount": {
-        "request": 11,
-        "resource": 3,
-        "other": 0
-      }
-    },
     {
       "nodeId": "s1-b",
       "shardId": 1,
@@ -136,44 +104,12 @@
       "epoch": 4,
       "health": "UP",
       "status": "READY",
-      "lastHeartbeatAgeSec": 1.525,
-      "lastSeq": 44,
+      "lastHeartbeatAgeSec": 1.939,
+      "lastSeq": 864,
       "recordCount": {
-        "request": 19,
-        "resource": 7,
-        "other": 0
-      }
-    },
-    {
-      "nodeId": "s0-a",
-      "shardId": 0,
-      "endpoint": "http://s0-a:9000",
-      "role": "REPLICA",
-      "epoch": 2,
-      "health": "UP",
-      "status": "READY",
-      "lastHeartbeatAgeSec": 1.214,
-      "lastSeq": 32,
-      "recordCount": {
-        "request": 11,
-        "resource": 3,
-        "other": 0
-      }
-    },
-    {
-      "nodeId": "s1-a",
-      "shardId": 1,
-      "endpoint": "http://s1-a:9000",
-      "role": "REPLICA",
-      "epoch": 4,
-      "health": "UP",
-      "status": "READY",
-      "lastHeartbeatAgeSec": 0.481,
-      "lastSeq": 44,
-      "recordCount": {
-        "request": 19,
-        "resource": 7,
-        "other": 0
+        "request": 227,
+        "resource": 98,
+        "other": 24
       }
     },
     {
@@ -184,12 +120,76 @@
       "epoch": 3,
       "health": "UP",
       "status": "READY",
-      "lastHeartbeatAgeSec": 0.234,
-      "lastSeq": 9,
+      "lastHeartbeatAgeSec": 1.255,
+      "lastSeq": 1023,
       "recordCount": {
-        "request": 3,
-        "resource": 2,
-        "other": 0
+        "request": 273,
+        "resource": 100,
+        "other": 22
+      }
+    },
+    {
+      "nodeId": "s1-a",
+      "shardId": 1,
+      "endpoint": "http://s1-a:9000",
+      "role": "REPLICA",
+      "epoch": 4,
+      "health": "UP",
+      "status": "READY",
+      "lastHeartbeatAgeSec": 0.535,
+      "lastSeq": 864,
+      "recordCount": {
+        "request": 227,
+        "resource": 98,
+        "other": 24
+      }
+    },
+    {
+      "nodeId": "s0-b",
+      "shardId": 0,
+      "endpoint": "http://s0-b:9000",
+      "role": "PRIMARY",
+      "epoch": 2,
+      "health": "UP",
+      "status": "READY",
+      "lastHeartbeatAgeSec": 0.823,
+      "lastSeq": 1072,
+      "recordCount": {
+        "request": 279,
+        "resource": 104,
+        "other": 29
+      }
+    },
+    {
+      "nodeId": "s2-a",
+      "shardId": 2,
+      "endpoint": "http://s2-a:9000",
+      "role": "PRIMARY",
+      "epoch": 3,
+      "health": "UP",
+      "status": "READY",
+      "lastHeartbeatAgeSec": 0.062,
+      "lastSeq": 1023,
+      "recordCount": {
+        "request": 273,
+        "resource": 100,
+        "other": 22
+      }
+    },
+    {
+      "nodeId": "s0-a",
+      "shardId": 0,
+      "endpoint": "http://s0-a:9000",
+      "role": "REPLICA",
+      "epoch": 2,
+      "health": "UP",
+      "status": "READY",
+      "lastHeartbeatAgeSec": 1.469,
+      "lastSeq": 1071,
+      "recordCount": {
+        "request": 279,
+        "resource": 104,
+        "other": 29
       }
     }
   ]

@@ -227,6 +227,35 @@ def test_manual_match_trigger(setup_env):
     assert r_409.json()["error"]["code"] == "INVALID_TRANSITION"
 
 
+def test_manual_match_pending_sets_event_pending_on_publish_failure(setup_env):
+    tc, _, pub, _ = setup_env
+    # 1. Create a request normally
+    req_id = tc.post(
+        "/requests",
+        json={"type": "food", "location": {"lat": 12.0, "lon": 77.0}, "details": "Rice packets"},
+    ).json()["requestId"]
+
+    # Request is PENDING and initially eventPending is False (confirmed published)
+    r_init = tc.get(f"/internal/requests/{req_id}")
+    assert r_init.json()["status"] == "PENDING"
+    assert r_init.json()["eventPending"] is False
+
+    # 2. Simulate RabbitMQ downtime during manual match retry
+    pub.publish = lambda evt: False
+
+    # 3. Manually trigger match on already-PENDING request
+    r_match = tc.post(f"/match/{req_id}")
+    assert r_match.status_code == 200
+    assert r_match.json()["status"] == "PENDING"
+    assert r_match.json()["matchQueued"] is False
+
+    # 4. Storage MUST record eventPending=True so outbox sweeper can recover it
+    r_after = tc.get(f"/internal/requests/{req_id}")
+    assert r_after.json()["status"] == "PENDING"
+    assert r_after.json()["eventPending"] is True
+
+
+
 def test_match_result_and_idempotency(setup_env):
     tc, _, _, _ = setup_env
     req_id = tc.post(
