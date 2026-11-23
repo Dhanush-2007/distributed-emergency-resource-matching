@@ -1,0 +1,26 @@
+INFO:     Started server process [1]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:9000 (Press CTRL+C to quit)
+{"ts": "2026-11-23T09:28:48.618200+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: GET http://ems-s1-b-0.ems-s1-b.ems.svc.cluster.local:9000/health \"HTTP/1.1 200 OK\"", "correlationId": null}
+{"ts": "2026-11-23T09:28:48.707470+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: POST http://coordinator:8000/internal/nodes/register \"HTTP/1.1 200 OK\"", "correlationId": null}
+{"ts": "2026-11-23T09:28:48.712914+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "Starting follower catch-up", "correlationId": null, "nodeId": "s1-a"}
+{"ts": "2026-11-23T09:28:48.713267+00:00", "level": "WARNING", "service": "storage-node-s1-a", "event": "Node demoted to REPLICA", "correlationId": null, "nodeId": "s1-a", "epoch": 2}
+{"ts": "2026-11-23T09:28:48.713660+00:00", "level": "WARNING", "service": "storage-node-s1-a", "event": "Node demoted to REPLICA", "correlationId": null, "nodeId": "s1-a", "epoch": 2}
+{"ts": "2026-11-23T09:28:48.713775+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "Registered with coordinator", "correlationId": null, "nodeId": "s1-a", "role": "REPLICA", "epoch": 2}
+{"ts": "2026-11-23T09:28:48.721119+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: GET http://ems-s1-b-0.ems-s1-b.ems.svc.cluster.local:9000/internal/sync?since=64&epoch=1&limit=500 \"HTTP/1.1 200 OK\"", "correlationId": null}
+{"ts": "2026-11-23T09:28:48.721787+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "Follower catch-up complete", "correlationId": null, "nodeId": "s1-a"}
+INFO:     10.244.0.1:54140 - "GET /health/live HTTP/1.1" 200 OK
+INFO:     10.244.0.1:54150 - "GET /health/ready HTTP/1.1" 200 OK
+{"ts": "2026-11-23T09:28:50.419520+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: GET http://ems-s1-b-0.ems-s1-b.ems.svc.cluster.local:9000/internal/sync?since=64&epoch=1&limit=500 \"HTTP/1.1 200 OK\"", "correlationId": null}
+{"ts": "2026-11-23T09:28:50.622084+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: GET http://ems-s1-b-0.ems-s1-b.ems.svc.cluster.local:9000/health \"HTTP/1.1 200 OK\"", "correlationId": null}
+{"ts": "2026-11-23T09:28:50.724776+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: POST http://coordinator:8000/internal/nodes/heartbeat \"HTTP/1.1 200 OK\"", "correlationId": null}
+{"ts": "2026-11-23T09:28:52.426971+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: GET http://ems-s1-b-0.ems-s1-b.ems.svc.cluster.local:9000/internal/sync?since=64&epoch=1&limit=500 \"HTTP/1.1 200 OK\"", "correlationId": null}
+{"ts": "2026-11-23T09:28:52.626802+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: GET http://ems-s1-b-0.ems-s1-b.ems.svc.cluster.local:9000/health \"HTTP/1.1 200 OK\"", "correlationId": null}
+{"ts": "2026-11-23T09:28:52.730103+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: POST http://coordinator:8000/internal/nodes/heartbeat \"HTTP/1.1 200 OK\"", "correlationId": null}
+{"ts": "2026-11-23T09:28:54.431936+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: GET http://ems-s1-b-0.ems-s1-b.ems.svc.cluster.local:9000/internal/sync?since=64&epoch=1&limit=500 \"HTTP/1.1 200 OK\"", "correlationId": null}
+{"ts": "2026-11-23T09:28:54.631113+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: GET http://ems-s1-b-0.ems-s1-b.ems.svc.cluster.local:9000/health \"HTTP/1.1 200 OK\"", "correlationId": null}
+{"ts": "2026-11-23T09:28:54.734682+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: POST http://coordinator:8000/internal/nodes/heartbeat \"HTTP/1.1 200 OK\"", "correlationId": null}
+{"ts": "2026-11-23T09:28:56.435228+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: GET http://ems-s1-b-0.ems-s1-b.ems.svc.cluster.local:9000/internal/sync?since=64&epoch=1&limit=500 \"HTTP/1.1 200 OK\"", "correlationId": null}
+{"ts": "2026-11-23T09:28:56.635769+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: GET http://ems-s1-b-0.ems-s1-b.ems.svc.cluster.local:9000/health \"HTTP/1.1 200 OK\"", "correlationId": null}
+{"ts": "2026-11-23T09:28:56.738545+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: POST http://coordinator:8000/internal/nodes/heartbeat \"HTTP/1.1 200 OK\"", "correlationId": null}

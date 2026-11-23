@@ -1,1 +1,1 @@
-{"key":"request:demo-shard-test-key-001","shardId":1,"nodeId":"s1-a","role":"PRIMARY","epoch":1,"health":"UP","endpoint":"http://s1-a:9000"}
+{"key":"request:demo-shard-test-key-001","shardId":1,"nodeId":"s1-a","role":"PRIMARY","epoch":1,"health":"UP","endpoint":"http://ems-s1-a-0.ems-s1-a.ems.svc.cluster.local:9000"}

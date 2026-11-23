@@ -1,12 +1,12 @@
 Starting load: rate=15.0 req/s, duration=2.0s against http://localhost:8001
-Load loop finished. Submitted: 22, Acknowledged: 22, 503 Retries: 0
-Verifying 22 acknowledged requests settle to MATCHED/NO_MATCH within 60s...
+Load loop finished. Submitted: 8, Acknowledged: 8, 503 Retries: 0
+Verifying 8 acknowledged requests settle to MATCHED/NO_MATCH within 60s...
 
 === App Load Summary ===
-Submitted:       22
-Acknowledged:    22
+Submitted:       8
+Acknowledged:    8
 503 Retries:     0
 MATCHED:         0
-NO_MATCH:        22
+NO_MATCH:        8
 Lost / Unsettled: 0
 SUCCESS: All acknowledged requests readable and settled.

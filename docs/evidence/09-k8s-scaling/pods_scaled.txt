@@ -1,4 +1,4 @@
-NAME                                READY   STATUS    RESTARTS   AGE   IP             NODE       NOMINATED NODE   READINESS GATES
-matching-service-56758c7f68-4xtwq   1/1     Running   0          6s    10.244.0.157   minikube   <none>           <none>
-matching-service-56758c7f68-g8rz8   1/1     Running   0          6s    10.244.0.156   minikube   <none>           <none>
-matching-service-56758c7f68-p2p4q   1/1     Running   0          91s   10.244.0.153   minikube   <none>           <none>
+NAME                                READY   STATUS    RESTARTS   AGE    IP            NODE       NOMINATED NODE   READINESS GATES
+matching-service-7465db6bb9-2n29g   1/1     Running   0          11s    10.244.0.74   minikube   <none>           <none>
+matching-service-7465db6bb9-kn285   1/1     Running   0          3m7s   10.244.0.70   minikube   <none>           <none>
+matching-service-7465db6bb9-wrr84   1/1     Running   0          11s    10.244.0.73   minikube   <none>           <none>

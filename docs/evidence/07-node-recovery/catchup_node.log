@@ -1,0 +1,24 @@
+INFO:     Started server process [1]
+INFO:     Waiting for application startup.
+{"ts": "2026-11-23T09:33:18.707506+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: POST http://coordinator:8000/internal/nodes/register \"HTTP/1.1 200 OK\"", "correlationId": null}
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:9000 (Press CTRL+C to quit)
+{"ts": "2026-11-23T09:33:18.712883+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "Starting follower catch-up", "correlationId": null, "nodeId": "s1-a"}
+{"ts": "2026-11-23T09:33:18.713022+00:00", "level": "WARNING", "service": "storage-node-s1-a", "event": "Node demoted to REPLICA", "correlationId": null, "nodeId": "s1-a", "epoch": 2}
+{"ts": "2026-11-23T09:33:18.804643+00:00", "level": "WARNING", "service": "storage-node-s1-a", "event": "Node demoted to REPLICA", "correlationId": null, "nodeId": "s1-a", "epoch": 2}
+{"ts": "2026-11-23T09:33:18.805234+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "Registered with coordinator", "correlationId": null, "nodeId": "s1-a", "role": "REPLICA", "epoch": 2}
+{"ts": "2026-11-23T09:33:18.809369+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: GET http://ems-s1-b-0.ems-s1-b.ems.svc.cluster.local:9000/health \"HTTP/1.1 200 OK\"", "correlationId": null}
+{"ts": "2026-11-23T09:33:18.814414+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: GET http://ems-s1-b-0.ems-s1-b.ems.svc.cluster.local:9000/internal/sync?since=74&epoch=1&limit=500 \"HTTP/1.1 200 OK\"", "correlationId": null}
+{"ts": "2026-11-23T09:33:18.815182+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "Follower catch-up complete", "correlationId": null, "nodeId": "s1-a"}
+INFO:     10.244.0.1:33746 - "GET /health/live HTTP/1.1" 200 OK
+{"ts": "2026-11-23T09:33:20.522072+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: GET http://ems-s1-b-0.ems-s1-b.ems.svc.cluster.local:9000/internal/sync?since=74&epoch=1&limit=500 \"HTTP/1.1 200 OK\"", "correlationId": null}
+INFO:     10.244.0.1:33748 - "GET /health/ready HTTP/1.1" 200 OK
+{"ts": "2026-11-23T09:33:20.816091+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: GET http://ems-s1-b-0.ems-s1-b.ems.svc.cluster.local:9000/health \"HTTP/1.1 200 OK\"", "correlationId": null}
+{"ts": "2026-11-23T09:33:20.820571+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: POST http://coordinator:8000/internal/nodes/heartbeat \"HTTP/1.1 200 OK\"", "correlationId": null}
+{"ts": "2026-11-23T09:33:22.526830+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: GET http://ems-s1-b-0.ems-s1-b.ems.svc.cluster.local:9000/internal/sync?since=74&epoch=1&limit=500 \"HTTP/1.1 200 OK\"", "correlationId": null}
+{"ts": "2026-11-23T09:33:22.820726+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: GET http://ems-s1-b-0.ems-s1-b.ems.svc.cluster.local:9000/health \"HTTP/1.1 200 OK\"", "correlationId": null}
+{"ts": "2026-11-23T09:33:22.825012+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: POST http://coordinator:8000/internal/nodes/heartbeat \"HTTP/1.1 200 OK\"", "correlationId": null}
+{"ts": "2026-11-23T09:33:24.531229+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: GET http://ems-s1-b-0.ems-s1-b.ems.svc.cluster.local:9000/internal/sync?since=74&epoch=1&limit=500 \"HTTP/1.1 200 OK\"", "correlationId": null}
+{"ts": "2026-11-23T09:33:24.825486+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: GET http://ems-s1-b-0.ems-s1-b.ems.svc.cluster.local:9000/health \"HTTP/1.1 200 OK\"", "correlationId": null}
+{"ts": "2026-11-23T09:33:24.831083+00:00", "level": "INFO", "service": "storage-node-s1-a", "event": "HTTP Request: POST http://coordinator:8000/internal/nodes/heartbeat \"HTTP/1.1 200 OK\"", "correlationId": null}
+INFO:     10.244.0.66:46256 - "GET /health HTTP/1.1" 200 OK
